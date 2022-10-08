@@ -1,0 +1,3 @@
+[submodule "libs/stack"]
+	path = libs/stack
+	url = git@github.com:Bigyin1/stack.git

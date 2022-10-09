@@ -1,0 +1,18 @@
+
+
+
+.code
+
+
+label:
+push 123
+mov [ax],23
+
+
+label2:
+
+pop
+
+.data
+dw 111
+db 121

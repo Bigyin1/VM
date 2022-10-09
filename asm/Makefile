@@ -5,7 +5,10 @@ EXECUTABLE = bin
 
 
 SRCS = 	main.cpp \
-		stack.cpp
+		utils.cpp \
+		tokenizer/tokenizer.cpp \
+		parser/parser.cpp \
+		parser/utils.cpp
 
 
 

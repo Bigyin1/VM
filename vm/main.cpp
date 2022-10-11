@@ -31,7 +31,7 @@ int main() {
             stackFree(st);
             return 0;
         }
-        printf("%d\n", el);
+        printf("%lf\n", (double)el);
     }
 
     stackDump(st, NULL);

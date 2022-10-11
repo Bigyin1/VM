@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include "../errors.hpp"
 #include "../tokenizer/tokenizer.hpp"
+#include "../../vm/cpu/instructions.hpp"
 
 
 typedef struct dataNode {
@@ -14,15 +15,15 @@ typedef struct dataNode {
 } dataNode;
 
 
-const size_t instrArgsMaxCount = 2;
 
-typedef struct commandArgument {
-    char *label;
+typedef struct instrArgument {
+    char *val;
+    int encVal;
+    e_arg_type type;
 
-    size_t offset;
-    char *instrName;
+    bool isAddr;
 
-} commandArgument;
+} instrArgument;
 
 
 typedef struct commandNode {
@@ -31,7 +32,9 @@ typedef struct commandNode {
     size_t offset;
     char *instrName;
 
-    commandArgument args[instrArgsMaxCount];
+    instrArgument args[instrArgsMaxCount];
+
+    size_t line;
 
 } commandNode;
 

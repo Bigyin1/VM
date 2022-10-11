@@ -4,6 +4,50 @@
 #include "utils.hpp"
 
 static const char *codeSectName = "code";
+static const char *dataSectName = "data";
+
+static asm_ecode parseCommandArgs(parser_s *parser, commandNode *node) {
+    assert(parser != NULL);
+    assert(node != NULL);
+
+    for (size_t i = 0; i < instrArgsMaxCount; i++) {
+        instrArgument *arg = node->args + i;
+
+        char *val = currTokenVal(parser);
+        if (currTokenType(parser) == ASM_T_WORD) {
+
+            eatToken(parser, ASM_T_WORD);
+            arg->val = val;
+            arg->isAddr = false;
+
+        } else {
+
+            if (eatToken(parser, ASM_T_L_PAREN) != E_ASM_OK)
+                return E_ASM_ERR;
+
+            val = currTokenVal(parser);
+            if (eatToken(parser, ASM_T_WORD) != E_ASM_OK)
+                return E_ASM_ERR;
+
+            if (eatToken(parser, ASM_T_R_PAREN) != E_ASM_OK)
+                return E_ASM_ERR;
+
+            arg->val = val;
+            arg->isAddr = true;
+        }
+
+        eatSP(parser);
+
+        if (currTokenType(parser) == ASM_T_COMMA)
+            eatToken(parser, ASM_T_COMMA);
+        else
+            return E_ASM_OK;
+
+        eatSP(parser);
+    }
+
+    return E_ASM_OK;
+}
 
 
 static asm_ecode parseCommandNode(parser_s *parser, commandNode *node) {
@@ -11,6 +55,8 @@ static asm_ecode parseCommandNode(parser_s *parser, commandNode *node) {
     assert(node != NULL);
 
     char *name = currTokenVal(parser);
+
+    node->line = parser->toks->currToken->line;
 
     if (eatToken(parser, ASM_T_WORD) != E_ASM_OK)
         return E_ASM_ERR;
@@ -29,7 +75,12 @@ static asm_ecode parseCommandNode(parser_s *parser, commandNode *node) {
 
     node->instrName = name;
 
+    if (peekNextToken(parser->toks)->type != ASM_T_NL)
+        if (eatToken(parser, ASM_T_SPACE) != E_ASM_OK)
+            return E_ASM_ERR;
 
+    if (parseCommandArgs(parser, node) != E_ASM_OK)
+        return E_ASM_ERR;
 
 
     return E_ASM_OK;
@@ -63,8 +114,10 @@ static asm_ecode parseCodeNode(parser_s *parser, codeNode *node) {
             return E_ASM_ERR;
 
         eatBlanks(parser);
-    }
 
+        if (currTokenType(parser) == ASM_T_EOF)
+            break;
+    }
 
     return E_ASM_OK;
 }

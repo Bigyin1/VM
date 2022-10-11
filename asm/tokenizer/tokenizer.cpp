@@ -55,11 +55,10 @@ asm_ecode tokenize (tokenizer_s *t, char *input) {
     assert(t != NULL);
     assert(input != NULL);
 
-
     char *textStart = input;
     token_s *tok = t->tokens;
     size_t tokLen = 0;
-    size_t line = 0;
+    size_t line = 1;
     size_t column = 1;
 
 
@@ -129,8 +128,8 @@ token_s *peekNextToken (tokenizer_s *t) {
         return t->currToken;
     }
 
-    if ((t->currToken + 1)->type == ASM_T_EOF)
-        return NULL;
+    if (t->currToken->type == ASM_T_EOF)
+        return t->currToken;
 
     return t->currToken + 1;
 }
@@ -143,7 +142,7 @@ void tokenizerDump(tokenizer_s *t, FILE *out) {
     token_s *tok = t->tokens;
 
     while (tok->type != ASM_T_EOF) {
-        fprintf(out, "tok(%zu %zu %s) ", tok->line, tok->column, tok->val);
+        fprintf(out, "(%zu %zu)%s ", tok->line, tok->column, tok->val);
         tok++;
     }
     fprintf(out, "\n");

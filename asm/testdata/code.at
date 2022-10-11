@@ -6,13 +6,9 @@
 
 label:
 push 123
-mov [ax],23
+load r1,[kbkL]
 
-
-label2:
-
-pop
-
-.data
-dw 111
-db 121
+kbkL:
+pop r1
+push 1
+pop r3

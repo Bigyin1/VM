@@ -5,14 +5,14 @@
 #include <stddef.h>
 
 
-const size_t gpRegsCount = 8;
+const size_t gpRegsCount = 4;
 const size_t maxDevicesCount = 3;
 
 
 enum operation {
-    OP_READ;
-    OP_WRITE;
-}
+    OP_READ,
+    OP_WRITE,
+};
 
 struct devise_s {
     char name[16];
@@ -22,7 +22,7 @@ struct devise_s {
     size_t lowAddr;
     size_t highAddr;
 
-    int (*)(void* dev, size_t addr, operation op) func;
+    //int (*)(void* dev, size_t addr, operation op) func;
 };
 
 

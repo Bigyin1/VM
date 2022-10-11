@@ -8,7 +8,9 @@ SRCS = 	main.cpp \
 		utils.cpp \
 		tokenizer/tokenizer.cpp \
 		parser/parser.cpp \
-		parser/utils.cpp
+		parser/utils.cpp \
+		assembler/assembler.cpp \
+		../vm/cpu/instructions.cpp
 
 
 

@@ -34,5 +34,7 @@ char *readFile(const char *name) {
     }
 
     text[fSize] = '\0';
+
+    fclose(f);
     return text;
 }

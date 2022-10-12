@@ -4,7 +4,8 @@ DOXYGEN = doxygen
 EXECUTABLE = bin
 
 
-SRCS = 	main.cpp
+SRCS = 	main.cpp \
+		cpu/instructions.cpp
 
 
 

@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include "instructions.hpp"
-#include "cpu.hpp"
 
 
 const regMeta regs[gpRegsCount] = {
@@ -74,6 +73,21 @@ const instrMeta instructions[] = {
         .opCode = 0x9,
         .allowedArgs = {ARG_REG_ADDR | ARG_IMM_ADDR, ARG_REG},
     },
+    {
+        .name = "call",
+        .opCode = 0xA,
+        .allowedArgs = {ARG_REG | ARG_IMM, ARG_EMPTY},
+    },
+    {
+        .name = "ret",
+        .opCode = 0xB,
+        .allowedArgs = {ARG_EMPTY, ARG_EMPTY},
+    },
+    {
+        .name = "end",
+        .opCode = 0xC,
+        .allowedArgs = {ARG_EMPTY, ARG_EMPTY},
+    },
 
 };
 
@@ -99,6 +113,18 @@ const instrMeta *findInstrByName(const char *name) {
     for (size_t i = 0; i < sizeof(instructions)/sizeof(instrMeta); i++) {
 
         if (strcmp(instructions[i].name, name) == 0)
+            return &instructions[i];
+
+    }
+
+    return NULL;
+}
+
+const instrMeta *findInstrByOpCode(char opCode) {
+
+    for (size_t i = 0; i < sizeof(instructions)/sizeof(instrMeta); i++) {
+
+        if (opCode == instructions[i].opCode)
             return &instructions[i];
 
     }

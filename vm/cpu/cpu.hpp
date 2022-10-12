@@ -3,9 +3,9 @@
 #define CPU_HPP
 
 #include <stddef.h>
+#include "instructions.hpp"
+#include "stack/stack.hpp"
 
-
-const size_t gpRegsCount = 4;
 const size_t maxDevicesCount = 3;
 
 
@@ -30,16 +30,13 @@ typedef struct devise_s devise_s;
 
 
 
-
-
-
 typedef int cpu_gp_reg_t;
 
 struct cpu_s
 {
     size_t regIP;
-    size_t regSP;
-    size_t regBP;
+    stack_s *stackPtr;
+
     cpu_gp_reg_t regs[gpRegsCount];
 
 

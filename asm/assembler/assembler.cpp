@@ -12,10 +12,9 @@ static bool instrEncode(const commandNode *cmd, FILE *out) {
 
     instrBin_s instr = {
         .arg1Type = cmd->args[0].type,
-        .arg1Value = (unsigned short)cmd->args[0].encVal,
+        .arg1Value = cmd->args[0].encVal,
         .arg2Type = cmd->args[1].type,
-        .arg2Value = (unsigned short)cmd->args[1].encVal,
-
+        .arg2Value = cmd->args[1].encVal,
     };
 
     const instrMeta *im = findInstrByName(cmd->instrName);
@@ -83,7 +82,7 @@ static bool expandCommonArg(instrArgument *arg) {
         arg->type = arg->isAddr ? ARG_REG_ADDR : ARG_REG;
         return true;
     }
-    if (sscanf(arg->val, "%d", &arg->encVal) == 1) {
+    if (sscanf(arg->val, "%hd", &arg->encVal) == 1) {
 
         arg->type = arg->isAddr ? ARG_IMM_ADDR : ARG_IMM;
         return true;
@@ -108,7 +107,7 @@ static e_asm_codes substLabelsArgs(commandNode *commands) {
                     printf("asm: line: %zu : label \"%s\" does not exist\n", commands[i].line, arg->val);
                     return E_ASM_ERR;
                 }
-                arg->encVal = (int)offset;
+                arg->encVal = (short)offset;
                 arg->type = arg->isAddr ? ARG_IMM_ADDR : ARG_IMM;
             }
         }
@@ -120,16 +119,22 @@ static e_asm_codes substLabelsArgs(commandNode *commands) {
 static e_asm_codes writeCode(commandNode *commands, FILE *out) {
     assert(commands != NULL);
 
-    for (size_t i = 0; commands[i].instrName != NULL; i++) {
+    size_t i = 0;
+    for (; commands[i].instrName != NULL; i++) {
 
         if (!instrEncode(&commands[i], out)) {
             printf("asm: line: %zu : instruction invalid\n", commands[i].line);
             return E_ASM_ERR;
         }
     }
+
+    commands[i].instrName = "end";
+    commands[i].args[0].type = ARG_EMPTY;
+    commands[i].args[1].type = ARG_EMPTY;
+    instrEncode(&commands[i], out);
+
     return E_ASM_OK;
 }
-
 
 
 asm_ecode assemble(assembler_s *as) {

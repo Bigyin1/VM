@@ -8,7 +8,6 @@
 
 int main(int argc, char **argv) {
 
-
     if (argc != 3) {
         printf("Wrong args count\n");
         return 1;
@@ -42,5 +41,6 @@ int main(int argc, char **argv) {
     assembler_s as = {.prog = &parser.prog, .out = out};
     assemble(&as);
     fclose(out);
+
     tokenizerFree(&tokenizer);
 }

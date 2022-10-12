@@ -18,7 +18,7 @@ typedef struct dataNode {
 
 typedef struct instrArgument {
     char *val;
-    int encVal;
+    short encVal;
     e_arg_type type;
 
     bool isAddr;
@@ -30,7 +30,7 @@ typedef struct commandNode {
     char *label;
 
     size_t offset;
-    char *instrName;
+    const char *instrName;
 
     instrArgument args[instrArgsMaxCount];
 

@@ -1,41 +1,68 @@
-#include "stack/stack.hpp"
+#include <stdio.h>
+#include <stdlib.h>
+#include <cassert>
+#include "cpu/cpu.hpp"
+#include "cpu/instructions.hpp"
 
 
-int main() {
+instrBin_s *readCode(const char *fName) {
+    assert(fName != NULL);
 
-    stack_s *st = NULL;
+    instrBin_s *code = NULL;
 
-    stackError err = E_OK;
-    err = stackInit(&st, 0, NULL);
-    if (err != E_OK) {
-        printf("error\n");
+    FILE *f = fopen(fName, "r");
+    if (f == NULL)
+        return NULL;
 
+
+    if (fseek(f, 0, SEEK_END) != 0)
+        return NULL;
+
+    long fSize = ftell(f);
+    if (fSize == -1)
+        return NULL;
+
+    if (fSize % sizeof(instrBin_s) != 0)
+        return NULL;
+
+    if (fseek(f, 0, SEEK_SET) != 0)
+        return NULL;
+
+    code = (instrBin_s *)calloc((size_t)fSize / sizeof(instrBin_s), sizeof(instrBin_s));
+    if (code == NULL)
+        return NULL;
+
+    if (fread(code, sizeof(char), (size_t)fSize, f) != (size_t)fSize) {
+        free(code);
+        return NULL;
     }
 
-    for (size_t i = 0; i < 33; i++)
-    {
-        err = stackPush(st, i);
-        if (err != E_OK){
-            printf("\nerror %d\n", err);
-            stackFree(st);
-            return 0;
-        }
+    fclose(f);
+    return code;
+}
+
+int main(int argc, char **argv) {
+
+    if (argc != 2) {
+        printf("Wrong args count\n");
+        return 1;
     }
 
-    for (size_t i = 0; i < 33; i++)
-    {
-        elem_t el = 0;
-        err = stackPop(st, &el);
-        if (err != E_OK){
-            printf("\nerror %d\n", err);
-            stackFree(st);
-            return 0;
-        }
-        printf("%lf\n", (double)el);
+
+
+
+
+    instrBin_s *code = readCode(argv[1]);
+    if (code == NULL) {
+        perror(argv[1]);
+        return 1;
     }
 
-    stackDump(st, NULL);
+    while (code->opCode != 0xC) {
+        printf("%s\n", findInstrByOpCode(code->opCode)->name);
+        ++code;
+    }
 
-    stackFree(st);
+
 
 }

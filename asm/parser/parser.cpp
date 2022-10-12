@@ -115,7 +115,7 @@ static asm_ecode parseCodeNode(parser_s *parser, codeNode *node) {
 
         eatBlanks(parser);
 
-        if (currTokenType(parser) == ASM_T_EOF)
+        if (currTokenType(parser) == ASM_T_EOF || currTokenType(parser) == ASM_T_DOT)
             break;
     }
 
@@ -155,5 +155,8 @@ static asm_ecode parseProgramNode(parser_s *parser, programNode *node) {
 asm_ecode parseTokens(parser_s *parser) {
     assert(parser != NULL);
 
-    return parseProgramNode(parser, &parser->prog);
+    if (parseProgramNode(parser, &parser->prog) != E_ASM_OK)
+        return E_ASM_ERR;
+
+    return E_ASM_OK;
 }

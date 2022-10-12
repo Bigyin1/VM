@@ -7,6 +7,8 @@
 #include <stdio.h>
 
 
+
+const size_t gpRegsCount = 4;
 const size_t instrArgsMaxCount = 2;
 
 
@@ -25,9 +27,9 @@ typedef struct instrBin_s {
 
     unsigned char opCode;
     char arg1Type;
-    unsigned short arg1Value;
+    short arg1Value;
     char arg2Type;
-    unsigned short arg2Value;
+    short arg2Value;
 
 } instrBin_s;
 
@@ -60,6 +62,8 @@ typedef struct instrMeta {
 const regMeta *findRegByName(const char *name);
 
 const instrMeta *findInstrByName(const char *name);
+
+const instrMeta *findInstrByOpCode(char opCode);
 
 
 #endif

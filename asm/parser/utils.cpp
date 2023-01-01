@@ -28,7 +28,7 @@ void eatNL(parser_s *p) {
 void eatSP(parser_s *p) {
     assert(p != NULL);
 
-    if (currTokenType(p) == ASM_T_SPACE) {
+    while (currTokenType(p) == ASM_T_SPACE) {
         getNextToken(p->toks);
     }
 }

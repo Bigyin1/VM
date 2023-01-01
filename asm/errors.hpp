@@ -9,6 +9,7 @@ typedef enum e_asm_codes
 {
   E_ASM_OK = 0,
   E_ASM_ERR = 1,
+  E_ASM_INSUFF_TOKEN = 2,
 } asm_ecode;
 
 #endif

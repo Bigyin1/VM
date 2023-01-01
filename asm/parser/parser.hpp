@@ -5,36 +5,19 @@
 #include <stddef.h>
 #include "../errors.hpp"
 #include "../tokenizer/tokenizer.hpp"
-#include "../../vm/cpu/instructions.hpp"
+#include "../../vm/instructions/instruction.hpp"
 
 
-typedef struct dataNode {
-    size_t addr;
-    char data[128];
-
-} dataNode;
-
-
-
-typedef struct instrArgument {
-    char *val;
-    short encVal;
-    e_arg_type type;
-
-    bool isAddr;
-
-} instrArgument;
 
 
 typedef struct commandNode {
-    char *label;
-
-    size_t offset;
+    const char *label;
     const char *instrName;
+    Instruction instr;
 
-    instrArgument args[instrArgsMaxCount];
 
     size_t line;
+    unsigned int offset;
 
 } commandNode;
 
@@ -46,24 +29,38 @@ typedef struct codeNode {
 } codeNode;
 
 
-typedef struct programNode {
-    codeNode code;
-    dataNode data;
+typedef struct labelData
+{
+    const char *label;
+    uint64_t    val;
 
-} programNode;
+    uint64_t    *imports[16];
+    size_t      importsSz;
+
+    bool        present;
+
+} labelData;
 
 
+
+typedef struct parser_s {
+    codeNode    prog;
+    tokenizer_s *toks;
+
+    labelData   labels[64];
+    size_t      labelsSz;
+
+} parser_s;
 
 
 #define currTokenType(p) (p)->toks->currToken->type
 
 #define currTokenVal(p) (p)->toks->currToken->val;
 
-typedef struct parser_s {
-    programNode prog;
-    tokenizer_s *toks;
+#define currTokenDblNumVal(p) (p)->toks->currToken->dblNumVal;
 
-} parser_s;
+#define currTokenIntNumVal(p) (p)->toks->currToken->intNumVal;
+
 
 
 asm_ecode parseTokens(parser_s *p);

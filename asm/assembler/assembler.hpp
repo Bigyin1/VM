@@ -8,7 +8,7 @@
 
 
 typedef struct assembler_s {
-    programNode *prog;
+    codeNode *prog;
     FILE *out;
 
 } assembler_s;

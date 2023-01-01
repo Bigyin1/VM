@@ -1,14 +1,15 @@
 
 
 
-.code
-
 
 label:
-push 123
-load r1,[kbkL]
+push -1234.3
+push [r1+123]
 
 kbkL:
 pop r1
 push 1
 pop r3
+je :label
+
+

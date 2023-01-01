@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "utils.hpp"
 #include "tokenizer/tokenizer.hpp"
 #include "parser/parser.hpp"
@@ -7,6 +8,7 @@
 
 
 int main(int argc, char **argv) {
+
 
     if (argc != 3) {
         printf("Wrong args count\n");
@@ -26,20 +28,18 @@ int main(int argc, char **argv) {
     }
 
     tokenizer_s tokenizer = {0};
-
-    if (tokenize(&tokenizer, text) == E_ASM_ERR)
+    if (tokenizerInit(&tokenizer, text) == E_ASM_ERR)
         return 1;
 
-    #ifdef _DEBUG
-    tokenizerDump(&tokenizer, stdout);
-    #endif
+    if (tokenize(&tokenizer) == E_ASM_ERR)
+        return 1;
 
     parser_s parser = {.prog = 0, .toks = &tokenizer};
     if (parseTokens(&parser) == E_ASM_ERR)
         return 1;
 
-    assembler_s as = {.prog = &parser.prog, .out = out};
-    assemble(&as);
+    // assembler_s as = {.prog = &parser.prog, .out = out};
+    // assemble(&as);
     fclose(out);
 
     tokenizerFree(&tokenizer);

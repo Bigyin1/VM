@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <string.h>
+#include <stdint.h>
 #include "../errors.hpp"
 #include "../../vm/cpu/instructions.hpp"
 #include "assembler.hpp"
@@ -29,7 +30,9 @@ static bool instrEncode(const commandNode *cmd, FILE *out) {
     if ((instr.arg2Type & im->allowedArgs[1]) == 0)
         return false;
 
-    fwrite(&instr, sizeof(instr), 1, out); //check error;
+    uint32_t ie = im->encode(&instr);
+
+    fwrite(&ie, sizeof(uint32_t), 1, out); //check error;
 
     return true;
 }
@@ -43,16 +46,19 @@ static void evalOffsets(codeNode *code) {
     size_t currOffset = code->addr;
 
     for (size_t i = 0; code->commands[i].instrName != NULL; i++) {
+        currOffset += 1;
+        instrArgument *arg = &code->commands[i].arg;
 
-       code->commands[i].offset = currOffset;
+        if (arg->isAddr || arg.)
 
-       currOffset += sizeof(instrBin_s);
+        currOffset += sizeof(uint32_t);
     }
 }
 
 
 static e_asm_codes getLabelOffset(commandNode *cmds, const char *label, size_t *res) {
     assert(label != NULL);
+    assert(res != NULL);
 
     for (size_t i = 0; cmds[i].instrName != NULL; i++) {
 
@@ -82,7 +88,7 @@ static bool expandCommonArg(instrArgument *arg) {
         arg->type = arg->isAddr ? ARG_REG_ADDR : ARG_REG;
         return true;
     }
-    if (sscanf(arg->val, "%hd", &arg->encVal) == 1) {
+    if (sscanf(arg->val, "%lf", &arg->encVal) == 1) {
 
         arg->type = arg->isAddr ? ARG_IMM_ADDR : ARG_IMM;
         return true;
@@ -97,19 +103,16 @@ static e_asm_codes substLabelsArgs(commandNode *commands) {
 
     for (size_t i = 0; commands[i].instrName != NULL; i++) {
 
-        for (size_t argIdx = 0; argIdx < instrArgsMaxCount; argIdx++) {
+        instrArgument *arg = &commands[i].arg;
+        size_t offset = 0;
 
-            instrArgument *arg = &commands[i].args[argIdx];
-            size_t offset = 0;
-
-            if (!expandCommonArg(arg)) {
-                if (getLabelOffset(commands, arg->val, &offset) == E_ASM_ERR) {
-                    printf("asm: line: %zu : label \"%s\" does not exist\n", commands[i].line, arg->val);
-                    return E_ASM_ERR;
-                }
-                arg->encVal = (short)offset;
-                arg->type = arg->isAddr ? ARG_IMM_ADDR : ARG_IMM;
+        if (!expandCommonArg(arg)) {
+            if (getLabelOffset(commands, arg->val, &offset) == E_ASM_ERR) {
+                printf("asm: line: %zu : label \"%s\" does not exist\n", commands[i].line, arg->val);
+                return E_ASM_ERR;
             }
+            arg->encVal = offset;
+            arg->type = arg->isAddr ? ARG_IMM_ADDR : ARG_IMM;
         }
     }
     return E_ASM_OK;
@@ -119,19 +122,13 @@ static e_asm_codes substLabelsArgs(commandNode *commands) {
 static e_asm_codes writeCode(commandNode *commands, FILE *out) {
     assert(commands != NULL);
 
-    size_t i = 0;
-    for (; commands[i].instrName != NULL; i++) {
+    for (size_t i = 0; commands[i].instrName != NULL; i++) {
 
         if (!instrEncode(&commands[i], out)) {
             printf("asm: line: %zu : instruction invalid\n", commands[i].line);
             return E_ASM_ERR;
         }
     }
-
-    commands[i].instrName = "end";
-    commands[i].args[0].type = ARG_EMPTY;
-    commands[i].args[1].type = ARG_EMPTY;
-    instrEncode(&commands[i], out);
 
     return E_ASM_OK;
 }
@@ -140,11 +137,11 @@ static e_asm_codes writeCode(commandNode *commands, FILE *out) {
 asm_ecode assemble(assembler_s *as) {
     assert(as != NULL);
 
-    evalOffsets(&as->prog->code);
-    if (substLabelsArgs(as->prog->code.commands) != E_ASM_OK)
+    evalOffsets(as->prog);
+    if (substLabelsArgs(as->prog->commands) != E_ASM_OK)
         return E_ASM_ERR;
 
-    if (writeCode(as->prog->code.commands, as->out) != E_ASM_OK)
+    if (writeCode(as->prog->commands, as->out) != E_ASM_OK)
         return E_ASM_ERR;
 
     return E_ASM_OK;

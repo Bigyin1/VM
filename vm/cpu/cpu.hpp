@@ -30,14 +30,12 @@ typedef struct devise_s devise_s;
 
 
 
-typedef int cpu_gp_reg_t;
-
 struct cpu_s
 {
     size_t regIP;
     stack_s *stackPtr;
 
-    cpu_gp_reg_t regs[gpRegsCount];
+    elem_t regs[gpRegsCount];
 
 
     devise_s dev[maxDevicesCount];

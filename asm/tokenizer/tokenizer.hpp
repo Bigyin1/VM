@@ -4,41 +4,51 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "../errors.hpp"
 
-enum e_asm_token_type
-{
+
+enum e_asm_token_type {
   ASM_T_EOF,
-  ASM_T_WORD,
-  ASM_T_COLON,
+  ASM_T_ID,
+  ASM_T_FLOAT,
+  ASM_T_INTEGER,
+  ASM_T_LABEL,
+  ASM_T_SPACE,
+
+
+  ASM_T_COMMA,
+  ASM_T_PLUS,
+  ASM_T_MINUS,
   ASM_T_L_PAREN,
   ASM_T_R_PAREN,
-  ASM_T_SPACE,
   ASM_T_NL,
-  ASM_T_COMMA,
   ASM_T_COMMENT,
-  ASM_T_DOT,
+
 };
 
 typedef enum e_asm_token_type e_asm_token_type;
 
+typedef struct token_meta_s {
 
-#define TOK_COLON ":"
-#define TOK_COMMA ","
-#define TOK_L_PAREN "["
-#define TOK_R_PAREN "]"
-#define TOK_SPACE " "
-#define TOK_NL "\n"
-#define TOK_COMMENT "#"
-#define TOK_DOT "."
+  e_asm_token_type type;
+  const char *val;
+
+} token_meta_s;
 
 
 
+const size_t maxTokenValLen = 24;
 
 struct token_s
 {
-    char *val;
+    char val[maxTokenValLen + 1];
+
+    double dblNumVal;
+    int64_t intNumVal;
+
     e_asm_token_type type;
+
     size_t line;
     size_t column;
 };
@@ -49,16 +59,23 @@ typedef struct token_s token_s;
 
 struct tokenizer_s
 {
-    token_s tokens[1024];
+    token_s *tokens;
     token_s *currToken;
+
+
+    char *input;
+    size_t line;
+    size_t column;
+
 };
 
 typedef struct tokenizer_s tokenizer_s;
 
 
 
+asm_ecode tokenizerInit (tokenizer_s *t, char *input);
 
-asm_ecode tokenize (tokenizer_s *t, char *input);
+asm_ecode tokenize(tokenizer_s *t);
 
 token_s *getNextToken (tokenizer_s *t);
 

@@ -3,47 +3,55 @@
 #include "parser.hpp"
 #include "utils.hpp"
 
-static const char *codeSectName = "code";
-static const char *dataSectName = "data";
-
-static asm_ecode parseCommandArgs(parser_s *parser, commandNode *node) {
+static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *arg) {
     assert(parser != NULL);
     assert(node != NULL);
 
-    for (size_t i = 0; i < instrArgsMaxCount; i++) {
-        instrArgument *arg = node->args + i;
 
-        char *val = currTokenVal(parser);
-        if (currTokenType(parser) == ASM_T_WORD) {
+    char *val = currTokenVal(parser);
+    if (currTokenType(parser) == ASM_T_LABEL) {
+        eatToken(parser, ASM_T_LABEL);
 
-            eatToken(parser, ASM_T_WORD);
-            arg->val = val;
-            arg->isAddr = false;
+        arg->Type = ArgImm;
 
-        } else {
+    } else if (currTokenType(parser) == ASM_T_FLOAT) {
 
-            if (eatToken(parser, ASM_T_L_PAREN) != E_ASM_OK)
-                return E_ASM_ERR;
+        eatToken(parser, ASM_T_FLOAT);
 
-            val = currTokenVal(parser);
-            if (eatToken(parser, ASM_T_WORD) != E_ASM_OK)
-                return E_ASM_ERR;
+        arg->Imm = currTokenDblNumVal(parser);
+        arg->Type = ArgImm;
 
-            if (eatToken(parser, ASM_T_R_PAREN) != E_ASM_OK)
-                return E_ASM_ERR;
+    } else if (currTokenType(parser) == ASM_T_INTEGER) {
 
-            arg->val = val;
-            arg->isAddr = true;
-        }
+        eatToken(parser, ASM_T_INTEGER);
 
-        eatSP(parser);
+        arg->Imm = currTokenIntNumVal(parser);
+        arg->Type = ArgImm;
 
-        if (currTokenType(parser) == ASM_T_COMMA)
-            eatToken(parser, ASM_T_COMMA);
-        else
-            return E_ASM_OK;
+    } else if (currTokenType(parser) == ASM_T_ID) {
+        eatToken(parser, ASM_T_ID);
 
-        eatSP(parser);
+        arg->RegNum = val;
+        arg->type |= ARG_REG;
+        arg->sz += regArgSize;
+
+    } else {
+
+        if (eatToken(parser, ASM_T_L_PAREN) != E_ASM_OK)
+            return E_ASM_ERR;
+
+        val = currTokenVal(parser);
+        if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
+            return E_ASM_ERR;
+
+        if (eatToken(parser, ASM_T_R_PAREN) != E_ASM_OK)
+            return E_ASM_ERR;
+
+        arg->reg = val;
+        arg->type |= ARG_REG;
+        arg->type |= ARG_ADDR;
+        arg->sz += regArgSize;
+
     }
 
     return E_ASM_OK;
@@ -56,30 +64,22 @@ static asm_ecode parseCommandNode(parser_s *parser, commandNode *node) {
 
     char *name = currTokenVal(parser);
 
-    node->line = parser->toks->currToken->line;
 
-    if (eatToken(parser, ASM_T_WORD) != E_ASM_OK)
-        return E_ASM_ERR;
-
-
-    if (currTokenType(parser) == ASM_T_COLON) {
-        eatToken(parser, ASM_T_COLON);
+    if (currTokenType(parser) == ASM_T_LABEL) {
         node->label = name;
-
+        eatToken(parser, ASM_T_LABEL);
         eatBlanks(parser);
-
-        name = currTokenVal(parser);
-        if (eatToken(parser, ASM_T_WORD) != E_ASM_OK)
-            return E_ASM_ERR;
     }
 
+    node->line = parser->toks->currToken->line;
+    name = currTokenVal(parser);
+    if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
+        return E_ASM_ERR;
+
     node->instrName = name;
+    eatToken(parser, ASM_T_SPACE);
 
-    if (peekNextToken(parser->toks)->type != ASM_T_NL)
-        if (eatToken(parser, ASM_T_SPACE) != E_ASM_OK)
-            return E_ASM_ERR;
-
-    if (parseCommandArgs(parser, node) != E_ASM_OK)
+    if (parseCommandArg(parser, node, &node->instr.Arg1) != E_ASM_OK)
         return E_ASM_ERR;
 
 
@@ -91,11 +91,7 @@ static asm_ecode parseCodeNode(parser_s *parser, codeNode *node) {
     assert(node != NULL);
 
     commandNode *cmds = node->commands;
-
-    eatSP(parser);
-
-    if (eatToken(parser, ASM_T_NL) != E_ASM_OK)
-        return E_ASM_ERR;
+    getNextToken(parser->toks);
 
     eatBlanks(parser);
 
@@ -115,7 +111,7 @@ static asm_ecode parseCodeNode(parser_s *parser, codeNode *node) {
 
         eatBlanks(parser);
 
-        if (currTokenType(parser) == ASM_T_EOF || currTokenType(parser) == ASM_T_DOT)
+        if (currTokenType(parser) == ASM_T_EOF)
             break;
     }
 
@@ -123,39 +119,10 @@ static asm_ecode parseCodeNode(parser_s *parser, codeNode *node) {
 }
 
 
-static asm_ecode parseProgramNode(parser_s *parser, programNode *node) {
-    assert(parser != NULL);
-    assert(node != NULL);
-
-    getNextToken(parser->toks);
-    eatNL(parser);
-
-    if (eatToken(parser, ASM_T_DOT) != E_ASM_OK)
-        return E_ASM_ERR;
-
-    char *sectionName = currTokenVal(parser);
-
-    if (eatToken(parser, ASM_T_WORD) != E_ASM_OK)
-        return E_ASM_ERR;
-
-    if (strcmp(sectionName, codeSectName) != 0) {
-        printf("asm: usupported file section: %s\n", sectionName);
-        return E_ASM_ERR;
-    }
-
-    if (parseCodeNode(parser, &node->code) != E_ASM_OK)
-        return E_ASM_ERR;
-
-
-    return E_ASM_OK;
-}
-
-
-
 asm_ecode parseTokens(parser_s *parser) {
     assert(parser != NULL);
 
-    if (parseProgramNode(parser, &parser->prog) != E_ASM_OK)
+    if (parseCodeNode(parser, &parser->prog) != E_ASM_OK)
         return E_ASM_ERR;
 
     return E_ASM_OK;

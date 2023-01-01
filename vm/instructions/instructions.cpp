@@ -1,12 +1,9 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
-#include "instructionsMeta.hpp"
+#include "instructions.hpp"
 #include "encode.hpp"
 #include "decode.hpp"
-
-
-
 
 const RegMeta regs[15] = {
 
@@ -37,9 +34,7 @@ const RegMeta regs[15] = {
     {
         .Name = "rbp",
         .RegCode = 14,
-    }
-};
-
+    }};
 
 const InstructionMeta instructions[] = {
 
@@ -53,8 +48,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgImmIndirect},
             {.First = ArgRegister, .Second = ArgImmOffsetIndirect},
         },
-        .EncFunc = encodeLD,
-        .DecFunc = decodeLD,
+        .encFunc = encodeLD,
+        .decFunc = decodeLD,
 
     },
     {
@@ -67,8 +62,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgImmIndirect},
             {.First = ArgRegister, .Second = ArgImmOffsetIndirect},
         },
-        .EncFunc = encodeST,
-        .DecFunc = decodeST,
+        .encFunc = encodeST,
+        .decFunc = decodeST,
     },
     {
         .Name = "mov",
@@ -77,8 +72,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeMOV,
-        .DecFunc = decodeMOV,
+        .encFunc = encodeMOV,
+        .decFunc = decodeMOV,
     },
     {
         .Name = "push",
@@ -87,8 +82,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgNone},
             {.First = ArgImm, .Second = ArgNone},
         },
-        .EncFunc = encodePUSH,
-        .DecFunc = decodePUSH,
+        .encFunc = encodePUSH,
+        .decFunc = decodePUSH,
     },
     {
         .Name = "pop",
@@ -96,8 +91,8 @@ const InstructionMeta instructions[] = {
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgNone},
         },
-        .EncFunc = encodePOP,
-        .DecFunc = decodePOP,
+        .encFunc = encodePOP,
+        .decFunc = decodePOP,
     },
     {
         .Name = "add",
@@ -106,8 +101,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeARITHM,
-        .DecFunc = decodeARITHM,
+        .encFunc = encodeARITHM,
+        .decFunc = decodeARITHM,
     },
     {
         .Name = "addf",
@@ -116,8 +111,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeARITHMF,
-        .DecFunc = decodeARITHMF,
+        .encFunc = encodeARITHMF,
+        .decFunc = decodeARITHMF,
     },
     {
         .Name = "sub",
@@ -126,8 +121,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeARITHM,
-        .DecFunc = decodeARITHM,
+        .encFunc = encodeARITHM,
+        .decFunc = decodeARITHM,
     },
     {
         .Name = "subf",
@@ -136,8 +131,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeARITHMF,
-        .DecFunc = decodeARITHMF,
+        .encFunc = encodeARITHMF,
+        .decFunc = decodeARITHMF,
     },
     {
         .Name = "mul",
@@ -146,8 +141,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeARITHM,
-        .DecFunc = decodeARITHM,
+        .encFunc = encodeARITHM,
+        .decFunc = decodeARITHM,
     },
     {
         .Name = "mulf",
@@ -156,8 +151,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeARITHMF,
-        .DecFunc = decodeARITHMF,
+        .encFunc = encodeARITHMF,
+        .decFunc = decodeARITHMF,
     },
     {
         .Name = "div",
@@ -166,8 +161,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeARITHM,
-        .DecFunc = decodeARITHM,
+        .encFunc = encodeARITHM,
+        .decFunc = decodeARITHM,
     },
     {
         .Name = "divf",
@@ -176,8 +171,8 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
         },
-        .EncFunc = encodeARITHMF,
-        .DecFunc = decodeARITHMF,
+        .encFunc = encodeARITHMF,
+        .decFunc = decodeARITHMF,
     },
     {
         .Name = "jmp",
@@ -188,50 +183,51 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegisterIndirect, .Second = ArgNone},
             {.First = ArgImmIndirect, .Second = ArgNone},
         },
-        .EncFunc = encodeJMP,
-        .DecFunc = decodeJMP,
+        .encFunc = encodeJMP,
+        .decFunc = decodeJMP,
     },
 
 };
 
-
-
-const InstructionMeta *findInsMetaByName(InstructionName name) {
+static const InstructionMeta *findInsMetaByName(InstructionName name)
+{
     assert(name != NULL);
 
-    for (size_t i = 0; i < sizeof(instructions)/sizeof(InstructionMeta); i++) {
+    for (size_t i = 0; i < sizeof(instructions) / sizeof(InstructionMeta); i++)
+    {
 
         if (strcmp(instructions[i].Name, name) == 0)
             return &instructions[i];
-
     }
 
     return NULL;
 }
 
-const InstructionMeta *findInsMetaByOpCode(uint8_t opCode) {
+static const InstructionMeta *findInsMetaByOpCode(uint8_t opCode)
+{
 
-    for (size_t i = 0; i < sizeof(instructions)/sizeof(InstructionMeta); i++) {
+    for (size_t i = 0; i < sizeof(instructions) / sizeof(InstructionMeta); i++)
+    {
 
         if (opCode == instructions[i].OpCode)
             return &instructions[i];
-
     }
 
     return NULL;
 }
 
+static int findArgSetIdx(uint8_t opCode, ArgSet args)
+{
 
-int findArgSetIdx(uint8_t opCode, ArgSet args) {
-
-    for (size_t i = 0; i < sizeof(instructions)/sizeof(InstructionMeta); i++) {
+    for (size_t i = 0; i < sizeof(instructions) / sizeof(InstructionMeta); i++)
+    {
 
         if (opCode == instructions[i].OpCode)
         {
-            for (size_t j = 0; i < sizeof(instructions->ArgSets)/sizeof(ArgSet); j++)
+            for (size_t j = 0; i < sizeof(instructions->ArgSets) / sizeof(ArgSet); j++)
             {
                 if (instructions[i].ArgSets[j].First == args.First &&
-                        instructions[i].ArgSets[j].Second == args.Second)
+                    instructions[i].ArgSets[j].Second == args.Second)
 
                     return j;
             }
@@ -241,14 +237,94 @@ int findArgSetIdx(uint8_t opCode, ArgSet args) {
     return -1;
 }
 
+int findRegByName(RegName name)
+{
 
-int findRegByName(RegName name) {
-
-    for (size_t i = 0; i < sizeof(regs)/sizeof(RegMeta); i++) {
+    for (size_t i = 0; i < sizeof(regs) / sizeof(RegMeta); i++)
+    {
 
         if (strcmp(regs[i].Name, name) == 0)
             return i;
     }
 
     return -1;
+}
+
+static InstrErr newInstructionFromOpCode(Instruction *ins, uint8_t opCode, uint8_t argSetIdx)
+{
+
+    ins->im = findInsMetaByOpCode(opCode);
+    if (ins->im == NULL)
+        return INSTR_UNKNOWN;
+
+    if (ins->ArgSetIdx != 0 && ins->im->ArgSets[argSetIdx].First == ArgNone)
+        return INSTR_WRONG_OPERANDS;
+
+    ins->ArgSetIdx = argSetIdx;
+
+    ins->Arg1.Type = ins->im->ArgSets[argSetIdx].First;
+    ins->Arg2.Type = ins->im->ArgSets[argSetIdx].Second;
+
+    return INSTR_OK;
+}
+
+static const uint8_t opCodeMask = 0b00011111;
+
+int Decode(Instruction *ins, FILE *r)
+{
+
+    char byte = 0;
+
+    fread(&byte, 1, 1, r);
+
+    uint8_t opCode = (byte & opCodeMask);
+    uint8_t argSetIdx = (byte >> 5);
+
+    InstrErr err = newInstructionFromOpCode(ins, opCode, argSetIdx);
+    if (err != INSTR_OK)
+        return err;
+
+    ins->im->decFunc(ins, r);
+
+    return 0;
+}
+
+static uint8_t encInstrHeader(uint8_t opCode, uint8_t argSetIdx)
+{
+
+    uint8_t byte = 0;
+
+    byte |= (opCode & opCodeMask);
+    byte |= (argSetIdx << 5);
+
+    return byte;
+}
+
+int Encode(Instruction *ins, FILE *w)
+{
+
+    uint8_t byte1 = encInstrHeader(ins->im->OpCode, ins->ArgSetIdx);
+    fwrite(&byte1, 1, 1, w);
+
+    ins->im->encFunc(ins, w);
+    return 0;
+}
+
+InstrErr NewInstruction(InstructionName name, Instruction instr, size_t *sz)
+{
+
+    const InstructionMeta *im = findInsMetaByName(name);
+    if (im == NULL)
+        return INSTR_UNKNOWN;
+
+    instr.im = im;
+
+    ArgSet argSet = {.First = instr.Arg1.Type, .Second = instr.Arg2.Type};
+
+    int argSetIdx = findArgSetIdx(im->OpCode, argSet);
+    if (argSetIdx < 0)
+        return INSTR_WRONG_OPERANDS;
+
+    instr.ArgSetIdx = argSetIdx;
+    return INSTR_OK;
 }

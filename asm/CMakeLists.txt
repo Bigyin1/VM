@@ -2,13 +2,13 @@ set(source_files
     main.cpp
     utils.cpp
     tokenizer/tokenizer.cpp
+
     parser/parser.cpp
     parser/utils.cpp
 
     ../vm/instructions/decode.cpp
     ../vm/instructions/encode.cpp
-    ../vm/instructions/instruction.cpp
-    ../vm/instructions/instructionsMeta.cpp
+    ../vm/instructions/instructions.cpp
 
     # assembler/assembler.cpp
 )

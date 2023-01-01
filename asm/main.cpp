@@ -4,25 +4,26 @@
 #include "tokenizer/tokenizer.hpp"
 #include "parser/parser.hpp"
 #include "assembler/assembler.hpp"
-#include "../vm/cpu/instructions.hpp"
 
+int main(int argc, char **argv)
+{
 
-int main(int argc, char **argv) {
-
-
-    if (argc != 3) {
+    if (argc != 3)
+    {
         printf("Wrong args count\n");
         return 1;
     }
 
     char *text = readFile(argv[1]);
-    if (text == NULL) {
+    if (text == NULL)
+    {
         perror(argv[1]);
         return 1;
     }
 
     FILE *out = fopen(argv[2], "w");
-    if (out == NULL){
+    if (out == NULL)
+    {
         perror(argv[2]);
         return 1;
     }

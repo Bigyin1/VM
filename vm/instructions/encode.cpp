@@ -2,32 +2,8 @@
 #include <cstddef>
 #include "encode.hpp"
 
-
-
-
-
-uint8_t encInstrHeader(uint8_t opCode, uint8_t argSetIdx) {
-
-    uint8_t byte = 0;
-
-    byte |= (opCode & opCodeMask);
-	byte |= (argSetIdx << 5);
-
-    return byte;
-}
-
-
-int Encode(Instruction *ins, FILE *w) {
-
-    uint8_t byte1 = encInstrHeader(ins->im->OpCode, ins->ArgSetIdx);
-    fwrite(&byte1, 1, 1, w);
-
-    ins->im->EncFunc(ins, w);
-    return 0;
-}
-
-
-void encodeCommon(Argument *arg, FILE *w) {
+void encodeCommon(Argument *arg, FILE *w)
+{
 
     switch (arg->Type)
     {
@@ -49,9 +25,11 @@ void encodeCommon(Argument *arg, FILE *w) {
         break;
 
     case ArgRegisterOffsetRegIndirect:
+    {
         uint8_t byte = arg->RegNum | (arg->DispRegNum << 4);
         fwrite(&byte, 1, 1, w);
         break;
+    }
 
     case ArgImmOffsetIndirect:
         fwrite(&arg->Imm, sizeof(arg->Imm), 1, w);
@@ -60,17 +38,17 @@ void encodeCommon(Argument *arg, FILE *w) {
 
     case ArgNone:
         return;
-
     }
 }
 
-void encodeImm(Argument *arg, FILE *w, uint8_t sz) {
+void encodeImm(Argument *arg, FILE *w, uint8_t sz)
+{
 
-    fwrite(&arg->Imm, 8, 1, w); //TODO
-
+    fwrite(&arg->Imm, 8, 1, w); // TODO
 }
 
-int encodeLD(Instruction *ins, FILE *w) {
+int encodeLD(Instruction *ins, FILE *w)
+{
 
     uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExtend << 6);
     fwrite(&byte, 1, 1, w);
@@ -79,7 +57,8 @@ int encodeLD(Instruction *ins, FILE *w) {
     return 0;
 }
 
-int encodeST(Instruction *ins, FILE *w) {
+int encodeST(Instruction *ins, FILE *w)
+{
 
     uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExtend << 6);
     fwrite(&byte, 1, 1, w);
@@ -88,9 +67,11 @@ int encodeST(Instruction *ins, FILE *w) {
     return 0;
 }
 
-int encodeMOV(Instruction *ins, FILE *w) {
+int encodeMOV(Instruction *ins, FILE *w)
+{
 
-    if (ins->Arg2.Type == ArgRegister) {
+    if (ins->Arg2.Type == ArgRegister)
+    {
 
         uint8_t byte = ins->Arg1.RegNum | (ins->Arg2.RegNum << 4);
         fwrite(&byte, 1, 1, w);
@@ -104,9 +85,11 @@ int encodeMOV(Instruction *ins, FILE *w) {
     return 0;
 }
 
-int encodePUSH(Instruction *ins, FILE *w) {
+int encodePUSH(Instruction *ins, FILE *w)
+{
 
-    if (ins->Arg1.Type == ArgRegister) {
+    if (ins->Arg1.Type == ArgRegister)
+    {
 
         fwrite(&ins->Arg1.RegNum, 1, 1, w);
         return 0;
@@ -116,16 +99,19 @@ int encodePUSH(Instruction *ins, FILE *w) {
     return 0;
 }
 
-int encodePOP(Instruction *ins, FILE *w) {
+int encodePOP(Instruction *ins, FILE *w)
+{
 
     fwrite(&ins->Arg1.RegNum, 1, 1, w);
 
     return 0;
 }
 
-int encodeARITHM(Instruction *ins, FILE *w) {
+int encodeARITHM(Instruction *ins, FILE *w)
+{
 
-    if (ins->Arg2.Type == ArgRegister) {
+    if (ins->Arg2.Type == ArgRegister)
+    {
 
         uint8_t byte = ins->Arg1.RegNum | (ins->Arg2.RegNum << 4);
         fwrite(&byte, 1, 1, w);
@@ -139,9 +125,11 @@ int encodeARITHM(Instruction *ins, FILE *w) {
     return 0;
 }
 
-int encodeARITHMF(Instruction *ins, FILE *w) {
+int encodeARITHMF(Instruction *ins, FILE *w)
+{
 
-    if (ins->Arg2.Type == ArgRegister) {
+    if (ins->Arg2.Type == ArgRegister)
+    {
 
         uint8_t byte = ins->Arg1.RegNum | (ins->Arg2.RegNum << 4);
         fwrite(&byte, 1, 1, w);
@@ -155,9 +143,11 @@ int encodeARITHMF(Instruction *ins, FILE *w) {
     return 0;
 }
 
-int encodeJMP(Instruction *ins, FILE *w) {
+int encodeJMP(Instruction *ins, FILE *w)
+{
 
-    if (ins->Arg1.Type == ArgImm) {
+    if (ins->Arg1.Type == ArgImm)
+    {
 
         encodeImm(&ins->Arg1, w, ins->DataSz);
         return 0;
@@ -167,5 +157,3 @@ int encodeJMP(Instruction *ins, FILE *w) {
 
     return 0;
 }
-
-

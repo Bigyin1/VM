@@ -4,7 +4,7 @@ ret
 
 # ld st
 label1:
-ld r0, [123]
+ld(hws) r0, [123]
  ld r1 , [:label1]
 st r2, [r3+128]
 st r0, [r2]

@@ -9,9 +9,9 @@ static const char *spaces = " \t";
 
 const token_meta_s generalTokens[] = {
     {ASM_T_L_PAREN, "["},
-    // {ASM_T_PLUS, "+"},
-    // {ASM_T_MINUS, "-"},
     {ASM_T_R_PAREN, "]"},
+    {ASM_T_L_SIMP_PAREN, "("},
+    {ASM_T_R_SIMP_PAREN, ")"},
     {ASM_T_COMMENT, "#"},
     {ASM_T_COMMA, ","},
     {ASM_T_NL, "\n"},

@@ -301,7 +301,7 @@ int main()
 
         if (i == sizeof(testIns) / sizeof(Instruction))
         {
-            printf("too many instructions in file\nFAILED\n");
+            printf("too many instructions in test file\nFAILED\n");
             fclose(f);
 
             return 1;

@@ -128,8 +128,69 @@ static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *
     return E_ASM_OK;
 }
 
+static asm_ecode parseInstrPostfix(parser_s *parser, commandNode *node)
+{
+    if (currTokenType(parser) != ASM_T_L_SIMP_PAREN)
+        return E_ASM_OK;
+
+    eatToken(parser, ASM_T_L_SIMP_PAREN);
+
+    const char *postfix = currTokenVal(parser);
+    if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
+        return E_ASM_ERR;
+
+    size_t len = strlen(postfix);
+
+    if (len > 3)
+        return E_ASM_ERR;
+
+    if (postfix[0] == 'b')
+    {
+        node->instr.DataSz = DataByte;
+        if (len == 2 && postfix[1] == 's')
+            node->instr.SignExtend = 1;
+        else if (len > 1)
+            return E_ASM_ERR;
+
+        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != E_ASM_OK)
+            return E_ASM_ERR;
+
+        return E_ASM_OK;
+    }
+
+    if (len < 2)
+        return E_ASM_ERR;
+
+    if (strncmp(postfix, "db", 2) == 0)
+    {
+        node->instr.DataSz = DataDByte;
+        if (len == 3 && postfix[2] == 's')
+            node->instr.SignExtend = 1;
+
+        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != E_ASM_OK)
+            return E_ASM_ERR;
+
+        return E_ASM_OK;
+    }
+    else if (strncmp(postfix, "hw", 2) == 0)
+    {
+        node->instr.DataSz = DataHalfWord;
+        if (len == 3 && postfix[2] == 's')
+            node->instr.SignExtend = 1;
+
+        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != E_ASM_OK)
+            return E_ASM_ERR;
+
+        return E_ASM_OK;
+    }
+
+    return E_ASM_ERR;
+}
+
 static asm_ecode createInstruction(parser_s *parser, commandNode *node)
 {
+
+    // ld(hws)
 
     size_t sz = 0;
     InstrErr err = NewInstruction(node->instrName, &node->instr, &sz);
@@ -178,6 +239,8 @@ static asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
         return E_ASM_ERR;
 
     node->instrName = name;
+    if (parseInstrPostfix(parser, node) != E_ASM_OK)
+        return E_ASM_ERR;
 
     eatSP(parser);
 

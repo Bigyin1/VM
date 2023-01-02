@@ -4,14 +4,14 @@
 
 #include "instructions.hpp"
 
-int encodeLD(Instruction *ins, FILE *w, bool);
-int encodeST(Instruction *ins, FILE *w, bool);
-int encodeMOV(Instruction *ins, FILE *w, bool);
-int encodePUSH(Instruction *ins, FILE *w, bool);
-int encodePOP(Instruction *ins, FILE *w, bool);
-int encodeARITHM(Instruction *ins, FILE *w, bool);
-int encodeARITHMF(Instruction *ins, FILE *w, bool);
-int encodeBranch(Instruction *ins, FILE *w, bool);
-int encodeNoArgs(Instruction *ins, FILE *w, bool);
+size_t encodeLD(Instruction *ins, FILE *w, bool);
+size_t encodeST(Instruction *ins, FILE *w, bool);
+size_t encodeMOV(Instruction *ins, FILE *w, bool);
+size_t encodePUSH(Instruction *ins, FILE *w, bool);
+size_t encodePOP(Instruction *ins, FILE *w, bool);
+size_t encodeARITHM(Instruction *ins, FILE *w, bool);
+size_t encodeARITHMF(Instruction *ins, FILE *w, bool);
+size_t encodeBranch(Instruction *ins, FILE *w, bool);
+size_t encodeNoArgs(Instruction *ins, FILE *w, bool);
 
 #endif

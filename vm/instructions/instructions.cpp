@@ -217,6 +217,30 @@ const InstructionMeta instructions[] = {
         .decFunc = decodeBranch,
     },
     {
+        .Name = "jg",
+        .OpCode = JG,
+        .ArgSets = {
+            {.First = ArgImm, .Second = ArgNone},
+            {.First = ArgRegister, .Second = ArgNone},
+            {.First = ArgRegisterIndirect, .Second = ArgNone},
+            {.First = ArgImmIndirect, .Second = ArgNone},
+        },
+        .encFunc = encodeBranch,
+        .decFunc = decodeBranch,
+    },
+    {
+        .Name = "jl",
+        .OpCode = JL,
+        .ArgSets = {
+            {.First = ArgImm, .Second = ArgNone},
+            {.First = ArgRegister, .Second = ArgNone},
+            {.First = ArgRegisterIndirect, .Second = ArgNone},
+            {.First = ArgImmIndirect, .Second = ArgNone},
+        },
+        .encFunc = encodeBranch,
+        .decFunc = decodeBranch,
+    },
+    {
         .Name = "call",
         .OpCode = CALL,
         .ArgSets = {
@@ -227,6 +251,16 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeBranch,
         .decFunc = decodeBranch,
+    },
+    {
+        .Name = "cmp",
+        .OpCode = CMP,
+        .ArgSets = {
+            {.First = ArgRegister, .Second = ArgRegister},
+            {.First = ArgRegister, .Second = ArgImm},
+        },
+        .encFunc = encodeMOV,
+        .decFunc = decodeMOV,
     },
 
 };
@@ -323,7 +357,7 @@ InstrErr Decode(Instruction *ins, FILE *r)
         return INSTR_NOT_EXIST;
 
     uint8_t opCode = (byte & opCodeMask);
-    uint8_t argSetIdx = (byte >> 5);
+    uint8_t argSetIdx = (uint8_t)(byte >> 5);
 
     InstrErr err = newInstructionFromOpCode(ins, opCode, argSetIdx);
     if (err != INSTR_OK)
@@ -340,7 +374,7 @@ static uint8_t encInstrHeader(uint8_t opCode, uint8_t argSetIdx)
     uint8_t byte = 0;
 
     byte |= (opCode & opCodeMask);
-    byte |= (argSetIdx << 5);
+    byte |= (uint8_t)(argSetIdx << 5);
 
     return byte;
 }
@@ -370,7 +404,7 @@ InstrErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz)
     if (argSetIdx < 0)
         return INSTR_WRONG_OPERANDS;
 
-    instr->ArgSetIdx = argSetIdx;
+    instr->ArgSetIdx = (uint8_t)argSetIdx;
 
     *sz = instr->im->encFunc(instr, NULL, true);
     return INSTR_OK;

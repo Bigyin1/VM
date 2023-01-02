@@ -42,7 +42,7 @@ int decodeLD(Instruction *ins, FILE *r)
 {
 
     // arg 1
-    char byte = 0;
+    uint8_t byte = 0;
     fread(&byte, 1, 1, r);
 
     ins->Arg1.RegNum = byte & regCodeMask;
@@ -59,12 +59,11 @@ int decodeST(Instruction *ins, FILE *r)
 {
 
     // arg 1
-    char byte = 0;
+    uint8_t byte = 0;
     fread(&byte, 1, 1, r);
 
     ins->Arg1.RegNum = byte & regCodeMask;
     ins->DataSz = (byte & 0b00110000) >> 4;
-    ins->SignExtend = (byte & 0b01000000) >> 6;
 
     // arg 2
     decodeCommon(&ins->Arg2, r);
@@ -75,7 +74,7 @@ int decodeST(Instruction *ins, FILE *r)
 int decodeMOV(Instruction *ins, FILE *r)
 {
 
-    char byte = 0;
+    uint8_t byte = 0;
     fread(&byte, 1, 1, r);
 
     // mov r1, r2
@@ -98,23 +97,31 @@ int decodeMOV(Instruction *ins, FILE *r)
 
 int decodePUSH(Instruction *ins, FILE *r)
 {
-
     decodeCommon(&ins->Arg1, r);
+    if (ins->Arg1.Type == ArgRegister)
+    {
+        ins->DataSz = (ins->Arg1.RegNum & 0b00110000) >> 4;
+        ins->Arg1.RegNum &= regCodeMask;
+    }
     return 0;
 }
 
 int decodePOP(Instruction *ins, FILE *r)
 {
 
-    // pop r1
     decodeCommon(&ins->Arg1, r);
+
+    ins->DataSz = (ins->Arg1.RegNum & 0b00110000) >> 4;
+    ins->SignExtend = (ins->Arg1.RegNum & 0b01000000) >> 6;
+    ins->Arg1.RegNum &= regCodeMask;
+
     return 0;
 }
 
 int decodeARITHM(Instruction *ins, FILE *r)
 {
 
-    char byte = 0;
+    uint8_t byte = 0;
     fread(&byte, 1, 1, r);
 
     // add r1, r2
@@ -138,7 +145,7 @@ int decodeARITHM(Instruction *ins, FILE *r)
 int decodeARITHMF(Instruction *ins, FILE *r)
 {
 
-    char byte = 0;
+    uint8_t byte = 0;
     fread(&byte, 1, 1, r);
 
     // addf r1, r2
@@ -166,7 +173,7 @@ int decodeBranch(Instruction *ins, FILE *r)
     return 0;
 }
 
-int decodeNoArgs(Instruction *ins, FILE *r)
+int decodeNoArgs(Instruction *, FILE *)
 {
     return 0;
 }

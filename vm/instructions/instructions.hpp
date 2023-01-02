@@ -10,6 +10,15 @@
 
 typedef struct InstructionMeta InstructionMeta;
 
+typedef enum DataSize
+{
+    DataWord = 0,
+    DataHalfWord,
+    DataDByte,
+    DataByte,
+
+} DataSize;
+
 typedef struct Instruction
 {
     const InstructionMeta *im;
@@ -33,7 +42,7 @@ typedef enum InstrErr
 } InstrErr;
 
 typedef int (*DecFunc)(Instruction *, FILE *);
-typedef int (*EncFunc)(Instruction *, FILE *, bool);
+typedef size_t (*EncFunc)(Instruction *, FILE *, bool);
 
 typedef struct ArgSet
 {
@@ -81,7 +90,10 @@ typedef enum InstrOpCode
     JMP,
     JEQ,
     JNEQ,
+    JG,
+    JL,
     CALL,
+    CMP,
 
 } InstrOpCode;
 

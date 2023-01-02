@@ -32,7 +32,7 @@ typedef enum InstrErr
 } InstrErr;
 
 typedef int (*DecFunc)(Instruction *, FILE *);
-typedef int (*EncFunc)(Instruction *, FILE *);
+typedef int (*EncFunc)(Instruction *, FILE *, bool);
 
 typedef struct ArgSet
 {
@@ -62,7 +62,7 @@ typedef struct RegMeta
 
 } RegMeta;
 
-int findRegByName(RegName name);
+int FindRegByName(RegName name);
 
 InstrErr NewInstruction(InstructionName name, Instruction instr, size_t *sz);
 

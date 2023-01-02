@@ -28,13 +28,6 @@ void decodeCommon(Argument *arg, FILE *r)
         fwrite(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r);
         break;
 
-    case ArgRegisterOffsetRegIndirect:
-        fread(&arg->RegNum, 1, 1, r);
-
-        arg->DispRegNum = arg->RegNum >> 4;
-        arg->RegNum &= regCodeMask;
-        break;
-
     case ArgImmOffsetIndirect:
         fread(&arg->Imm, sizeof(arg->Imm), 1, r);
         fread(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r);

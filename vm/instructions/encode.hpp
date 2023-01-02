@@ -4,13 +4,13 @@
 
 #include "instructions.hpp"
 
-int encodeLD(Instruction *ins, FILE *w);
-int encodeST(Instruction *ins, FILE *w);
-int encodeMOV(Instruction *ins, FILE *w);
-int encodePUSH(Instruction *ins, FILE *w);
-int encodePOP(Instruction *ins, FILE *w);
-int encodeARITHM(Instruction *ins, FILE *w);
-int encodeARITHMF(Instruction *ins, FILE *w);
-int encodeJMP(Instruction *ins, FILE *w);
+int encodeLD(Instruction *ins, FILE *w, bool);
+int encodeST(Instruction *ins, FILE *w, bool);
+int encodeMOV(Instruction *ins, FILE *w, bool);
+int encodePUSH(Instruction *ins, FILE *w, bool);
+int encodePOP(Instruction *ins, FILE *w, bool);
+int encodeARITHM(Instruction *ins, FILE *w, bool);
+int encodeARITHMF(Instruction *ins, FILE *w, bool);
+int encodeJMP(Instruction *ins, FILE *w, bool);
 
 #endif

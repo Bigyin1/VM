@@ -1,13 +1,13 @@
 #include <string.h>
-#include "parser.hpp"
+#include "labels.hpp"
 
-
-
-int defineNewLabel(parser_s *p, const char *label, uint64_t val) {
+int defineNewLabel(parser_s *p, const char *label, uint64_t val)
+{
 
     for (size_t i = 0; i < p->labelsSz; i++)
     {
-        if (strcmp(p->labels[i].label, label) == 0) {
+        if (strcmp(p->labels[i].label, label) == 0)
+        {
             if (p->labels[i].present)
                 return -1;
 
@@ -25,15 +25,15 @@ int defineNewLabel(parser_s *p, const char *label, uint64_t val) {
 
     p->labelsSz++;
     return 0;
-
 }
 
-
-void addLabelImport(parser_s *p, const char *label, uint64_t *v) {
+void addLabelImport(parser_s *p, const char *label, uint64_t *v)
+{
 
     for (size_t i = 0; i < p->labelsSz; i++)
     {
-        if (strcmp(p->labels[i].label, label) == 0) {
+        if (strcmp(p->labels[i].label, label) == 0)
+        {
 
             size_t impSz = p->labels[i].importsSz;
 
@@ -50,5 +50,4 @@ void addLabelImport(parser_s *p, const char *label, uint64_t *v) {
     p->labels[p->labelsSz].importsSz++;
 
     p->labelsSz++;
-
 }

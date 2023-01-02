@@ -7,23 +7,21 @@
 
 static const char *spaces = " \t";
 
-
 const token_meta_s generalTokens[] = {
-  {ASM_T_L_PAREN, "["},
-//   {ASM_T_PLUS, "+"},
-//   {ASM_T_MINUS, "-"},
-  {ASM_T_R_PAREN, "]"},
-  {ASM_T_COMMENT, "#"},
-  {ASM_T_COMMA, ","},
-  {ASM_T_NL, "\n"},
+    {ASM_T_L_PAREN, "["},
+    // {ASM_T_PLUS, "+"},
+    // {ASM_T_MINUS, "-"},
+    {ASM_T_R_PAREN, "]"},
+    {ASM_T_COMMENT, "#"},
+    {ASM_T_COMMA, ","},
+    {ASM_T_NL, "\n"},
 };
 
-static bool checkSimpleToken(tokenizer_s *t, e_asm_token_type type, const char *tokVal) {
-    assert(t != NULL);
-    assert(tokVal != NULL);
+static bool checkSimpleToken(tokenizer_s *t, e_asm_token_type type, const char *tokVal)
+{
 
-    size_t tokLen = strlen (tokVal);
-    if (strncmp (t->input, tokVal, tokLen) != 0)
+    size_t tokLen = strlen(tokVal);
+    if (strncmp(t->input, tokVal, tokLen) != 0)
         return false;
 
     t->currToken->type = type;
@@ -33,15 +31,14 @@ static bool checkSimpleToken(tokenizer_s *t, e_asm_token_type type, const char *
     return true;
 }
 
-
-static bool checkLabelToken(tokenizer_s *t) {
-    assert(t != NULL);
+static bool checkLabelToken(tokenizer_s *t)
+{
 
     int wordLen = 0;
 
     short colon = 0;
-    if (sscanf(t->input, ":%24[a-zA-Z1-9]%n", t->currToken->val, &wordLen) == 0
-        && sscanf(t->input, "%24[a-zA-Z1-9]%1[:]%n", t->currToken->val, &colon, &wordLen) != 2) // separates only spaces
+    if (sscanf(t->input, ":%24[a-zA-Z0-9]%n", t->currToken->val, &wordLen) == 0 &&
+        sscanf(t->input, "%24[a-zA-Z0-9]%1[:]%n", t->currToken->val, &colon, &wordLen) != 2)
         return false;
 
     t->currToken->type = ASM_T_LABEL;
@@ -51,19 +48,21 @@ static bool checkLabelToken(tokenizer_s *t) {
     return true;
 }
 
-
-static bool checkNumberToken(tokenizer_s *t) {
-    assert(t != NULL);
+static bool checkNumberToken(tokenizer_s *t)
+{
 
     int numLen = 0;
-    sscanf(t->input, "%*[1-9.+-]%n", &numLen);
+    sscanf(t->input, "%*[0-9.+-]%n", &numLen);
+    if (numLen == 0)
+        return false;
 
     int64_t num = 0;
     int read = 0;
     if (sscanf(t->input, "%ld%n", &num, &read) == 0)
         return false;
 
-    if (read < numLen) {
+    if (read < numLen)
+    {
         double dblNum = 0;
         sscanf(t->input, "%lf%n", &dblNum, &read);
         if (read < numLen)
@@ -71,8 +70,9 @@ static bool checkNumberToken(tokenizer_s *t) {
 
         t->currToken->dblNumVal = dblNum;
         t->currToken->type = ASM_T_FLOAT;
-
-    } else {
+    }
+    else
+    {
         t->currToken->intNumVal = num;
         t->currToken->type = ASM_T_INTEGER;
     }
@@ -82,42 +82,68 @@ static bool checkNumberToken(tokenizer_s *t) {
     return true;
 }
 
-static bool checkIdToken(tokenizer_s *t) {
-    assert(t != NULL);
+static bool checkIdToken(tokenizer_s *t)
+{
 
     int wordLen = 0;
-    sscanf(t->input, "%*[1-9a-zA-Z]%n", &wordLen);
+    sscanf(t->input, "%*[0-9a-zA-Z]%n", &wordLen);
+    if (wordLen == 0)
+        return false;
 
-    sscanf(t->input, "%s", t->currToken->val);
+    sscanf(t->input, "%[0-9a-zA-Z]", t->currToken->val);
     t->currToken->type = ASM_T_ID;
-
 
     t->column += wordLen;
     t->input += wordLen;
-    return E_ASM_OK;
+    return true;
 }
 
+static bool checkSimpleTokens(tokenizer_s *t)
+{
+    for (size_t i = 0; i < sizeof(generalTokens) / sizeof(generalTokens[0]); i++)
+    {
+        if (checkSimpleToken(t, generalTokens[i].type, generalTokens[i].val))
+        {
+            if (generalTokens[i].type == ASM_T_NL)
+            {
+                t->line++;
+                t->column = 1;
+                return true;
+            }
+            if (generalTokens[i].type == ASM_T_COMMENT)
+            {
+                int len = 0;
+                sscanf(t->input, "%*s%n", &len);
+                t->column += len;
+                t->input += len;
+            }
+            return true;
+        }
+    }
+    return false;
+}
 
-asm_ecode tokenize(tokenizer_s *t) {
-    assert(t != NULL);
+asm_ecode tokenize(tokenizer_s *t)
+{
 
     asm_ecode err = E_ASM_OK;
     char *textStart = t->input;
 
     t->currToken = t->tokens;
 
-    for (; *t->input != '\0'; t->currToken++) {
+    for (; *t->input != '\0'; t->currToken++)
+    {
         t->currToken->column = t->column;
         t->currToken->line = t->line;
 
-        size_t tokLen = strspn (t->input, spaces);
-        if (tokLen != 0) {
+        size_t tokLen = strspn(t->input, spaces);
+        if (tokLen != 0)
+        {
             t->currToken->type = ASM_T_SPACE;
             t->input += tokLen;
             t->column += tokLen;
             continue;
         }
-
 
         if (t->currToken->type != ASM_T_EOF)
             continue;
@@ -128,24 +154,11 @@ asm_ecode tokenize(tokenizer_s *t) {
         if (checkNumberToken(t))
             continue;
 
-        if (checkIdToken(t))
+        if (checkSimpleTokens(t))
             continue;
 
-        for (size_t i = 0; i < sizeof(generalTokens)/sizeof(generalTokens[0]); i++) {
-            if (checkSimpleToken(t, generalTokens[i].type, generalTokens[i].val)) {
-                if (generalTokens[i].type == ASM_T_NL) {
-                    t->line++;
-                    t->column = 1;
-                }
-                if (generalTokens[i].type == ASM_T_COMMENT) {
-                    int len = 0;
-                    sscanf(t->input, "%*s%n", &len);
-                    t->column += len;
-                    t->input += len;
-                }
-                break;
-            }
-        }
+        if (checkIdToken(t))
+            continue;
     }
 
     t->currToken->type = ASM_T_EOF;
@@ -156,28 +169,29 @@ asm_ecode tokenize(tokenizer_s *t) {
     return err;
 }
 
-
-asm_ecode tokenizerInit (tokenizer_s *t, char *input) {
+asm_ecode tokenizerInit(tokenizer_s *t, char *input)
+{
     t->input = input;
     t->column = 1;
     t->line = 1;
 
     t->currToken = NULL;
-    t->tokens = (token_s*)calloc(1024, sizeof(token_s)); // change to list
-    if (t->tokens == NULL) {
+    t->tokens = (token_s *)calloc(1024, sizeof(token_s)); // TODO: change to list
+    if (t->tokens == NULL)
+    {
         perror("asm: ");
         return E_ASM_ERR;
     }
 
     return E_ASM_OK;
-
 }
 
-
-token_s *getNextToken (tokenizer_s *t) {
+token_s *getNextToken(tokenizer_s *t)
+{
     assert(t != NULL);
 
-    if (t->currToken == NULL){
+    if (t->currToken == NULL)
+    {
         t->currToken = t->tokens;
         return t->currToken;
     }
@@ -189,10 +203,12 @@ token_s *getNextToken (tokenizer_s *t) {
     return t->currToken;
 }
 
-token_s *peekNextToken (tokenizer_s *t) {
+token_s *peekNextToken(tokenizer_s *t)
+{
     assert(t != NULL);
 
-    if (t->currToken == NULL){
+    if (t->currToken == NULL)
+    {
         t->currToken = t->tokens;
         return t->currToken;
     }
@@ -203,7 +219,8 @@ token_s *peekNextToken (tokenizer_s *t) {
     return t->currToken + 1;
 }
 
-void tokenizerFree (tokenizer_s *t) {
+void tokenizerFree(tokenizer_s *t)
+{
     assert(t != NULL);
 
     free(t->tokens);

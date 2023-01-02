@@ -5,7 +5,7 @@
 #include "encode.hpp"
 #include "decode.hpp"
 
-const RegMeta regs[15] = {
+const RegMeta regs[] = {
 
     {
         .Name = "r0",
@@ -33,7 +33,7 @@ const RegMeta regs[15] = {
     },
     {
         .Name = "rbp",
-        .RegCode = 14,
+        .RegCode = 13,
     }};
 
 const InstructionMeta instructions[] = {
@@ -44,7 +44,6 @@ const InstructionMeta instructions[] = {
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegisterIndirect},
             {.First = ArgRegister, .Second = ArgRegisterOffsetIndirect},
-            {.First = ArgRegister, .Second = ArgRegisterOffsetRegIndirect},
             {.First = ArgRegister, .Second = ArgImmIndirect},
             {.First = ArgRegister, .Second = ArgImmOffsetIndirect},
         },
@@ -58,7 +57,6 @@ const InstructionMeta instructions[] = {
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegisterIndirect},
             {.First = ArgRegister, .Second = ArgRegisterOffsetIndirect},
-            {.First = ArgRegister, .Second = ArgRegisterOffsetRegIndirect},
             {.First = ArgRegister, .Second = ArgImmIndirect},
             {.First = ArgRegister, .Second = ArgImmOffsetIndirect},
         },
@@ -224,7 +222,7 @@ static int findArgSetIdx(uint8_t opCode, ArgSet args)
 
         if (opCode == instructions[i].OpCode)
         {
-            for (size_t j = 0; i < sizeof(instructions->ArgSets) / sizeof(ArgSet); j++)
+            for (size_t j = 0; j < sizeof(instructions->ArgSets) / sizeof(ArgSet); j++)
             {
                 if (instructions[i].ArgSets[j].First == args.First &&
                     instructions[i].ArgSets[j].Second == args.Second)
@@ -237,14 +235,13 @@ static int findArgSetIdx(uint8_t opCode, ArgSet args)
     return -1;
 }
 
-int findRegByName(RegName name)
+int FindRegByName(RegName name)
 {
 
     for (size_t i = 0; i < sizeof(regs) / sizeof(RegMeta); i++)
     {
-
         if (strcmp(regs[i].Name, name) == 0)
-            return i;
+            return regs[i].RegCode;
     }
 
     return -1;
@@ -306,7 +303,7 @@ int Encode(Instruction *ins, FILE *w)
     uint8_t byte1 = encInstrHeader(ins->im->OpCode, ins->ArgSetIdx);
     fwrite(&byte1, 1, 1, w);
 
-    ins->im->encFunc(ins, w);
+    ins->im->encFunc(ins, w, false);
     return 0;
 }
 
@@ -326,5 +323,7 @@ InstrErr NewInstruction(InstructionName name, Instruction instr, size_t *sz)
         return INSTR_WRONG_OPERANDS;
 
     instr.ArgSetIdx = argSetIdx;
+
+    *sz = instr.im->encFunc(&instr, NULL, true);
     return INSTR_OK;
 }

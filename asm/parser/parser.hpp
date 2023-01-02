@@ -14,7 +14,7 @@ typedef struct commandNode
     Instruction instr;
 
     size_t line;
-    unsigned int offset;
+    size_t offset;
 
 } commandNode;
 
@@ -45,15 +45,17 @@ typedef struct parser_s
     labelData labels[64];
     size_t labelsSz;
 
+    size_t currOffset;
+
 } parser_s;
 
 #define currTokenType(p) (p)->toks->currToken->type
 
-#define currTokenVal(p) (p)->toks->currToken->val;
+#define currTokenVal(p) (p)->toks->currToken->val
 
-#define currTokenDblNumVal(p) (p)->toks->currToken->dblNumVal;
+#define currTokenDblNumVal(p) (p)->toks->currToken->dblNumVal
 
-#define currTokenIntNumVal(p) (p)->toks->currToken->intNumVal;
+#define currTokenIntNumVal(p) (p)->toks->currToken->intNumVal
 
 asm_ecode parseTokens(parser_s *p);
 

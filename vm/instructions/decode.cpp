@@ -25,7 +25,7 @@ static void decodeCommon(Argument *arg, FILE *r)
 
     case ArgRegisterOffsetIndirect:
         fread(&arg->RegNum, 1, 1, r);
-        fwrite(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r);
+        fread(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r);
         break;
 
     case ArgImmOffsetIndirect:
@@ -163,5 +163,10 @@ int decodeJMP(Instruction *ins, FILE *r)
 {
 
     decodeCommon(&ins->Arg1, r);
+    return 0;
+}
+
+int decodeNoArgs(Instruction *ins, FILE *r)
+{
     return 0;
 }

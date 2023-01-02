@@ -27,6 +27,7 @@ typedef enum InstrErr
 
     INSTR_UNKNOWN,
     INSTR_WRONG_OPERANDS,
+    INSTR_NOT_EXIST,
     INSTR_OK,
 
 } InstrErr;
@@ -56,17 +57,38 @@ typedef const char *RegName;
 
 typedef struct RegMeta
 {
-
     RegName Name;
     uint8_t RegCode;
 
 } RegMeta;
 
+typedef enum InstrOpCode
+{
+    RET = 0,
+    LD,
+    ST,
+    MOV,
+    PUSH,
+    POP,
+    ADD,
+    ADDF,
+    SUB,
+    SUBF,
+    MUL,
+    MULF,
+    DIV,
+    DIVF,
+    JMP,
+
+} InstrOpCode;
+
+extern const InstructionMeta instructions[];
+
 int FindRegByName(RegName name);
 
-InstrErr NewInstruction(InstructionName name, Instruction instr, size_t *sz);
+InstrErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz);
 
-int Decode(Instruction *ins, FILE *r);
+InstrErr Decode(Instruction *ins, FILE *r);
 
 int Encode(Instruction *ins, FILE *w);
 

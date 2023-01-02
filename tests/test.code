@@ -1,0 +1,45 @@
+
+# ret
+ret
+
+# ld st
+label1:
+ld r0, [123]
+ ld r1 , [:label1]
+st r2, [r3+128]
+st r0, [r2]
+
+# mov
+label3:
+mov r0, r1
+mov r1, 123
+mov r2, 3434.234
+mov r4, :label3
+
+# push
+label4:
+push -1234.3
+push  :label4
+push    r0
+push 128
+
+# pop
+label5:
+pop r0
+
+# arithmetic
+label6:
+add r0, r1
+mul r0,  r2
+mulf r1, 1234.0
+divf r0, 2.00
+
+
+# branch
+label7:
+jmp :label6
+
+
+
+
+

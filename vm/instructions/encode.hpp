@@ -12,5 +12,6 @@ int encodePOP(Instruction *ins, FILE *w, bool);
 int encodeARITHM(Instruction *ins, FILE *w, bool);
 int encodeARITHMF(Instruction *ins, FILE *w, bool);
 int encodeJMP(Instruction *ins, FILE *w, bool);
+int encodeNoArgs(Instruction *ins, FILE *w, bool);
 
 #endif

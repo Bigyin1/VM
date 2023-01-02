@@ -37,10 +37,18 @@ const RegMeta regs[] = {
     }};
 
 const InstructionMeta instructions[] = {
-
+    {
+        .Name = "ret",
+        .OpCode = RET,
+        .ArgSets = {
+            {.First = ArgNone, .Second = ArgNone},
+        },
+        .encFunc = encodeNoArgs,
+        .decFunc = decodeNoArgs,
+    },
     {
         .Name = "ld",
-        .OpCode = 1,
+        .OpCode = LD,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegisterIndirect},
             {.First = ArgRegister, .Second = ArgRegisterOffsetIndirect},
@@ -53,7 +61,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "st",
-        .OpCode = 2,
+        .OpCode = ST,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegisterIndirect},
             {.First = ArgRegister, .Second = ArgRegisterOffsetIndirect},
@@ -65,7 +73,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "mov",
-        .OpCode = 3,
+        .OpCode = MOV,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -75,7 +83,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "push",
-        .OpCode = 4,
+        .OpCode = PUSH,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgNone},
             {.First = ArgImm, .Second = ArgNone},
@@ -85,7 +93,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "pop",
-        .OpCode = 5,
+        .OpCode = POP,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgNone},
         },
@@ -94,7 +102,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "add",
-        .OpCode = 6,
+        .OpCode = ADD,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -104,7 +112,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "addf",
-        .OpCode = 7,
+        .OpCode = ADDF,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -114,7 +122,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "sub",
-        .OpCode = 8,
+        .OpCode = SUB,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -124,7 +132,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "subf",
-        .OpCode = 9,
+        .OpCode = SUBF,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -134,7 +142,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "mul",
-        .OpCode = 10,
+        .OpCode = MUL,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -144,7 +152,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "mulf",
-        .OpCode = 11,
+        .OpCode = MULF,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -154,7 +162,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "div",
-        .OpCode = 12,
+        .OpCode = DIV,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -164,7 +172,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "divf",
-        .OpCode = 13,
+        .OpCode = DIVF,
         .ArgSets = {
             {.First = ArgRegister, .Second = ArgRegister},
             {.First = ArgRegister, .Second = ArgImm},
@@ -174,7 +182,7 @@ const InstructionMeta instructions[] = {
     },
     {
         .Name = "jmp",
-        .OpCode = 14,
+        .OpCode = JMP,
         .ArgSets = {
             {.First = ArgImm, .Second = ArgNone},
             {.First = ArgRegister, .Second = ArgNone},
@@ -249,6 +257,7 @@ int FindRegByName(RegName name)
 
 static InstrErr newInstructionFromOpCode(Instruction *ins, uint8_t opCode, uint8_t argSetIdx)
 {
+    assert(ins != NULL);
 
     ins->im = findInsMetaByOpCode(opCode);
     if (ins->im == NULL)
@@ -267,12 +276,15 @@ static InstrErr newInstructionFromOpCode(Instruction *ins, uint8_t opCode, uint8
 
 static const uint8_t opCodeMask = 0b00011111;
 
-int Decode(Instruction *ins, FILE *r)
+InstrErr Decode(Instruction *ins, FILE *r)
 {
+    assert(ins != NULL);
+    assert(r != NULL);
 
     char byte = 0;
 
-    fread(&byte, 1, 1, r);
+    if (fread(&byte, 1, 1, r) == 0)
+        return INSTR_NOT_EXIST;
 
     uint8_t opCode = (byte & opCodeMask);
     uint8_t argSetIdx = (byte >> 5);
@@ -283,7 +295,7 @@ int Decode(Instruction *ins, FILE *r)
 
     ins->im->decFunc(ins, r);
 
-    return 0;
+    return INSTR_OK;
 }
 
 static uint8_t encInstrHeader(uint8_t opCode, uint8_t argSetIdx)
@@ -307,23 +319,23 @@ int Encode(Instruction *ins, FILE *w)
     return 0;
 }
 
-InstrErr NewInstruction(InstructionName name, Instruction instr, size_t *sz)
+InstrErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz)
 {
 
     const InstructionMeta *im = findInsMetaByName(name);
     if (im == NULL)
         return INSTR_UNKNOWN;
 
-    instr.im = im;
+    instr->im = im;
 
-    ArgSet argSet = {.First = instr.Arg1.Type, .Second = instr.Arg2.Type};
+    ArgSet argSet = {.First = instr->Arg1.Type, .Second = instr->Arg2.Type};
 
     int argSetIdx = findArgSetIdx(im->OpCode, argSet);
     if (argSetIdx < 0)
         return INSTR_WRONG_OPERANDS;
 
-    instr.ArgSetIdx = argSetIdx;
+    instr->ArgSetIdx = argSetIdx;
 
-    *sz = instr.im->encFunc(&instr, NULL, true);
+    *sz = instr->im->encFunc(instr, NULL, true);
     return INSTR_OK;
 }

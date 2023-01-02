@@ -75,6 +75,9 @@ static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *
     assert(parser != NULL);
     assert(node != NULL);
 
+    if (currTokenType(parser) == ASM_T_NL)
+        return E_ASM_OK;
+
     if (currTokenType(parser) == ASM_T_LABEL)
     {
         char *labelVal = currTokenVal(parser);
@@ -129,7 +132,7 @@ static asm_ecode createInstruction(parser_s *parser, commandNode *node)
 {
 
     size_t sz = 0;
-    InstrErr err = NewInstruction(node->instrName, node->instr, &sz);
+    InstrErr err = NewInstruction(node->instrName, &node->instr, &sz);
     if (err == INSTR_UNKNOWN)
     {
         printf("asm: unknown mnemonic: %s; line: %zu\n", node->instrName, node->line);
@@ -172,8 +175,6 @@ static asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
         return E_ASM_ERR;
 
     node->instrName = name;
-    if (eatToken(parser, ASM_T_SPACE) != E_ASM_OK)
-        return E_ASM_ERR;
 
     eatSP(parser);
 

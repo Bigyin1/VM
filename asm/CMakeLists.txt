@@ -1,6 +1,7 @@
 set(source_files
     main.cpp
     utils.cpp
+    assemble.cpp
     tokenizer/tokenizer.cpp
 
     parser/parser.cpp
@@ -11,7 +12,7 @@ set(source_files
     ../vm/instructions/encode.cpp
     ../vm/instructions/instructions.cpp
 
-    # assembler/assembler.cpp
+    assembler/assembler.cpp
 )
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/testdata

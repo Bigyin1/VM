@@ -139,3 +139,8 @@ int encodeJMP(Instruction *ins, FILE *w, bool evalSz)
 
     return 1 + encodeCommon(&ins->Arg1, w, evalSz);
 }
+
+int encodeNoArgs(Instruction *ins, FILE *w, bool evalSz)
+{
+    return 1;
+}

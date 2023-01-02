@@ -113,7 +113,7 @@ static bool checkSimpleTokens(tokenizer_s *t)
             if (generalTokens[i].type == ASM_T_COMMENT)
             {
                 int len = 0;
-                sscanf(t->input, "%*s%n", &len);
+                sscanf(t->input, "%*[^\n]%n", &len);
                 t->column += len;
                 t->input += len;
             }

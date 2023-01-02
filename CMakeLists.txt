@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.17)
 
 set(CMAKE_CPP_STANDARD 17)
 set(ASM_EXE_NAME asm)
+set(VM_EXE_NAME vm)
+set(TESTS_EXE_NAME tests)
 
 set(CMAKE_CXX_FLAGS "-std=c++17 -O0 -Wall \
 	-Wextra -Weffc++ -Waggressive-loop-optimizations \
@@ -26,5 +28,5 @@ set(CMAKE_CXX_FLAGS "-std=c++17 -O0 -Wall \
 	-fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,nonnull-attribute,leak,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr")
 
 add_subdirectory(asm)
-
-# add_subdirectory(src)
+add_subdirectory(vm)
+add_subdirectory(tests)

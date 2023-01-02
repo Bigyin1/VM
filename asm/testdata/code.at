@@ -3,7 +3,7 @@
 
 
 label:
-push -1234.3
+push -1234.3 # blalala
 push :kbkL
 ld r1, [:label+3]
 

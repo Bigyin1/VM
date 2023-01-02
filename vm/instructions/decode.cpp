@@ -2,7 +2,7 @@
 
 static uint8_t regCodeMask = 0b00001111;
 
-void decodeCommon(Argument *arg, FILE *r)
+static void decodeCommon(Argument *arg, FILE *r)
 {
 
     switch (arg->Type)

@@ -8,4 +8,6 @@ int defineNewLabel(parser_s *p, const char *label, uint64_t val);
 
 void addLabelImport(parser_s *p, const char *label, uint64_t *v);
 
+int resolveImports(parser_s *p);
+
 #endif

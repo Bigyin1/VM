@@ -23,6 +23,8 @@ typedef struct codeNode
     size_t addr;
     commandNode commands[256];
 
+    size_t currOffset;
+
 } codeNode;
 
 typedef struct labelData
@@ -44,8 +46,6 @@ typedef struct parser_s
 
     labelData labels[64];
     size_t labelsSz;
-
-    size_t currOffset;
 
 } parser_s;
 

@@ -51,3 +51,21 @@ void addLabelImport(parser_s *p, const char *label, uint64_t *v)
 
     p->labelsSz++;
 }
+
+int resolveImports(parser_s *p)
+{
+
+    for (size_t i = 0; i < p->labelsSz; i++)
+    {
+        labelData *ld = &p->labels[i];
+        if (!ld->present)
+        {
+            printf("asm: label: %s is not definded\n", ld->label);
+            return -2;
+        }
+
+        for (size_t j = 0; j < ld->importsSz; j++)
+            *ld->imports[j] = ld->val;
+    }
+    return 0;
+}

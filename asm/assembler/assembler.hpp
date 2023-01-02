@@ -6,15 +6,15 @@
 #include "../parser/parser.hpp"
 #include "../errors.hpp"
 
+extern const uint32_t magicHeader;
 
-typedef struct assembler_s {
+typedef struct assembler_s
+{
     codeNode *prog;
     FILE *out;
 
 } assembler_s;
 
-
 asm_ecode assemble(assembler_s *as);
-
 
 #endif

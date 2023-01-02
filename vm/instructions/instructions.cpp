@@ -189,8 +189,44 @@ const InstructionMeta instructions[] = {
             {.First = ArgRegisterIndirect, .Second = ArgNone},
             {.First = ArgImmIndirect, .Second = ArgNone},
         },
-        .encFunc = encodeJMP,
-        .decFunc = decodeJMP,
+        .encFunc = encodeBranch,
+        .decFunc = decodeBranch,
+    },
+    {
+        .Name = "jeq",
+        .OpCode = JEQ,
+        .ArgSets = {
+            {.First = ArgImm, .Second = ArgNone},
+            {.First = ArgRegister, .Second = ArgNone},
+            {.First = ArgRegisterIndirect, .Second = ArgNone},
+            {.First = ArgImmIndirect, .Second = ArgNone},
+        },
+        .encFunc = encodeBranch,
+        .decFunc = decodeBranch,
+    },
+    {
+        .Name = "jneq",
+        .OpCode = JNEQ,
+        .ArgSets = {
+            {.First = ArgImm, .Second = ArgNone},
+            {.First = ArgRegister, .Second = ArgNone},
+            {.First = ArgRegisterIndirect, .Second = ArgNone},
+            {.First = ArgImmIndirect, .Second = ArgNone},
+        },
+        .encFunc = encodeBranch,
+        .decFunc = decodeBranch,
+    },
+    {
+        .Name = "call",
+        .OpCode = CALL,
+        .ArgSets = {
+            {.First = ArgImm, .Second = ArgNone},
+            {.First = ArgRegister, .Second = ArgNone},
+            {.First = ArgRegisterIndirect, .Second = ArgNone},
+            {.First = ArgImmIndirect, .Second = ArgNone},
+        },
+        .encFunc = encodeBranch,
+        .decFunc = decodeBranch,
     },
 
 };

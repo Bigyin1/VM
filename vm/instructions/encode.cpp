@@ -131,7 +131,7 @@ int encodeARITHMF(Instruction *ins, FILE *w, bool evalSz)
     return sz + my_fwrite(&ins->Arg2.Imm, sizeof(double), 1, w, evalSz);
 }
 
-int encodeJMP(Instruction *ins, FILE *w, bool evalSz)
+int encodeBranch(Instruction *ins, FILE *w, bool evalSz)
 {
 
     if (ins->Arg1.Type == ArgImm)

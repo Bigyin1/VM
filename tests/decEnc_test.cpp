@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "../asm/assemble.hpp"
 #include "../vm/instructions/instructions.hpp"
+#include "../asm/assembler/assembler.hpp"
 
 Instruction testIns[] = {
 
@@ -241,6 +242,30 @@ static bool instrEq(Instruction *ins1, Instruction *ins2)
     return true;
 }
 
+static FILE *checkMagic(char buf[1024])
+{
+
+    FILE *f = fmemopen(buf, 1024, "r");
+
+    uint32_t magic = 0;
+    fread(&magic, sizeof(magic), 1, f);
+    if (magic != magicHeader)
+    {
+        printf("bad magic number in header\n");
+        fclose(f);
+        return NULL;
+    }
+
+    size_t codeSz = 0;
+    fread(&codeSz, sizeof(codeSz), 1, f);
+    fclose(f);
+
+    f = fmemopen(buf, sizeof(magic) + sizeof(codeSz) + codeSz, "r");
+
+    fseek(f, sizeof(magic) + sizeof(codeSz), SEEK_SET);
+    return f;
+}
+
 int main()
 {
     FILE *in = fopen("test.code", "r");
@@ -256,9 +281,12 @@ int main()
     if (assemble(in, out) == E_ASM_ERR)
         return 1;
 
-    FILE *f = fmemopen(buf, 1024, "r");
-    if (f == NULL)
+    FILE *f = NULL;
+    if ((f = checkMagic(buf)) == NULL)
+    {
+        printf("FAILED\n");
         return 1;
+    }
 
     Instruction instr = {0};
     InstrErr err = INSTR_OK;
@@ -271,11 +299,27 @@ int main()
         if (err == INSTR_NOT_EXIST && feof(f))
             break;
 
+        if (i == sizeof(testIns) / sizeof(Instruction))
+        {
+            printf("too many instructions in file\nFAILED\n");
+            fclose(f);
+
+            return 1;
+        }
+
         printf("%zu: %s:\t", i + 1, instr.im->Name);
+
+        if (err != INSTR_OK)
+        {
+            printf("decoding error\nFAILED\n");
+            fclose(f);
+
+            return 1;
+        }
+
         if (!instrEq(&testIns[i], &instr))
         {
             printf("FAILED\n");
-
             fclose(f);
 
             return 1;

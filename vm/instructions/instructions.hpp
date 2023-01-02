@@ -79,6 +79,9 @@ typedef enum InstrOpCode
     DIV,
     DIVF,
     JMP,
+    JEQ,
+    JNEQ,
+    CALL,
 
 } InstrOpCode;
 

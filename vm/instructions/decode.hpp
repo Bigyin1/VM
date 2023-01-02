@@ -11,7 +11,7 @@ int decodePUSH(Instruction *ins, FILE *r);
 int decodePOP(Instruction *ins, FILE *r);
 int decodeARITHM(Instruction *ins, FILE *r);
 int decodeARITHMF(Instruction *ins, FILE *r);
-int decodeJMP(Instruction *ins, FILE *r);
+int decodeBranch(Instruction *ins, FILE *r);
 int decodeNoArgs(Instruction *ins, FILE *r);
 
 #endif

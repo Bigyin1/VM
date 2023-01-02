@@ -159,7 +159,7 @@ int decodeARITHMF(Instruction *ins, FILE *r)
     return 0;
 }
 
-int decodeJMP(Instruction *ins, FILE *r)
+int decodeBranch(Instruction *ins, FILE *r)
 {
 
     decodeCommon(&ins->Arg1, r);

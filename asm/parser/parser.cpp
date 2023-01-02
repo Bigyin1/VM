@@ -145,6 +145,7 @@ static asm_ecode createInstruction(parser_s *parser, commandNode *node)
     }
 
     parser->prog.currOffset += sz;
+
     return E_ASM_OK;
 }
 
@@ -170,7 +171,9 @@ static asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
     }
 
     node->line = parser->toks->currToken->line;
+
     name = currTokenVal(parser);
+
     if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
         return E_ASM_ERR;
 

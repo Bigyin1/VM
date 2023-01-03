@@ -1,12 +1,10 @@
 
-# ret
-ret
-
 # ld st
 label1:
-ld(hws) r0, [123]
- ld r1 , [:label1]
-st r2, [r3+128]
+mov r2, 255
+st(b) r2, [5076]
+ ld(bs) r1 , [5076]
+add r1, 1
 st r0, [r2]
 
 # mov

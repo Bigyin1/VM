@@ -4,14 +4,14 @@
 
 #include "instructions.hpp"
 
-InstrErr decodeLD(Instruction *ins, FILE *r);
-InstrErr decodeST(Instruction *ins, FILE *r);
-InstrErr decodeMOV(Instruction *ins, FILE *r);
-InstrErr decodePUSH(Instruction *ins, FILE *r);
-InstrErr decodePOP(Instruction *ins, FILE *r);
-InstrErr decodeARITHM(Instruction *ins, FILE *r);
-InstrErr decodeARITHMF(Instruction *ins, FILE *r);
-InstrErr decodeBranch(Instruction *ins, FILE *r);
-InstrErr decodeNoArgs(Instruction *ins, FILE *r);
+InstrDecErr decodeLD(Instruction *ins, FILE *r);
+InstrDecErr decodeST(Instruction *ins, FILE *r);
+InstrDecErr decodeMOV(Instruction *ins, FILE *r);
+InstrDecErr decodePUSH(Instruction *ins, FILE *r);
+InstrDecErr decodePOP(Instruction *ins, FILE *r);
+InstrDecErr decodeARITHM(Instruction *ins, FILE *r);
+InstrDecErr decodeARITHMF(Instruction *ins, FILE *r);
+InstrDecErr decodeBranch(Instruction *ins, FILE *r);
+InstrDecErr decodeNoArgs(Instruction *ins, FILE *r);
 
 #endif

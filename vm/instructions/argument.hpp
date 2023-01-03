@@ -26,7 +26,7 @@ typedef struct Argument
     uint8_t RegNum;
 
     int16_t ImmDisp16;
-    uint8_t DispRegNum;
+    // uint8_t DispRegNum;
 
 } Argument;
 

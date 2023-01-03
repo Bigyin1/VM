@@ -289,7 +289,7 @@ int main()
     }
 
     Instruction instr = {0};
-    InstrErr err = INSTR_OK;
+    InstrDecErr err = INSTR_OK;
 
     size_t i = 0;
     while (!feof(f))

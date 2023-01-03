@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "../asm/assembler/assembler.hpp"
+#include "instructions/instructions.hpp"
 #include "devices/rom.hpp"
 #include "devices/ram.hpp"
 #include "vm.hpp"
@@ -70,7 +71,7 @@ int InitVM(CPU *cpu, FILE *prog)
         return -1;
 
     cpu->regIP = cpu->rom.lowAddr;
-    cpu->gpRegs[14] = cpu->ram.lowAddr; // SP
+    cpu->gpRegs[RSP] = cpu->ram.lowAddr; // SP
 
     if (LoadCode((ROM *)cpu->rom.concreteDevice, prog) < -1)
         return -1;
@@ -89,31 +90,9 @@ void DestructVM(CPU *cpu)
     free(cpu->rom.concreteDevice);
 }
 
-static Device *findDevice(CPU *cpu, size_t addr)
-{
-    assert(cpu != NULL);
-
-    if (cpu->ram.lowAddr <= addr && cpu->ram.highAddr >= addr)
-        return &cpu->ram;
-
-    if (cpu->rom.lowAddr <= addr && cpu->rom.highAddr >= addr)
-        return &cpu->rom;
-
-    for (size_t i = 0; i < SecondaryDevicesCount; i++)
-    {
-        if (cpu->dev[i].concreteDevice == NULL)
-            continue;
-
-        if (cpu->dev[i].lowAddr <= addr && cpu->dev[i].highAddr >= addr)
-            return &cpu->dev[i];
-    }
-
-    return NULL;
-}
-
 static int execNextInstruction(CPU *cpu)
 {
-    Device *dev = findDevice(cpu, cpu->regIP);
+    Device *dev = FindDevice(cpu, cpu->regIP);
     if (dev == NULL)
     {
         printf("vm: unmapped address: %zu\n", cpu->regIP);
@@ -138,7 +117,7 @@ static int execNextInstruction(CPU *cpu)
 
     Instruction instr = {0};
 
-    InstrErr err = Decode(&instr, reader);
+    InstrDecErr err = Decode(&instr, reader);
     if (err == INSTR_NOT_EXIST)
     {
         printf("vm: bad instruction; finished executing\n");
@@ -156,6 +135,9 @@ static int execNextInstruction(CPU *cpu)
     }
 
     cpu->regIP += (ftell(reader) - posPrev);
+
+    if (instr.im->runFunc(cpu, &instr) < 0)
+        return -1;
 
     return 0;
 }

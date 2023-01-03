@@ -2,7 +2,7 @@
 
 static uint8_t regCodeMask = 0b00001111;
 
-static InstrErr decodeCommon(Argument *arg, FILE *r)
+static InstrDecErr decodeCommon(Argument *arg, FILE *r)
 {
 
     switch (arg->Type)
@@ -48,7 +48,7 @@ static InstrErr decodeCommon(Argument *arg, FILE *r)
     return INSTR_OK;
 }
 
-InstrErr decodeLD(Instruction *ins, FILE *r)
+InstrDecErr decodeLD(Instruction *ins, FILE *r)
 {
 
     // arg 1
@@ -64,7 +64,7 @@ InstrErr decodeLD(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-InstrErr decodeST(Instruction *ins, FILE *r)
+InstrDecErr decodeST(Instruction *ins, FILE *r)
 {
 
     // arg 1
@@ -79,7 +79,7 @@ InstrErr decodeST(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-InstrErr decodeMOV(Instruction *ins, FILE *r)
+InstrDecErr decodeMOV(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
@@ -102,7 +102,7 @@ InstrErr decodeMOV(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-InstrErr decodePUSH(Instruction *ins, FILE *r)
+InstrDecErr decodePUSH(Instruction *ins, FILE *r)
 {
     if (decodeCommon(&ins->Arg1, r) != INSTR_OK)
         return INSTR_NOT_EXIST;
@@ -115,7 +115,7 @@ InstrErr decodePUSH(Instruction *ins, FILE *r)
     return INSTR_OK;
 }
 
-InstrErr decodePOP(Instruction *ins, FILE *r)
+InstrDecErr decodePOP(Instruction *ins, FILE *r)
 {
 
     if (decodeCommon(&ins->Arg1, r) != INSTR_OK)
@@ -128,7 +128,7 @@ InstrErr decodePOP(Instruction *ins, FILE *r)
     return INSTR_OK;
 }
 
-InstrErr decodeARITHM(Instruction *ins, FILE *r)
+InstrDecErr decodeARITHM(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
@@ -151,7 +151,7 @@ InstrErr decodeARITHM(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-InstrErr decodeARITHMF(Instruction *ins, FILE *r)
+InstrDecErr decodeARITHMF(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
@@ -174,13 +174,13 @@ InstrErr decodeARITHMF(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-InstrErr decodeBranch(Instruction *ins, FILE *r)
+InstrDecErr decodeBranch(Instruction *ins, FILE *r)
 {
 
     return decodeCommon(&ins->Arg1, r);
 }
 
-InstrErr decodeNoArgs(Instruction *, FILE *)
+InstrDecErr decodeNoArgs(Instruction *, FILE *)
 {
     return INSTR_OK;
 }

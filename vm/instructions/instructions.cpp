@@ -4,36 +4,41 @@
 #include "instructions.hpp"
 #include "encode.hpp"
 #include "decode.hpp"
+#include "run.hpp"
 
 const RegMeta regs[] = {
 
     {
         .Name = "r0",
-        .RegCode = 0,
+        .RegCode = R0,
     },
     {
         .Name = "r1",
-        .RegCode = 1,
+        .RegCode = R1,
     },
     {
         .Name = "r2",
-        .RegCode = 2,
+        .RegCode = R2,
     },
     {
         .Name = "r3",
-        .RegCode = 3,
+        .RegCode = R3,
     },
     {
         .Name = "r4",
-        .RegCode = 4,
+        .RegCode = R4,
     },
     {
         .Name = "r5",
-        .RegCode = 5,
+        .RegCode = R5,
     },
     {
         .Name = "rbp",
-        .RegCode = 13,
+        .RegCode = RBP,
+    },
+    {
+        .Name = "rsp",
+        .RegCode = RSP,
     }};
 
 const InstructionMeta instructions[] = {
@@ -45,6 +50,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeNoArgs,
         .decFunc = decodeNoArgs,
+        .runFunc = runRET,
     },
     {
         .Name = "ld",
@@ -57,6 +63,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeLD,
         .decFunc = decodeLD,
+        .runFunc = runLD,
 
     },
     {
@@ -70,6 +77,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeST,
         .decFunc = decodeST,
+        .runFunc = runST,
     },
     {
         .Name = "mov",
@@ -80,6 +88,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeMOV,
         .decFunc = decodeMOV,
+        .runFunc = runMOV,
     },
     {
         .Name = "push",
@@ -90,6 +99,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodePUSH,
         .decFunc = decodePUSH,
+        .runFunc = runPUSH,
     },
     {
         .Name = "pop",
@@ -99,6 +109,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodePOP,
         .decFunc = decodePOP,
+        .runFunc = runPOP,
     },
     {
         .Name = "add",
@@ -109,6 +120,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeARITHM,
         .decFunc = decodeARITHM,
+        .runFunc = runADD,
     },
     {
         .Name = "addf",
@@ -119,6 +131,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeARITHMF,
         .decFunc = decodeARITHMF,
+        .runFunc = runADDF,
     },
     {
         .Name = "sub",
@@ -129,6 +142,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeARITHM,
         .decFunc = decodeARITHM,
+        .runFunc = runSUB,
     },
     {
         .Name = "subf",
@@ -139,6 +153,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeARITHMF,
         .decFunc = decodeARITHMF,
+        .runFunc = runSUBF,
     },
     {
         .Name = "mul",
@@ -149,6 +164,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeARITHM,
         .decFunc = decodeARITHM,
+        .runFunc = runMUL,
     },
     {
         .Name = "mulf",
@@ -159,6 +175,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeARITHMF,
         .decFunc = decodeARITHMF,
+        .runFunc = runMULF,
     },
     {
         .Name = "div",
@@ -169,6 +186,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeARITHM,
         .decFunc = decodeARITHM,
+        .runFunc = runDIV,
     },
     {
         .Name = "divf",
@@ -179,6 +197,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeARITHMF,
         .decFunc = decodeARITHMF,
+        .runFunc = runDIVF,
     },
     {
         .Name = "jmp",
@@ -191,6 +210,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeBranch,
         .decFunc = decodeBranch,
+        .runFunc = runJMP,
     },
     {
         .Name = "jeq",
@@ -203,6 +223,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeBranch,
         .decFunc = decodeBranch,
+        .runFunc = runJEQ,
     },
     {
         .Name = "jneq",
@@ -215,6 +236,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeBranch,
         .decFunc = decodeBranch,
+        .runFunc = runJNEQ,
     },
     {
         .Name = "jg",
@@ -227,6 +249,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeBranch,
         .decFunc = decodeBranch,
+        .runFunc = runJG,
     },
     {
         .Name = "jl",
@@ -239,18 +262,19 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeBranch,
         .decFunc = decodeBranch,
+        .runFunc = runJL,
     },
     {
         .Name = "call",
         .OpCode = CALL,
         .ArgSets = {
-            {.First = ArgImm, .Second = ArgNone},
-            {.First = ArgRegister, .Second = ArgNone},
-            {.First = ArgRegisterIndirect, .Second = ArgNone},
-            {.First = ArgImmIndirect, .Second = ArgNone},
+            {.First = ArgImm, .Second = ArgNone}, {.First = ArgRegister, .Second = ArgNone},
+            // {.First = ArgRegisterIndirect, .Second = ArgNone},
+            // {.First = ArgImmIndirect, .Second = ArgNone},
         },
         .encFunc = encodeBranch,
         .decFunc = decodeBranch,
+        .runFunc = runCALL,
     },
     {
         .Name = "cmp",
@@ -261,6 +285,7 @@ const InstructionMeta instructions[] = {
         },
         .encFunc = encodeMOV,
         .decFunc = decodeMOV,
+        .runFunc = runCMP,
     },
 
 };
@@ -325,7 +350,7 @@ int FindRegByName(RegName name)
     return -1;
 }
 
-static InstrErr newInstructionFromOpCode(Instruction *ins, uint8_t opCode, uint8_t argSetIdx)
+static InstrDecErr newInstructionFromOpCode(Instruction *ins, uint8_t opCode, uint8_t argSetIdx)
 {
     assert(ins != NULL);
 
@@ -346,7 +371,7 @@ static InstrErr newInstructionFromOpCode(Instruction *ins, uint8_t opCode, uint8
 
 static const uint8_t opCodeMask = 0b00011111;
 
-InstrErr Decode(Instruction *ins, FILE *r)
+InstrDecErr Decode(Instruction *ins, FILE *r)
 {
     assert(ins != NULL);
     assert(r != NULL);
@@ -359,7 +384,7 @@ InstrErr Decode(Instruction *ins, FILE *r)
     uint8_t opCode = (byte & opCodeMask);
     uint8_t argSetIdx = (uint8_t)(byte >> 5);
 
-    InstrErr err = newInstructionFromOpCode(ins, opCode, argSetIdx);
+    InstrDecErr err = newInstructionFromOpCode(ins, opCode, argSetIdx);
     if (err != INSTR_OK)
         return err;
 
@@ -387,7 +412,7 @@ int Encode(Instruction *ins, FILE *w)
     return 0;
 }
 
-InstrErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz)
+InstrDecErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz)
 {
 
     const InstructionMeta *im = findInsMetaByName(name);

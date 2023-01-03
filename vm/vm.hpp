@@ -3,34 +3,14 @@
 #define CPU_HPP
 
 #include <stddef.h>
-#include <stdio.h>
+#include "devices/device.hpp"
 
 const size_t SecondaryDevicesCount = 2;
-
-typedef FILE *(*ReaderFunc)(void *dev, size_t addr);
-typedef FILE *(*WriterFunc)(void *dev, size_t addr);
-
-typedef void (*DevTickFunc)(void *dev);
-
-typedef struct Device
-{
-    const char *name;
-
-    size_t lowAddr;
-    size_t highAddr;
-
-    void *concreteDevice;
-
-    ReaderFunc getReader;
-    WriterFunc getWriter;
-
-    DevTickFunc tick;
-
-} Device;
 
 typedef struct CPU
 {
     size_t regIP;
+    int8_t statusReg;
     uint64_t gpRegs[16];
 
     Device rom;
@@ -45,4 +25,5 @@ void DestructVM(CPU *cpu);
 
 void RunVM(CPU *cpu);
 
+Device *FindDevice(CPU *cpu, size_t addr);
 #endif

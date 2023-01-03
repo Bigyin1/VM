@@ -5,9 +5,11 @@ set(source_files
 
     instructions/decode.cpp
     instructions/encode.cpp
+    instructions/run.cpp
     instructions/instructions.cpp
     devices/rom.cpp
     devices/ram.cpp
+    devices/device.cpp
 )
 
 # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.code

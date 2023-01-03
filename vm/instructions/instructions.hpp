@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "argument.hpp"
+#include "../vm.hpp"
 
 typedef struct InstructionMeta InstructionMeta;
 
@@ -31,7 +32,7 @@ typedef struct Instruction
 
 } Instruction;
 
-typedef enum InstrErr
+typedef enum InstrDecErr
 {
 
     INSTR_UNKNOWN,
@@ -39,10 +40,11 @@ typedef enum InstrErr
     INSTR_NOT_EXIST,
     INSTR_OK,
 
-} InstrErr;
+} InstrDecErr;
 
-typedef InstrErr (*DecFunc)(Instruction *, FILE *);
+typedef InstrDecErr (*DecFunc)(Instruction *, FILE *);
 typedef size_t (*EncFunc)(Instruction *, FILE *, bool);
+typedef int (*RunFunc)(CPU *, Instruction *);
 
 typedef struct ArgSet
 {
@@ -60,9 +62,28 @@ struct InstructionMeta
     ArgSet ArgSets[8];
     EncFunc encFunc;
     DecFunc decFunc;
+    RunFunc runFunc;
 };
 
 typedef const char *RegName;
+
+typedef enum RegCodes
+{
+    R0 = 0,
+    R1,
+    R2,
+    R3,
+    R4,
+    R5,
+    R6,
+    R7,
+    R8,
+    R9,
+    R10,
+    RSP,
+    RBP
+
+} RegCodes;
 
 typedef struct RegMeta
 {
@@ -101,9 +122,9 @@ extern const InstructionMeta instructions[];
 
 int FindRegByName(RegName name);
 
-InstrErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz);
+InstrDecErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz);
 
-InstrErr Decode(Instruction *ins, FILE *r);
+InstrDecErr Decode(Instruction *ins, FILE *r);
 
 int Encode(Instruction *ins, FILE *w);
 

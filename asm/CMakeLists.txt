@@ -10,7 +10,10 @@ set(source_files
 
     ../vm/instructions/decode.cpp
     ../vm/instructions/encode.cpp
+    ../vm/instructions/run.cpp
     ../vm/instructions/instructions.cpp
+
+    ../vm/devices/device.cpp
 
     assembler/assembler.cpp
 )

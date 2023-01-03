@@ -193,7 +193,7 @@ static asm_ecode createInstruction(parser_s *parser, commandNode *node)
     // ld(hws)
 
     size_t sz = 0;
-    InstrErr err = NewInstruction(node->instrName, &node->instr, &sz);
+    InstrDecErr err = NewInstruction(node->instrName, &node->instr, &sz);
     if (err == INSTR_UNKNOWN)
     {
         printf("asm: unknown mnemonic: %s; line: %zu\n", node->instrName, node->line);

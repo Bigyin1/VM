@@ -274,7 +274,7 @@ int main()
 
     char buf[1024] = {0};
 
-    FILE *out = fmemopen(buf, sizeof(buf), "w");
+    FILE *out = fmemopen(buf, sizeof(buf), "wb");
     if (out == NULL)
         return 1;
 

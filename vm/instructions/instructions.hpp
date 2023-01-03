@@ -41,7 +41,7 @@ typedef enum InstrErr
 
 } InstrErr;
 
-typedef int (*DecFunc)(Instruction *, FILE *);
+typedef InstrErr (*DecFunc)(Instruction *, FILE *);
 typedef size_t (*EncFunc)(Instruction *, FILE *, bool);
 
 typedef struct ArgSet

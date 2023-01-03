@@ -2,80 +2,89 @@
 
 static uint8_t regCodeMask = 0b00001111;
 
-static void decodeCommon(Argument *arg, FILE *r)
+static InstrErr decodeCommon(Argument *arg, FILE *r)
 {
 
     switch (arg->Type)
     {
     case ArgRegister:
-        fread(&arg->RegNum, 1, 1, r);
+        if (fread(&arg->RegNum, 1, 1, r) == 0)
+            return INSTR_NOT_EXIST;
         break;
 
     case ArgImm:
-        fread(&arg->Imm, sizeof(arg->Imm), 1, r);
+        if (fread(&arg->Imm, sizeof(arg->Imm), 1, r) == 0)
+            return INSTR_NOT_EXIST;
         break;
 
     case ArgRegisterIndirect:
-        fread(&arg->RegNum, 1, 1, r);
+        if (fread(&arg->RegNum, 1, 1, r) == 0)
+            return INSTR_NOT_EXIST;
         break;
 
     case ArgImmIndirect:
-        fread(&arg->Imm, sizeof(arg->Imm), 1, r);
+        if (fread(&arg->Imm, sizeof(arg->Imm), 1, r) == 0)
+            return INSTR_NOT_EXIST;
         break;
 
     case ArgRegisterOffsetIndirect:
-        fread(&arg->RegNum, 1, 1, r);
-        fread(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r);
+        if (fread(&arg->RegNum, 1, 1, r) == 0)
+            return INSTR_NOT_EXIST;
+        if (fread(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r) == 0)
+            return INSTR_NOT_EXIST;
         break;
 
     case ArgImmOffsetIndirect:
-        fread(&arg->Imm, sizeof(arg->Imm), 1, r);
-        fread(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r);
+        if (fread(&arg->Imm, sizeof(arg->Imm), 1, r) == 0)
+            return INSTR_NOT_EXIST;
+        if (fread(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r) == 0)
+            return INSTR_NOT_EXIST;
         break;
 
     case ArgNone:
-        return;
+        return INSTR_OK;
     }
+
+    return INSTR_OK;
 }
 
-int decodeLD(Instruction *ins, FILE *r)
+InstrErr decodeLD(Instruction *ins, FILE *r)
 {
 
     // arg 1
     uint8_t byte = 0;
-    fread(&byte, 1, 1, r);
+    if (fread(&byte, 1, 1, r) == 0)
+        return INSTR_NOT_EXIST;
 
     ins->Arg1.RegNum = byte & regCodeMask;
     ins->DataSz = (byte & 0b00110000) >> 4;
     ins->SignExtend = (byte & 0b01000000) >> 6;
 
     // arg 2
-    decodeCommon(&ins->Arg2, r);
-
-    return 0;
+    return decodeCommon(&ins->Arg2, r);
 }
 
-int decodeST(Instruction *ins, FILE *r)
+InstrErr decodeST(Instruction *ins, FILE *r)
 {
 
     // arg 1
     uint8_t byte = 0;
-    fread(&byte, 1, 1, r);
+    if (fread(&byte, 1, 1, r) == 0)
+        return INSTR_NOT_EXIST;
 
     ins->Arg1.RegNum = byte & regCodeMask;
     ins->DataSz = (byte & 0b00110000) >> 4;
 
     // arg 2
-    decodeCommon(&ins->Arg2, r);
-
-    return 0;
+    return decodeCommon(&ins->Arg2, r);
 }
 
-int decodeMOV(Instruction *ins, FILE *r)
+InstrErr decodeMOV(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
-    fread(&byte, 1, 1, r);
+    if (fread(&byte, 1, 1, r) == 0)
+        return INSTR_NOT_EXIST;
 
     // mov r1, r2
     if (ins->Arg2.Type == ArgRegister)
@@ -83,46 +92,48 @@ int decodeMOV(Instruction *ins, FILE *r)
 
         ins->Arg2.RegNum = byte >> 4;
         ins->Arg1.RegNum = byte & regCodeMask;
-        return 0;
+        return INSTR_OK;
     }
 
     // arg 1
     ins->Arg1.RegNum = byte & regCodeMask; // TODO data sz
 
     // arg 2
-    decodeCommon(&ins->Arg2, r);
-
-    return 0;
+    return decodeCommon(&ins->Arg2, r);
 }
 
-int decodePUSH(Instruction *ins, FILE *r)
+InstrErr decodePUSH(Instruction *ins, FILE *r)
 {
-    decodeCommon(&ins->Arg1, r);
+    if (decodeCommon(&ins->Arg1, r) != INSTR_OK)
+        return INSTR_NOT_EXIST;
+
     if (ins->Arg1.Type == ArgRegister)
     {
         ins->DataSz = (ins->Arg1.RegNum & 0b00110000) >> 4;
         ins->Arg1.RegNum &= regCodeMask;
     }
-    return 0;
+    return INSTR_OK;
 }
 
-int decodePOP(Instruction *ins, FILE *r)
+InstrErr decodePOP(Instruction *ins, FILE *r)
 {
 
-    decodeCommon(&ins->Arg1, r);
+    if (decodeCommon(&ins->Arg1, r) != INSTR_OK)
+        return INSTR_NOT_EXIST;
 
     ins->DataSz = (ins->Arg1.RegNum & 0b00110000) >> 4;
     ins->SignExtend = (ins->Arg1.RegNum & 0b01000000) >> 6;
     ins->Arg1.RegNum &= regCodeMask;
 
-    return 0;
+    return INSTR_OK;
 }
 
-int decodeARITHM(Instruction *ins, FILE *r)
+InstrErr decodeARITHM(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
-    fread(&byte, 1, 1, r);
+    if (fread(&byte, 1, 1, r) == 0)
+        return INSTR_NOT_EXIST;
 
     // add r1, r2
     if (ins->Arg2.Type == ArgRegister)
@@ -130,23 +141,22 @@ int decodeARITHM(Instruction *ins, FILE *r)
 
         ins->Arg2.RegNum = byte >> 4;
         ins->Arg1.RegNum = byte & regCodeMask;
-        return 0;
+        return INSTR_OK;
     }
 
     // arg 1
     ins->Arg1.RegNum = byte & regCodeMask; // TODO data sz
 
     // arg 2
-    decodeCommon(&ins->Arg2, r);
-
-    return 0;
+    return decodeCommon(&ins->Arg2, r);
 }
 
-int decodeARITHMF(Instruction *ins, FILE *r)
+InstrErr decodeARITHMF(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
-    fread(&byte, 1, 1, r);
+    if (fread(&byte, 1, 1, r) == 0)
+        return INSTR_NOT_EXIST;
 
     // addf r1, r2
     if (ins->Arg2.Type == ArgRegister)
@@ -154,26 +164,23 @@ int decodeARITHMF(Instruction *ins, FILE *r)
 
         ins->Arg2.RegNum = byte >> 4;
         ins->Arg1.RegNum = byte & regCodeMask;
-        return 0;
+        return INSTR_OK;
     }
 
     // arg 1
     ins->Arg1.RegNum = byte;
 
     // arg 2
-    decodeCommon(&ins->Arg2, r);
-
-    return 0;
+    return decodeCommon(&ins->Arg2, r);
 }
 
-int decodeBranch(Instruction *ins, FILE *r)
+InstrErr decodeBranch(Instruction *ins, FILE *r)
 {
 
-    decodeCommon(&ins->Arg1, r);
-    return 0;
+    return decodeCommon(&ins->Arg1, r);
 }
 
-int decodeNoArgs(Instruction *, FILE *)
+InstrErr decodeNoArgs(Instruction *, FILE *)
 {
-    return 0;
+    return INSTR_OK;
 }

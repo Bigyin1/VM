@@ -1,26 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <cassert>
-#include "cpu/cpu.hpp"
 #include "instructions/instructions.hpp"
-
-static void readCode(const char *fName)
-{
-    assert(fName != NULL);
-
-    FILE *f = fopen(fName, "r");
-    if (f == NULL)
-        return;
-
-    Instruction instr = {0};
-    while (!feof(f))
-    {
-        instr = {0};
-        Decode(&instr, f);
-    }
-
-    fclose(f);
-}
+#include "vm.hpp"
 
 int main(int argc, char **argv)
 {
@@ -31,16 +11,19 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    readCode(argv[1]);
-    // if (code == NULL)
-    // {
-    //     perror(argv[1]);
-    //     return 1;
-    // }
+    FILE *in = fopen(argv[1], "r");
+    if (in == NULL)
+        return 1;
 
-    // while (code->opCode != 0xC)
-    // {
-    //     printf("%s\n", findInstrByOpCode(code->opCode)->name);
-    //     ++code;
-    // }
+    CPU cpu = {0};
+
+    if (InitVM(&cpu, in) < 0)
+    {
+        DestructVM(&cpu);
+        return -1;
+    }
+
+    RunVM(&cpu);
+    DestructVM(&cpu);
+    return 0;
 }

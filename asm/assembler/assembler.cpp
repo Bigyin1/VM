@@ -5,8 +5,6 @@
 #include "../../vm/instructions/instructions.hpp"
 #include "assembler.hpp"
 
-const uint32_t magicHeader = 0xFAAFAAAF;
-
 static e_asm_codes writeHeader(size_t codeSz, FILE *out)
 {
     fwrite(&magicHeader, sizeof(magicHeader), 1, out);

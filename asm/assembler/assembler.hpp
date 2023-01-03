@@ -6,7 +6,7 @@
 #include "../parser/parser.hpp"
 #include "../errors.hpp"
 
-extern const uint32_t magicHeader;
+const uint32_t magicHeader = 0xFAAFAAAF;
 
 typedef struct assembler_s
 {

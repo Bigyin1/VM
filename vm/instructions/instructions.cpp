@@ -363,9 +363,7 @@ InstrErr Decode(Instruction *ins, FILE *r)
     if (err != INSTR_OK)
         return err;
 
-    ins->im->decFunc(ins, r);
-
-    return INSTR_OK;
+    return ins->im->decFunc(ins, r);
 }
 
 static uint8_t encInstrHeader(uint8_t opCode, uint8_t argSetIdx)

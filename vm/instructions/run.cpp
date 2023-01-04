@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include "instructions.hpp"
+#include "registers/registers.hpp"
 #include "run.hpp"
 
 static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
@@ -74,7 +75,7 @@ static int readFromAddr(CPU *cpu, size_t addr, void *val, DataSize sz)
     FILE *reader = dev->getReader(dev->concreteDevice, addr - dev->lowAddr);
     if (reader == NULL)
     {
-        printf("vm: device %s unable to serve write request at address: %zu\n",
+        printf("vm: device %s unable to serve read request at address: %zu\n",
                dev->name, cpu->regIP - dev->lowAddr);
         return -1;
     }
@@ -84,7 +85,7 @@ static int readFromAddr(CPU *cpu, size_t addr, void *val, DataSize sz)
     case DataByte:
         if (fread(val, 1, 1, reader) == 0)
         {
-            printf("vm: failed to read 1 byte at address %zu(device: %s)\n", addr, dev->name);
+            printf("vm: failed to read 1 byte from address %zu(device: %s)\n", addr, dev->name);
             return -1;
         }
         break;
@@ -92,21 +93,21 @@ static int readFromAddr(CPU *cpu, size_t addr, void *val, DataSize sz)
     case DataDByte:
         if (fread(val, 2, 1, reader) == 0)
         {
-            printf("vm: failed to read 2 bytes at address %zu(device: %s)\n", addr, dev->name);
+            printf("vm: failed to read 2 bytes from address %zu(device: %s)\n", addr, dev->name);
             return -1;
         }
         break;
     case DataHalfWord:
         if (fread(val, 4, 1, reader) == 0)
         {
-            printf("vm: failed to read 4 bytes at address %zu(device: %s)\n", addr, dev->name);
+            printf("vm: failed to read 4 bytes from address %zu(device: %s)\n", addr, dev->name);
             return -1;
         }
         break;
     case DataWord:
         if (fread(val, 8, 1, reader) == 0)
         {
-            printf("vm: failed to read 8 bytes at address %zu(device: %s)\n", addr, dev->name);
+            printf("vm: failed to read 8 bytes from address %zu(device: %s)\n", addr, dev->name);
             return -1;
         }
         break;

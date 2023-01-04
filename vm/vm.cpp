@@ -2,6 +2,7 @@
 #include <assert.h>
 #include "../asm/assembler/assembler.hpp"
 #include "instructions/instructions.hpp"
+#include "instructions/registers/registers.hpp"
 #include "devices/rom.hpp"
 #include "devices/ram.hpp"
 #include "vm.hpp"

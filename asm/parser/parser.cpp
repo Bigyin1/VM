@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <string.h>
+#include "../../vm/instructions/registers/registers.hpp"
 #include "parser.hpp"
 #include "labels.hpp"
 #include "utils.hpp"

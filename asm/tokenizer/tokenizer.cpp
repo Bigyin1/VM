@@ -37,8 +37,15 @@ static bool checkLabelToken(tokenizer_s *t)
     int wordLen = 0;
 
     short colon = 0;
-    if (sscanf(t->input, ":%24[a-zA-Z0-9]%n", t->currToken->val, &wordLen) == 0 &&
-        sscanf(t->input, "%24[a-zA-Z0-9]%1[:]%n", t->currToken->val, &colon, &wordLen) != 2)
+
+    if (sscanf(t->input, ":%"
+                         "24"
+                         "[a-zA-Z0-9_]%n",
+               t->currToken->val, &wordLen) == 0 &&
+        sscanf(t->input, "%"
+                         "24"
+                         "[a-zA-Z0-9_]%1[:]%n",
+               t->currToken->val, &colon, &wordLen) != 2)
         return false;
 
     t->currToken->type = ASM_T_LABEL;
@@ -90,7 +97,7 @@ static bool checkIdToken(tokenizer_s *t)
     if (wordLen == 0)
         return false;
 
-    sscanf(t->input, "%[0-9a-zA-Z]", t->currToken->val);
+    sscanf(t->input, "%24[0-9a-zA-Z]", t->currToken->val);
     t->currToken->type = ASM_T_ID;
 
     t->column += wordLen;

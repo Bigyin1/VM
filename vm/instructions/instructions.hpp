@@ -65,33 +65,6 @@ struct InstructionMeta
     RunFunc runFunc;
 };
 
-typedef const char *RegName;
-
-typedef enum RegCodes
-{
-    R0 = 0,
-    R1,
-    R2,
-    R3,
-    R4,
-    R5,
-    R6,
-    R7,
-    R8,
-    R9,
-    R10,
-    RSP,
-    RBP
-
-} RegCodes;
-
-typedef struct RegMeta
-{
-    RegName Name;
-    uint8_t RegCode;
-
-} RegMeta;
-
 typedef enum InstrOpCode
 {
     RET = 0,
@@ -119,8 +92,6 @@ typedef enum InstrOpCode
 } InstrOpCode;
 
 extern const InstructionMeta instructions[];
-
-int FindRegByName(RegName name);
 
 InstrDecErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz);
 

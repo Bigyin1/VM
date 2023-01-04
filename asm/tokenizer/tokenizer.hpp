@@ -12,7 +12,8 @@ enum e_asm_token_type
   ASM_T_EOF,
   ASM_T_ID,
   ASM_T_FLOAT,
-  ASM_T_INTEGER,
+  ASM_T_SIGNED_INT,
+  ASM_T_UNSIGNED_INT,
   ASM_T_LABEL,
   ASM_T_SPACE,
 

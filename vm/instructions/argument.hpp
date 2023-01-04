@@ -5,6 +5,15 @@
 #include <cstddef>
 #include <stdint.h>
 
+typedef enum DataSize
+{
+    DataWord = 0,
+    DataHalfWord,
+    DataDByte,
+    DataByte,
+
+} DataSize;
+
 typedef enum ArgType
 {
 
@@ -26,8 +35,11 @@ typedef struct Argument
     uint8_t RegNum;
 
     int16_t ImmDisp16;
-    // uint8_t DispRegNum;
+
+    DataSize _immArgSz;
 
 } Argument;
+
+size_t DataSzToBytesSz(DataSize sz);
 
 #endif

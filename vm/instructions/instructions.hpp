@@ -11,15 +11,6 @@
 
 typedef struct InstructionMeta InstructionMeta;
 
-typedef enum DataSize
-{
-    DataWord = 0,
-    DataHalfWord,
-    DataDByte,
-    DataByte,
-
-} DataSize;
-
 typedef struct Instruction
 {
     const InstructionMeta *im;
@@ -27,7 +18,7 @@ typedef struct Instruction
     Argument Arg2;
     uint8_t ArgSetIdx;
 
-    uint8_t DataSz;
+    DataSize DataSz;
     uint8_t SignExtend;
 
 } Instruction;

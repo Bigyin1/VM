@@ -63,10 +63,20 @@ static bool checkNumberToken(tokenizer_s *t)
     if (numLen == 0)
         return false;
 
-    int64_t num = 0;
+    char sign = t->input[0];
+
+    uint64_t num = 0;
     int read = 0;
-    if (sscanf(t->input, "%ld%n", &num, &read) == 0)
-        return false;
+    if (sign == '-')
+    {
+        if (sscanf(t->input, "%lld%n", &num, &read) == 0)
+            return false;
+    }
+    else
+    {
+        if (sscanf(t->input, "%llu%n", &num, &read) == 0)
+            return false;
+    }
 
     if (read < numLen)
     {
@@ -78,10 +88,15 @@ static bool checkNumberToken(tokenizer_s *t)
         t->currToken->dblNumVal = dblNum;
         t->currToken->type = ASM_T_FLOAT;
     }
+    else if (sign == '-')
+    {
+        t->currToken->intNumVal = num;
+        t->currToken->type = ASM_T_SIGNED_INT;
+    }
     else
     {
         t->currToken->intNumVal = num;
-        t->currToken->type = ASM_T_INTEGER;
+        t->currToken->type = ASM_T_UNSIGNED_INT;
     }
 
     t->column += numLen;

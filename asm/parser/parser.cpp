@@ -1,9 +1,34 @@
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 #include "../../vm/instructions/registers/registers.hpp"
 #include "parser.hpp"
 #include "labels.hpp"
 #include "utils.hpp"
+
+static DataSize evalImmMinDataSz(u_int64_t val, e_asm_token_type type)
+{
+    if (type == ASM_T_UNSIGNED_INT)
+    {
+        uint64_t uVal = val;
+        if (uVal <= UINT8_MAX)
+            return DataByte;
+        if (uVal <= UINT16_MAX)
+            return DataDByte;
+        if (uVal <= UINT32_MAX)
+            return DataHalfWord;
+        return DataWord;
+    }
+    int64_t sVal = val;
+
+    if (sVal <= INT8_MAX && sVal >= INT8_MIN)
+        return DataByte;
+    if (sVal <= INT16_MAX && sVal >= INT16_MIN)
+        return DataDByte;
+    if (sVal <= INT32_MAX && sVal >= INT32_MIN)
+        return DataHalfWord;
+    return DataWord;
+}
 
 static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument *arg)
 {
@@ -16,29 +41,31 @@ static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument 
         addLabelImport(parser, labelVal, &arg->Imm);
         eatToken(parser, ASM_T_LABEL);
 
-        if (currTokenType(parser) == ASM_T_INTEGER) // [label+128]
+        if (currTokenType(parser) == ASM_T_SIGNED_INT ||
+            currTokenType(parser) == ASM_T_UNSIGNED_INT) // [label+128]
         {
             arg->ImmDisp16 = currTokenIntNumVal(parser);
             arg->Type = ArgImmOffsetIndirect;
 
-            eatToken(parser, ASM_T_INTEGER);
+            eatToken(parser, currTokenType(parser));
             return E_ASM_OK;
         }
 
         arg->Type = ArgImmIndirect;
         return E_ASM_OK;
     }
-    else if (currTokenType(parser) == ASM_T_INTEGER)
+    else if (currTokenType(parser) == ASM_T_UNSIGNED_INT)
     {
         arg->Imm = currTokenIntNumVal(parser);
-        eatToken(parser, ASM_T_INTEGER);
+        eatToken(parser, ASM_T_UNSIGNED_INT);
 
-        if (currTokenType(parser) == ASM_T_INTEGER) // [128+128]
+        if (currTokenType(parser) == ASM_T_SIGNED_INT ||
+            currTokenType(parser) == ASM_T_UNSIGNED_INT) // [128+128]
         {
             arg->ImmDisp16 = currTokenIntNumVal(parser);
             arg->Type = ArgImmOffsetIndirect;
 
-            eatToken(parser, ASM_T_INTEGER);
+            eatToken(parser, currTokenType(parser));
             return E_ASM_OK;
         }
 
@@ -57,12 +84,13 @@ static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument 
         arg->RegNum = (uint8_t)regNum;
         eatToken(parser, ASM_T_ID);
 
-        if (currTokenType(parser) == ASM_T_INTEGER) // [r0+128]
+        if (currTokenType(parser) == ASM_T_SIGNED_INT ||
+            currTokenType(parser) == ASM_T_UNSIGNED_INT) // [r0+128]
         {
             arg->ImmDisp16 = currTokenIntNumVal(parser);
             arg->Type = ArgRegisterOffsetIndirect;
 
-            eatToken(parser, ASM_T_INTEGER);
+            eatToken(parser, currTokenType(parser));
             return E_ASM_OK;
         }
 
@@ -84,19 +112,29 @@ static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *
         char *labelVal = currTokenVal(parser);
         addLabelImport(parser, labelVal, &arg->Imm);
         arg->Type = ArgImm;
+
+        arg->_immArgSz = DataWord; // address size
+
         eatToken(parser, ASM_T_LABEL);
     }
     else if (currTokenType(parser) == ASM_T_FLOAT)
     {
         memcpy(&arg->Imm, &parser->toks->currToken->dblNumVal, sizeof(double));
+
         arg->Type = ArgImm;
+
+        arg->_immArgSz = DataWord; // double size
+
         eatToken(parser, ASM_T_FLOAT);
     }
-    else if (currTokenType(parser) == ASM_T_INTEGER)
+    else if (currTokenType(parser) == ASM_T_SIGNED_INT || currTokenType(parser) == ASM_T_UNSIGNED_INT)
     {
         arg->Imm = currTokenIntNumVal(parser);
         arg->Type = ArgImm;
-        eatToken(parser, ASM_T_INTEGER);
+
+        arg->_immArgSz = evalImmMinDataSz(arg->Imm, currTokenType(parser));
+
+        eatToken(parser, currTokenType(parser));
     }
     else if (currTokenType(parser) == ASM_T_ID) // register name
     {

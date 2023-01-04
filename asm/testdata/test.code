@@ -1,7 +1,7 @@
 
 # ld st
 label1:
-mov r2, 255
+mov r2, 1234446
 st(b) r2, [5076]
  ld(bs) r1 , [5076]
 add r1, 1

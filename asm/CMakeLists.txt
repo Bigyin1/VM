@@ -12,6 +12,7 @@ set(source_files
     ../vm/instructions/encode.cpp
     ../vm/instructions/run.cpp
     ../vm/instructions/instructions.cpp
+    ../vm/instructions/argument.cpp
     ../vm/instructions/registers/registers.cpp
 
     ../vm/devices/device.cpp

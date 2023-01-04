@@ -10,43 +10,36 @@ static size_t my_fwrite(const void *__ptr, size_t __size, size_t __nitems, FILE 
     return fwrite(__ptr, __size, __nitems, __stream);
 }
 
-static size_t encodeCommon(Argument *arg, FILE *w, bool evalSz)
+static size_t encodeCommon(Argument *arg, FILE *w, DataSize argSz, bool evalSz)
 {
 
     switch (arg->Type)
     {
     case ArgRegister:
         return my_fwrite(&arg->RegNum, 1, 1, w, evalSz);
-        break;
+
+    case ArgImm:
+        return my_fwrite(&arg->Imm, DataSzToBytesSz(argSz), 1, w, evalSz);
 
     case ArgRegisterIndirect:
         return my_fwrite(&arg->RegNum, 1, 1, w, evalSz);
-        break;
 
     case ArgImmIndirect:
 
         return my_fwrite(&arg->Imm, sizeof(arg->Imm), 1, w, evalSz);
-        break;
 
     case ArgRegisterOffsetIndirect:
         return my_fwrite(&arg->RegNum, 1, 1, w, evalSz) +
                my_fwrite(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, w, evalSz);
-        break;
 
     case ArgImmOffsetIndirect:
 
         return my_fwrite(&arg->Imm, sizeof(arg->Imm), 1, w, evalSz) +
                my_fwrite(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, w, evalSz);
-        break;
 
     case ArgNone:
         return 0;
     }
-}
-
-static size_t encodeImm(Argument *arg, FILE *w, uint8_t sz, bool evalSz)
-{
-    return my_fwrite(&arg->Imm, sizeof(arg->Imm), 1, w, evalSz); // TODO
 }
 
 size_t encodeLD(Instruction *ins, FILE *w, bool evalSz)
@@ -55,17 +48,17 @@ size_t encodeLD(Instruction *ins, FILE *w, bool evalSz)
     uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExtend << 6);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
-    return sz + encodeCommon(&ins->Arg2, w, evalSz);
+    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz);
 }
 
 size_t encodeST(Instruction *ins, FILE *w, bool evalSz)
 {
 
     size_t sz = 1;
-    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4);
+    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4); // sign extend ???
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
-    return sz + encodeCommon(&ins->Arg2, w, evalSz);
+    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz);
 }
 
 size_t encodeMOV(Instruction *ins, FILE *w, bool evalSz)
@@ -79,10 +72,10 @@ size_t encodeMOV(Instruction *ins, FILE *w, bool evalSz)
 
     size_t sz = 1;
 
-    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4);
+    uint8_t byte = ins->Arg1.RegNum | (ins->Arg2._immArgSz << 4) | (ins->SignExtend << 6);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
-    return sz + encodeImm(&ins->Arg2, w, ins->DataSz, evalSz);
+    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz);
 }
 
 size_t encodePUSH(Instruction *ins, FILE *w, bool evalSz)
@@ -95,7 +88,12 @@ size_t encodePUSH(Instruction *ins, FILE *w, bool evalSz)
         return 1 + my_fwrite(&byte, 1, 1, w, evalSz);
     }
 
-    return 1 + encodeImm(&ins->Arg1, w, ins->DataSz, evalSz);
+    size_t sz = 1;
+
+    uint8_t byte = (ins->DataSz) | (ins->Arg2._immArgSz << 2); // sign extend ???
+    sz += my_fwrite(&byte, 1, 1, w, evalSz);
+
+    return 1 + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz);
 }
 
 size_t encodePOP(Instruction *ins, FILE *w, bool evalSz)
@@ -114,10 +112,10 @@ size_t encodeARITHM(Instruction *ins, FILE *w, bool evalSz)
     }
 
     size_t sz = 1;
-    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4);
+    uint8_t byte = ins->Arg1.RegNum | (ins->Arg2._immArgSz << 4);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
-    return sz + encodeImm(&ins->Arg2, w, ins->DataSz, evalSz);
+    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz);
 }
 
 size_t encodeARITHMF(Instruction *ins, FILE *w, bool evalSz)
@@ -140,9 +138,9 @@ size_t encodeBranch(Instruction *ins, FILE *w, bool evalSz)
 {
 
     if (ins->Arg1.Type == ArgImm)
-        return 1 + encodeImm(&ins->Arg1, w, ins->DataSz, evalSz);
+        return 1 + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz);
 
-    return 1 + encodeCommon(&ins->Arg1, w, evalSz);
+    return 1 + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz);
 }
 
 size_t encodeNoArgs(Instruction *, FILE *, bool)

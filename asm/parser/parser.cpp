@@ -167,61 +167,103 @@ static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *
     return E_ASM_OK;
 }
 
+static asm_ecode parseJumpPostfix(commandNode *node, const char *postfix)
+{
+    if (strcmp(postfix, "eq") == 0)
+    {
+        node->instr.JumpTyp = JumpEQ;
+        return E_ASM_OK;
+    }
+
+    if (strcmp(postfix, "neq") == 0)
+    {
+        node->instr.JumpTyp = JumpNEQ;
+        return E_ASM_OK;
+    }
+
+    if (strcmp(postfix, "g") == 0)
+    {
+        node->instr.JumpTyp = JumpG;
+        return E_ASM_OK;
+    }
+
+    if (strcmp(postfix, "ge") == 0)
+    {
+        node->instr.JumpTyp = JumpGE;
+        return E_ASM_OK;
+    }
+
+    if (strcmp(postfix, "l") == 0)
+    {
+        node->instr.JumpTyp = JumpL;
+        return E_ASM_OK;
+    }
+
+    if (strcmp(postfix, "le") == 0)
+    {
+        node->instr.JumpTyp = JumpLE;
+        return E_ASM_OK;
+    }
+
+    return E_ASM_ERR;
+}
+
 static asm_ecode parseInstrPostfix(parser_s *parser, commandNode *node)
 {
-    if (currTokenType(parser) != ASM_T_L_SIMP_PAREN)
-        return E_ASM_OK;
-
-    eatToken(parser, ASM_T_L_SIMP_PAREN);
 
     const char *postfix = currTokenVal(parser);
     if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
         return E_ASM_ERR;
 
-    size_t len = strlen(postfix);
+    if (strcmp(node->instrName, "jmp"))
+    {
+        if (parseJumpPostfix(node, postfix) == E_ASM_OK)
+            return E_ASM_OK;
 
-    if (len > 3)
+        printf("asm: invalid jump postfix: %s; line: %zu\n", postfix, node->line);
         return E_ASM_ERR;
+    }
 
-    if (postfix[0] == 'b')
+    if (strcmp(postfix, "b") == 0)
     {
         node->instr.DataSz = DataByte;
-        if (len == 2 && postfix[1] == 's')
-            node->instr.SignExtend = 1;
-        else if (len > 1)
-            return E_ASM_ERR;
-
-        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != E_ASM_OK)
-            return E_ASM_ERR;
-
         return E_ASM_OK;
     }
 
-    if (len < 2)
-        return E_ASM_ERR;
+    if (strcmp(postfix, "bs") == 0)
+    {
+        node->instr.DataSz = DataByte;
+        node->instr.SignExtend = 1;
+        return E_ASM_OK;
+    }
 
-    if (strncmp(postfix, "db", 2) == 0)
+    if (strcmp(postfix, "db") == 0)
     {
         node->instr.DataSz = DataDByte;
-        if (len == 3 && postfix[2] == 's')
-            node->instr.SignExtend = 1;
-
-        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != E_ASM_OK)
-            return E_ASM_ERR;
-
         return E_ASM_OK;
     }
-    else if (strncmp(postfix, "hw", 2) == 0)
+
+    if (strcmp(postfix, "dbs") == 0)
+    {
+        node->instr.DataSz = DataDByte;
+        node->instr.SignExtend = 1;
+        return E_ASM_OK;
+    }
+
+    if (strcmp(postfix, "hw") == 0)
     {
         node->instr.DataSz = DataHalfWord;
-        if (len == 3 && postfix[2] == 's')
-            node->instr.SignExtend = 1;
-
-        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != E_ASM_OK)
-            return E_ASM_ERR;
-
         return E_ASM_OK;
     }
+
+    if (strcmp(postfix, "hws") == 0)
+    {
+        node->instr.DataSz = DataHalfWord;
+        node->instr.SignExtend = 1;
+        return E_ASM_OK;
+    }
+
+    printf("asm: invalid data postfix: %s; line: %zu\n", postfix, node->line);
 
     return E_ASM_ERR;
 }
@@ -278,8 +320,15 @@ static asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
         return E_ASM_ERR;
 
     node->instrName = name;
-    if (parseInstrPostfix(parser, node) != E_ASM_OK)
-        return E_ASM_ERR;
+    if (currTokenType(parser) == ASM_T_L_SIMP_PAREN)
+    {
+        eatToken(parser, ASM_T_L_SIMP_PAREN);
+        if (parseInstrPostfix(parser, node) != E_ASM_OK)
+            return E_ASM_ERR;
+
+        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != E_ASM_OK)
+            return E_ASM_ERR;
+    }
 
     eatSP(parser);
 

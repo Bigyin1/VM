@@ -7,7 +7,7 @@
 
 typedef enum DataSize
 {
-    DataWord = 0,
+    DataWord = 0, // default value
     DataHalfWord,
     DataDByte,
     DataByte,

@@ -9,6 +9,19 @@
 #include "argument.hpp"
 #include "../vm.hpp"
 
+typedef enum JumpType
+{
+
+    JumpUncond = 0, // default value
+    JumpEQ,         // ==
+    JumpNEQ,        // !=
+    JumpG,          // >
+    JumpGE,         // >=
+    JumpL,          // <
+    JumpLE,         // <=
+
+} JumpType;
+
 typedef struct InstructionMeta InstructionMeta;
 
 typedef struct Instruction
@@ -20,6 +33,8 @@ typedef struct Instruction
 
     DataSize DataSz;
     uint8_t SignExtend;
+
+    JumpType JumpTyp;
 
 } Instruction;
 

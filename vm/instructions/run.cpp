@@ -24,37 +24,11 @@ static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
         return -1;
     }
 
-    switch (sz)
+    if (fwrite(&val, DataSzToBytesSz(sz), 1, writer) == 0)
     {
-    case DataByte:
-        if (fwrite(&val, 1, 1, writer) == 0)
-        {
-            printf("vm: failed to write 1 byte at address %zu(device: %s)\n", addr, dev->name);
-            return -1;
-        }
-        break;
-
-    case DataDByte:
-        if (fwrite(&val, 2, 1, writer) == 0)
-        {
-            printf("vm: failed to write 2 bytes at address %zu(device: %s)\n", addr, dev->name);
-            return -1;
-        }
-        break;
-    case DataHalfWord:
-        if (fwrite(&val, 4, 1, writer) == 0)
-        {
-            printf("vm: failed to write 4 bytes at address %zu(device: %s)\n", addr, dev->name);
-            return -1;
-        }
-        break;
-    case DataWord:
-        if (fwrite(&val, 8, 1, writer) == 0)
-        {
-            printf("vm: failed to write 8 bytes at address %zu(device: %s)\n", addr, dev->name);
-            return -1;
-        }
-        break;
+        printf("vm: failed to write %d byte(s) at address %zu(device: %s)\n",
+               DataSzToBytesSz(sz), addr, dev->name);
+        return -1;
     }
 
     return 0;
@@ -80,40 +54,14 @@ static int readFromAddr(CPU *cpu, size_t addr, void *val, DataSize sz)
         return -1;
     }
 
-    switch (sz)
+    if (fread(val, DataSzToBytesSz(sz), 1, reader) == 0)
     {
-    case DataByte:
-        if (fread(val, 1, 1, reader) == 0)
-        {
-            printf("vm: failed to read 1 byte from address %zu(device: %s)\n", addr, dev->name);
-            return -1;
-        }
-        break;
-
-    case DataDByte:
-        if (fread(val, 2, 1, reader) == 0)
-        {
-            printf("vm: failed to read 2 bytes from address %zu(device: %s)\n", addr, dev->name);
-            return -1;
-        }
-        break;
-    case DataHalfWord:
-        if (fread(val, 4, 1, reader) == 0)
-        {
-            printf("vm: failed to read 4 bytes from address %zu(device: %s)\n", addr, dev->name);
-            return -1;
-        }
-        break;
-    case DataWord:
-        if (fread(val, 8, 1, reader) == 0)
-        {
-            printf("vm: failed to read 8 bytes from address %zu(device: %s)\n", addr, dev->name);
-            return -1;
-        }
-        break;
+        printf("vm: failed to read %d byte(s) from address %zu(device: %s)\n",
+               DataSzToBytesSz(sz), addr, dev->name);
+        return -1;
     }
 
-    return 0;
+        return 0;
 }
 
 int runRET(CPU *cpu, Instruction *ins)
@@ -187,7 +135,7 @@ static uint64_t signExtendValue(uint64_t val, DataSize sz)
     }
     case DataHalfWord:
     {
-        int16_t v32 = val;
+        int32_t v32 = val;
         int64_t v64 = v32;
         return v64;
     }

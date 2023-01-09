@@ -61,7 +61,7 @@ static int readFromAddr(CPU *cpu, size_t addr, void *val, DataSize sz)
         return -1;
     }
 
-        return 0;
+    return 0;
 }
 
 int runRET(CPU *cpu, Instruction *ins)
@@ -206,7 +206,7 @@ int runPUSH(CPU *cpu, Instruction *ins)
     if (writeToAddr(cpu, addr, val, (DataSize)ins->DataSz) < 0)
         return -1;
 
-    switch ((DataSize)ins->DataSz)
+    switch (ins->DataSz)
     {
     case DataWord:
         cpu->gpRegs[RSP] += 8;
@@ -233,7 +233,7 @@ int runPOP(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    switch ((DataSize)ins->DataSz)
+    switch (ins->DataSz)
     {
     case DataWord:
         cpu->gpRegs[RSP] -= 8;
@@ -318,9 +318,9 @@ int runSUB(CPU *cpu, Instruction *ins)
     cpu->gpRegs[ins->Arg1.RegNum] -= val;
 
     cpu->statusReg = 0;
-    if (cpu->gpRegs[ins->Arg1.RegNum] > 0)
+    if ((int64_t)cpu->gpRegs[ins->Arg1.RegNum] > 0)
         cpu->statusReg = 1;
-    else if (cpu->gpRegs[ins->Arg1.RegNum] < 0)
+    else if ((int64_t)cpu->gpRegs[ins->Arg1.RegNum] < 0)
         cpu->statusReg = -1;
 
     return 0;
@@ -429,6 +429,38 @@ int runDIVF(CPU *cpu, Instruction *ins)
 int runJMP(CPU *cpu, Instruction *ins)
 {
 
+    JumpType jmpType = ins->JmpType;
+    switch (jmpType)
+    {
+    case JumpUncond:
+        break;
+
+    case JumpEQ:
+        if (cpu->statusReg != 0)
+            return 0;
+        break;
+    case JumpG:
+        if (cpu->statusReg <= 0)
+            return 0;
+        break;
+    case JumpGE:
+        if (cpu->statusReg < 0)
+            return 0;
+        break;
+    case JumpL:
+        if (cpu->statusReg >= 0)
+            return 0;
+        break;
+    case JumpLE:
+        if (cpu->statusReg > 0)
+            return 0;
+        break;
+    case JumpNEQ:
+        if (cpu->statusReg != 0)
+            return 0;
+        break;
+    }
+
     size_t addr = 0;
     if (ins->Arg1.Type == ArgRegister)
         addr = cpu->gpRegs[ins->Arg1.RegNum];
@@ -437,42 +469,6 @@ int runJMP(CPU *cpu, Instruction *ins)
 
     cpu->regIP = addr;
     return 0;
-}
-
-int runJEQ(CPU *cpu, Instruction *ins)
-{
-
-    if (cpu->statusReg != 0)
-        return 0;
-
-    return runJMP(cpu, ins);
-}
-
-int runJNEQ(CPU *cpu, Instruction *ins)
-{
-
-    if (cpu->statusReg == 0)
-        return 0;
-
-    return runJMP(cpu, ins);
-}
-
-int runJG(CPU *cpu, Instruction *ins)
-{
-
-    if (cpu->statusReg <= 0)
-        return 0;
-
-    return runJMP(cpu, ins);
-}
-
-int runJL(CPU *cpu, Instruction *ins)
-{
-
-    if (cpu->statusReg >= 0)
-        return 0;
-
-    return runJMP(cpu, ins);
 }
 
 int runCALL(CPU *cpu, Instruction *ins)
@@ -501,12 +497,12 @@ int runCMP(CPU *cpu, Instruction *ins)
     else
         val = cpu->gpRegs[ins->Arg2.RegNum];
 
-    cpu->gpRegs[ins->Arg1.RegNum] -= val;
+    int64_t res = cpu->gpRegs[ins->Arg1.RegNum] - val;
 
     cpu->statusReg = 0;
-    if (cpu->gpRegs[ins->Arg1.RegNum] > 0)
+    if (res > 0)
         cpu->statusReg = 1;
-    else if (cpu->gpRegs[ins->Arg1.RegNum] < 0)
+    else if (res < 0)
         cpu->statusReg = -1;
 
     return 0;

@@ -90,10 +90,10 @@ size_t encodePUSH(Instruction *ins, FILE *w, bool evalSz)
 
     size_t sz = 1;
 
-    uint8_t byte = (ins->DataSz) | (ins->Arg2._immArgSz << 2); // sign extend ???
+    uint8_t byte = (ins->DataSz) | (ins->Arg1._immArgSz << 2); // sign extend ???
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
-    return 1 + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz);
+    return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz);
 }
 
 size_t encodePOP(Instruction *ins, FILE *w, bool evalSz)
@@ -134,11 +134,19 @@ size_t encodeARITHMF(Instruction *ins, FILE *w, bool evalSz)
     return sz + my_fwrite(&ins->Arg2.Imm, sizeof(double), 1, w, evalSz);
 }
 
-size_t encodeBranch(Instruction *ins, FILE *w, bool evalSz)
+size_t encodeJMP(Instruction *ins, FILE *w, bool evalSz)
 {
+    size_t sz = 1;
+    uint8_t byte = ins->JmpType;
+    sz += my_fwrite(&byte, 1, 1, w, evalSz);
+    ins->Arg1._immArgSz = DataWord; // encoded as 8 bytes for now;
 
-    if (ins->Arg1.Type == ArgImm)
-        return 1 + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz);
+    return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz);
+}
+
+size_t encodeCALL(Instruction *ins, FILE *w, bool evalSz)
+{
+    ins->Arg1._immArgSz = DataWord; // encoded as 8 bytes for now;
 
     return 1 + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz);
 }

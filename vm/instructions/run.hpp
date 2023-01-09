@@ -20,10 +20,6 @@ int runMULF(CPU *cpu, Instruction *ins);
 int runDIV(CPU *cpu, Instruction *ins);
 int runDIVF(CPU *cpu, Instruction *ins);
 int runJMP(CPU *cpu, Instruction *ins);
-int runJEQ(CPU *cpu, Instruction *ins);
-int runJNEQ(CPU *cpu, Instruction *ins);
-int runJG(CPU *cpu, Instruction *ins);
-int runJL(CPU *cpu, Instruction *ins);
 int runCALL(CPU *cpu, Instruction *ins);
 int runCMP(CPU *cpu, Instruction *ins);
 

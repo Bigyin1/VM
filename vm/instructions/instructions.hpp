@@ -34,7 +34,7 @@ typedef struct Instruction
     DataSize DataSz;
     uint8_t SignExtend;
 
-    JumpType JumpTyp;
+    JumpType JmpType;
 
 } Instruction;
 
@@ -88,10 +88,6 @@ typedef enum InstrOpCode
     DIV,
     DIVF,
     JMP,
-    JEQ,
-    JNEQ,
-    JG,
-    JL,
     CALL,
     CMP,
 

@@ -11,7 +11,8 @@ InstrDecErr decodePUSH(Instruction *ins, FILE *r);
 InstrDecErr decodePOP(Instruction *ins, FILE *r);
 InstrDecErr decodeARITHM(Instruction *ins, FILE *r);
 InstrDecErr decodeARITHMF(Instruction *ins, FILE *r);
-InstrDecErr decodeBranch(Instruction *ins, FILE *r);
+InstrDecErr decodeJMP(Instruction *ins, FILE *r);
+InstrDecErr decodeCALL(Instruction *ins, FILE *r);
 InstrDecErr decodeNoArgs(Instruction *ins, FILE *r);
 
 #endif

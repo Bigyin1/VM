@@ -171,37 +171,37 @@ static asm_ecode parseJumpPostfix(commandNode *node, const char *postfix)
 {
     if (strcmp(postfix, "eq") == 0)
     {
-        node->instr.JumpTyp = JumpEQ;
+        node->instr.JmpType = JumpEQ;
         return E_ASM_OK;
     }
 
     if (strcmp(postfix, "neq") == 0)
     {
-        node->instr.JumpTyp = JumpNEQ;
+        node->instr.JmpType = JumpNEQ;
         return E_ASM_OK;
     }
 
     if (strcmp(postfix, "g") == 0)
     {
-        node->instr.JumpTyp = JumpG;
+        node->instr.JmpType = JumpG;
         return E_ASM_OK;
     }
 
     if (strcmp(postfix, "ge") == 0)
     {
-        node->instr.JumpTyp = JumpGE;
+        node->instr.JmpType = JumpGE;
         return E_ASM_OK;
     }
 
     if (strcmp(postfix, "l") == 0)
     {
-        node->instr.JumpTyp = JumpL;
+        node->instr.JmpType = JumpL;
         return E_ASM_OK;
     }
 
     if (strcmp(postfix, "le") == 0)
     {
-        node->instr.JumpTyp = JumpLE;
+        node->instr.JmpType = JumpLE;
         return E_ASM_OK;
     }
 
@@ -215,7 +215,7 @@ static asm_ecode parseInstrPostfix(parser_s *parser, commandNode *node)
     if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
         return E_ASM_ERR;
 
-    if (strcmp(node->instrName, "jmp"))
+    if (strcmp(node->instrName, "jmp") == 0)
     {
         if (parseJumpPostfix(node, postfix) == E_ASM_OK)
             return E_ASM_OK;
@@ -227,6 +227,13 @@ static asm_ecode parseInstrPostfix(parser_s *parser, commandNode *node)
     if (strcmp(postfix, "b") == 0)
     {
         node->instr.DataSz = DataByte;
+        return E_ASM_OK;
+    }
+
+    if (strcmp(postfix, "s") == 0)
+    {
+        node->instr.DataSz = DataWord;
+        node->instr.SignExtend = 1;
         return E_ASM_OK;
     }
 

@@ -20,7 +20,6 @@ set(source_files
     assembler/assembler.cpp
 )
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/testdata
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testdata/test.code ${CMAKE_CURRENT_BINARY_DIR}/testdata COPYONLY)
 
 add_executable(${ASM_EXE_NAME} ${source_files})

@@ -126,6 +126,7 @@ InstrDecErr decodePUSH(Instruction *ins, FILE *r)
     {
         ins->DataSz = (DataSize)((ins->Arg1.RegNum & 0b00110000) >> 4);
         ins->Arg1.RegNum &= regCodeMask;
+        return decodeCommon(&ins->Arg1, r);
     }
     return INSTR_OK;
 }
@@ -160,7 +161,7 @@ InstrDecErr decodeARITHM(Instruction *ins, FILE *r)
     }
 
     // arg 1
-    ins->Arg1.RegNum = byte & regCodeMask; // TODO data sz
+    ins->Arg1.RegNum = byte & regCodeMask;
     ins->Arg2._immArgSz = (DataSize)(byte >> 4);
 
     // arg 2
@@ -190,8 +191,23 @@ InstrDecErr decodeARITHMF(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-InstrDecErr decodeBranch(Instruction *ins, FILE *r)
+InstrDecErr decodeJMP(Instruction *ins, FILE *r)
 {
+    uint8_t byte = 0;
+    if (fread(&byte, 1, 1, r) == 0)
+        return INSTR_NOT_EXIST;
+
+    ins->JmpType = (JumpType)byte;
+
+    ins->Arg1._immArgSz = DataWord;
+
+    return decodeCommon(&ins->Arg1, r);
+}
+
+InstrDecErr decodeCALL(Instruction *ins, FILE *r)
+{
+
+    ins->Arg1._immArgSz = DataWord;
 
     return decodeCommon(&ins->Arg1, r);
 }

@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include "devices/device.hpp"
 
-const size_t SecondaryDevicesCount = 2;
+const size_t SecondaryDevicesCount = 1;
 
 typedef struct CPU
 {

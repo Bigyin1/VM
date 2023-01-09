@@ -20,8 +20,8 @@ int ConstructRAM(RAM *ram, size_t sz);
 
 void DestructRAM(RAM *ram);
 
-FILE *RAMGetReaderOnAddr(void *rom, size_t addr);
+FILE *RAMGetReaderOnAddr(void *ram, size_t addr);
 
-FILE *RAMGetWriterOnAddr(void *rom, size_t addr);
+FILE *RAMGetWriterOnAddr(void *ram, size_t addr);
 
 #endif

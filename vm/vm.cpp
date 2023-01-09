@@ -5,6 +5,7 @@
 #include "instructions/registers/registers.hpp"
 #include "devices/rom.hpp"
 #include "devices/ram.hpp"
+#include "devices/console.hpp"
 #include "vm.hpp"
 
 static bool checkMagic(FILE *prog)
@@ -58,6 +59,26 @@ static int attachRAM(CPU *cpu, size_t addr, size_t sz)
     return 0;
 }
 
+static int attachConsole(CPU *cpu, size_t addr)
+{
+
+    cpu->dev[0].lowAddr = addr;
+    cpu->dev[0].highAddr = cpu->dev[0].lowAddr + sizeof(double) + sizeof(int64_t) + sizeof(char) - 1;
+
+    cpu->dev[0].name = "Majestic Console";
+
+    cpu->dev[0].getReader = MajesticConsoleGetReaderOnAddr;
+    cpu->dev[0].getWriter = MajesticConsoleGetWriterOnAddr;
+    cpu->dev[0].tick = MajesticConsoleTicker;
+
+    cpu->dev[0].concreteDevice = calloc(1, sizeof(MajesticConsole));
+
+    if (ConstructMajesticConsole((MajesticConsole *)cpu->dev[0].concreteDevice) < 0)
+        return -1;
+
+    return 0;
+}
+
 int InitVM(CPU *cpu, FILE *prog)
 {
     assert(cpu != NULL);
@@ -69,6 +90,9 @@ int InitVM(CPU *cpu, FILE *prog)
         return -1;
 
     if (attachRAM(cpu, 4096, 4096) < 0)
+        return -1;
+
+    if (attachConsole(cpu, 10000) < 0)
         return -1;
 
     cpu->regIP = cpu->rom.lowAddr;
@@ -86,9 +110,11 @@ void DestructVM(CPU *cpu)
 
     DestructRAM((RAM *)cpu->ram.concreteDevice);
     DestructROM((ROM *)cpu->rom.concreteDevice);
+    DestructMajesticConsole((MajesticConsole *)cpu->dev[0].concreteDevice);
 
     free(cpu->ram.concreteDevice);
     free(cpu->rom.concreteDevice);
+    free(cpu->dev[0].concreteDevice);
 }
 
 static int execNextInstruction(CPU *cpu)
@@ -153,5 +179,10 @@ void RunVM(CPU *cpu)
     {
         if (execNextInstruction(cpu) < 0)
             return;
+
+        for (size_t i = 0; i < SecondaryDevicesCount; i++)
+        {
+            cpu->dev[i].tick(cpu->dev[i].concreteDevice);
+        }
     }
 }

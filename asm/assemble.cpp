@@ -11,7 +11,7 @@ e_asm_codes assemble(FILE *in, FILE *out)
     char *text = readFile(in);
     if (text == NULL)
     {
-        perror("");
+        perror("asm:");
         return E_ASM_ERR;
     }
     fclose(in);

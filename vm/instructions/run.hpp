@@ -22,5 +22,6 @@ int runDIVF(CPU *cpu, Instruction *ins);
 int runJMP(CPU *cpu, Instruction *ins);
 int runCALL(CPU *cpu, Instruction *ins);
 int runCMP(CPU *cpu, Instruction *ins);
+int runHALT(CPU *cpu, Instruction *ins);
 
 #endif

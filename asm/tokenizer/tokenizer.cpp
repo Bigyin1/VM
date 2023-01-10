@@ -8,6 +8,7 @@
 static const char *spaces = " \t";
 
 const token_meta_s generalTokens[] = {
+    // {ASM_T_SING_QUOTE, "'"},
     {ASM_T_L_PAREN, "["},
     {ASM_T_R_PAREN, "]"},
     {ASM_T_L_SIMP_PAREN, "("},
@@ -120,6 +121,29 @@ static bool checkIdToken(tokenizer_s *t)
     return true;
 }
 
+static bool checkAsciiCharToken(tokenizer_s *t)
+{
+
+    int wordLen = 0;
+    char c = 0;
+    char backslash[2] = {0};
+    char qoute[2] = {0};
+    if (sscanf(t->input, "'%1[\\]%1c%1[']%n", backslash, &c, qoute, &wordLen) != 3 &&
+        sscanf(t->input, "'%1c%1[']%n", &c, qoute, &wordLen) != 2)
+        return false;
+
+    if (backslash[0] && c != '\\')
+        c &= 0b00111111;
+
+    t->currToken->intNumVal = c;
+
+    t->currToken->type = ASM_T_UNSIGNED_INT;
+
+    t->column += wordLen;
+    t->input += wordLen;
+    return true;
+}
+
 static bool checkSimpleTokens(tokenizer_s *t)
 {
     for (size_t i = 0; i < sizeof(generalTokens) / sizeof(generalTokens[0]); i++)
@@ -168,6 +192,9 @@ asm_ecode tokenize(tokenizer_s *t)
         }
 
         if (t->currToken->type != ASM_T_EOF)
+            continue;
+
+        if (checkAsciiCharToken(t))
             continue;
 
         if (checkLabelToken(t))

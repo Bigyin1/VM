@@ -185,7 +185,7 @@ int runMOV(CPU *cpu, Instruction *ins)
     else
         val = cpu->gpRegs[ins->Arg2.RegNum];
 
-    cpu->gpRegs[ins->Arg1.RegNum] = val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, (DataSize)ins->Arg2._immArgSz) : val;
 
     return 0;
 }
@@ -504,6 +504,16 @@ int runCMP(CPU *cpu, Instruction *ins)
         cpu->statusReg = 1;
     else if (res < 0)
         cpu->statusReg = -1;
+
+    return 0;
+}
+
+int runHALT(CPU *cpu, Instruction *ins)
+{
+    assert(cpu != NULL);
+    assert(ins != NULL);
+
+    cpu->running = false;
 
     return 0;
 }

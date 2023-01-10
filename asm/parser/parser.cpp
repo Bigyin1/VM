@@ -104,7 +104,7 @@ static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *
     assert(parser != NULL);
     assert(node != NULL);
 
-    if (currTokenType(parser) == ASM_T_NL)
+    if (currTokenType(parser) == ASM_T_NL || currTokenType(parser) == ASM_T_EOF)
         return E_ASM_OK;
 
     if (currTokenType(parser) == ASM_T_LABEL)

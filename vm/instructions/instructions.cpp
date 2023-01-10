@@ -199,6 +199,16 @@ const InstructionMeta instructions[] = {
         .decFunc = decodeMOV,
         .runFunc = runCMP,
     },
+    {
+        .Name = "halt",
+        .OpCode = HALT,
+        .ArgSets = {
+            {.First = ArgNone, .Second = ArgNone},
+        },
+        .encFunc = encodeNoArgs,
+        .decFunc = decodeNoArgs,
+        .runFunc = runHALT,
+    },
 
 };
 

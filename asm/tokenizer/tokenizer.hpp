@@ -17,6 +17,7 @@ enum e_asm_token_type
   ASM_T_LABEL,
   ASM_T_SPACE,
 
+  ASM_T_SING_QUOTE,
   ASM_T_COMMA,
   ASM_T_PLUS,
   ASM_T_MINUS,

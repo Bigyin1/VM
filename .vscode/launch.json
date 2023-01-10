@@ -33,11 +33,14 @@
             "args": [
                 "./testdata/out"
             ],
+            "internalConsoleOptions": "openOnSessionStart",
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/asm",
             "environment": [],
-            "console": "externalTerminal",
-            "MIMode": "lldb",
+            "externalConsole": true,
+            "osx": {
+                "MIMode": "lldb"
+            },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -57,7 +60,9 @@
             "cwd": "${workspaceFolder}/build/tests",
             "environment": [],
             "console": "externalTerminal",
-            "MIMode": "lldb",
+            "osx": {
+                "MIMode": "lldb"
+            },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

@@ -175,7 +175,9 @@ void RunVM(CPU *cpu)
     assert(cpu->ram.concreteDevice != NULL);
     assert(cpu->rom.concreteDevice != NULL);
 
-    while (1)
+    cpu->running = true;
+
+    while (cpu->running)
     {
         if (execNextInstruction(cpu) < 0)
             return;

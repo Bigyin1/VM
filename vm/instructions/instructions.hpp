@@ -90,6 +90,7 @@ typedef enum InstrOpCode
     JMP,
     CALL,
     CMP,
+    HALT,
 
 } InstrOpCode;
 

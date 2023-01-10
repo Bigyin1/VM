@@ -17,6 +17,8 @@ typedef struct CPU
     Device ram;
 
     Device dev[SecondaryDevicesCount];
+
+    bool running;
 } CPU;
 
 int InitVM(CPU *cpu, FILE *prog);

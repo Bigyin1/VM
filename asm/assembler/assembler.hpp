@@ -10,7 +10,7 @@ const uint32_t magicHeader = 0xFAAFAAAF;
 
 typedef struct assembler_s
 {
-    codeNode *prog;
+    parser_s *parser;
     FILE *out;
 
 } assembler_s;

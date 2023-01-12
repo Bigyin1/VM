@@ -7,6 +7,7 @@ set(source_files
     parser/parser.cpp
     parser/utils.cpp
     parser/labels.cpp
+    parser/directives.cpp
 
     ../vm/instructions/decode.cpp
     ../vm/instructions/encode.cpp

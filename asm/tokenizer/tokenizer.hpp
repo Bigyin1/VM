@@ -17,7 +17,7 @@ enum e_asm_token_type
   ASM_T_LABEL,
   ASM_T_SPACE,
 
-  ASM_T_SING_QUOTE,
+  ASM_T_SECTION_NAME,
   ASM_T_COMMA,
   ASM_T_PLUS,
   ASM_T_MINUS,
@@ -44,9 +44,8 @@ const size_t maxTokenValLen = 24;
 
 struct token_s
 {
-  char val[maxTokenValLen + 1];
-
-  double dblNumVal;
+  char val[maxTokenValLen + 1]; // polymorf
+  double dblNumVal;             // TODO: remove this field
   int64_t intNumVal;
 
   e_asm_token_type type;
@@ -62,6 +61,8 @@ struct tokenizer_s
   token_s *tokens;
   token_s *currToken;
 
+  token_s *saved;
+
   char *input;
   size_t line;
   size_t column;
@@ -76,6 +77,10 @@ asm_ecode tokenize(tokenizer_s *t);
 token_s *getNextToken(tokenizer_s *t);
 
 token_s *peekNextToken(tokenizer_s *t);
+
+token_s *saveCurrToken(tokenizer_s *t);
+
+token_s *restoreSavedToken(tokenizer_s *t);
 
 void tokenizerFree(tokenizer_s *t);
 

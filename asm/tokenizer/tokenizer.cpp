@@ -8,7 +8,6 @@
 static const char *spaces = " \t";
 
 const token_meta_s generalTokens[] = {
-    // {ASM_T_SING_QUOTE, "'"},
     {ASM_T_L_PAREN, "["},
     {ASM_T_R_PAREN, "]"},
     {ASM_T_L_SIMP_PAREN, "("},
@@ -50,6 +49,26 @@ static bool checkLabelToken(tokenizer_s *t)
         return false;
 
     t->currToken->type = ASM_T_LABEL;
+
+    t->column += wordLen;
+    t->input += wordLen;
+    return true;
+}
+
+static bool checkSectNameToken(tokenizer_s *t)
+{
+
+    int wordLen = 0;
+
+    short colon = 0;
+
+    if (sscanf(t->input, ".%"
+                         "24"
+                         "[a-zA-Z]%n",
+               t->currToken->val, &wordLen) == 0)
+        return false;
+
+    t->currToken->type = ASM_T_SECTION_NAME;
 
     t->column += wordLen;
     t->input += wordLen;
@@ -194,6 +213,9 @@ asm_ecode tokenize(tokenizer_s *t)
         if (t->currToken->type != ASM_T_EOF)
             continue;
 
+        if (checkSectNameToken(t))
+            continue;
+
         if (checkAsciiCharToken(t))
             continue;
 
@@ -208,6 +230,12 @@ asm_ecode tokenize(tokenizer_s *t)
 
         if (checkIdToken(t))
             continue;
+
+        printf("asm: unknown token at line: %zu, column: %zu\n",
+               t->currToken->line,
+               t->currToken->column);
+        err = E_ASM_INSUFF_TOKEN;
+        break;
     }
 
     t->currToken->type = ASM_T_EOF;
@@ -248,6 +276,24 @@ token_s *getNextToken(tokenizer_s *t)
     t->currToken++;
     if (t->currToken->type == ASM_T_EOF)
         return NULL;
+
+    return t->currToken;
+}
+
+token_s *saveCurrToken(tokenizer_s *t)
+{
+    assert(t != NULL);
+
+    t->saved = t->currToken;
+
+    return t->currToken;
+}
+
+token_s *restoreSavedToken(tokenizer_s *t)
+{
+    assert(t != NULL);
+
+    t->currToken = t->saved;
 
     return t->currToken;
 }

@@ -7,6 +7,18 @@
 #include "../tokenizer/tokenizer.hpp"
 #include "../../vm/instructions/instructions.hpp"
 
+typedef struct labelData
+{
+    const char *label;
+    uint64_t val;
+
+    uint64_t *imports[16];
+    size_t importsSz;
+
+    bool present;
+
+} labelData;
+
 typedef enum CmdType
 {
 
@@ -31,18 +43,6 @@ typedef struct commandNode
     size_t offset;
 
 } commandNode;
-
-typedef struct labelData
-{
-    const char *label;
-    uint64_t val;
-
-    uint64_t *imports[16];
-    size_t importsSz;
-
-    bool present;
-
-} labelData;
 
 typedef struct sectionNode
 {
@@ -74,9 +74,7 @@ typedef struct parser_s
 
 #define currTokenVal(p) (p)->toks->currToken->val
 
-#define currTokenDblNumVal(p) (p)->toks->currToken->dblNumVal
-
-#define currTokenIntNumVal(p) (p)->toks->currToken->intNumVal
+#define currTokenNumVal(p) (p)->toks->currToken->numVal
 
 asm_ecode parseTokens(parser_s *p);
 

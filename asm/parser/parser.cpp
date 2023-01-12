@@ -45,7 +45,7 @@ static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument 
         if (currTokenType(parser) == ASM_T_SIGNED_INT ||
             currTokenType(parser) == ASM_T_UNSIGNED_INT) // [label+128]
         {
-            arg->ImmDisp16 = currTokenIntNumVal(parser);
+            arg->ImmDisp16 = currTokenNumVal(parser);
             arg->Type = ArgImmOffsetIndirect;
 
             eatToken(parser, currTokenType(parser));
@@ -57,13 +57,13 @@ static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument 
     }
     else if (currTokenType(parser) == ASM_T_UNSIGNED_INT)
     {
-        arg->Imm = currTokenIntNumVal(parser);
+        arg->Imm = currTokenNumVal(parser);
         eatToken(parser, ASM_T_UNSIGNED_INT);
 
         if (currTokenType(parser) == ASM_T_SIGNED_INT ||
             currTokenType(parser) == ASM_T_UNSIGNED_INT) // [128+128]
         {
-            arg->ImmDisp16 = currTokenIntNumVal(parser);
+            arg->ImmDisp16 = currTokenNumVal(parser);
             arg->Type = ArgImmOffsetIndirect;
 
             eatToken(parser, currTokenType(parser));
@@ -88,7 +88,7 @@ static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument 
         if (currTokenType(parser) == ASM_T_SIGNED_INT ||
             currTokenType(parser) == ASM_T_UNSIGNED_INT) // [r0+128]
         {
-            arg->ImmDisp16 = currTokenIntNumVal(parser);
+            arg->ImmDisp16 = currTokenNumVal(parser);
             arg->Type = ArgRegisterOffsetIndirect;
 
             eatToken(parser, currTokenType(parser));
@@ -120,8 +120,7 @@ static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *
     }
     else if (currTokenType(parser) == ASM_T_FLOAT)
     {
-        memcpy(&arg->Imm, &parser->toks->currToken->dblNumVal, sizeof(double));
-
+        arg->Imm = currTokenNumVal(parser);
         arg->Type = ArgImm;
 
         arg->_immArgSz = DataWord; // double size
@@ -130,7 +129,7 @@ static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *
     }
     else if (currTokenType(parser) == ASM_T_SIGNED_INT || currTokenType(parser) == ASM_T_UNSIGNED_INT)
     {
-        arg->Imm = currTokenIntNumVal(parser);
+        arg->Imm = currTokenNumVal(parser);
         arg->Type = ArgImm;
 
         arg->_immArgSz = evalImmMinDataSz(arg->Imm, currTokenType(parser));
@@ -321,13 +320,12 @@ static asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
     node->line = parser->toks->currToken->line;
 
     node->name = currTokenVal(parser);
+    if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
+        return E_ASM_ERR;
 
     e_asm_codes err = parseDataDefDirective(parser, node);
     if (err != E_ASM_INSUFF_TOKEN)
         return err;
-
-    if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
-        return E_ASM_ERR;
 
     if (currTokenType(parser) == ASM_T_L_SIMP_PAREN)
     {
@@ -462,7 +460,7 @@ asm_ecode parseTokens(parser_s *parser)
         parser->currSection->name = sectName;
 
         eatSP(parser);
-        uint64_t sectAddr = currTokenIntNumVal(parser);
+        uint64_t sectAddr = currTokenNumVal(parser);
         if (eatToken(parser, ASM_T_UNSIGNED_INT) != E_ASM_OK)
             return E_ASM_ERR;
 

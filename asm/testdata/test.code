@@ -2,7 +2,8 @@
 .data 4096 # load address
 
 hello:
-db 'H', 'e', 'l', 'l', 'o', '\@'
+db 'H', 'e', 'l', 'l', 'o',
+    ' ', 'W' , 'o', 'r', 'l', 'd', '\@'
 
 array1:
 ddb 12, 13

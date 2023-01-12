@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "directives.hpp"
 #include "utils.hpp"
+#include "labels.hpp"
 
 typedef struct dataDirective
 {
@@ -63,14 +64,15 @@ static asm_ecode getDataDefDirectiveArgsCount(parser_s *parser, commandNode *nod
     return E_ASM_OK;
 }
 
-static asm_ecode parseDataDefDirectiveArgs(parser_s *parser, commandNode *node, DataSize sz)
+static asm_ecode parseDataDefDirectiveArgs(parser_s *parser, commandNode *node, size_t sz)
 {
     size_t count = 0;
 
     if (getDataDefDirectiveArgsCount(parser, node, &count) == E_ASM_ERR)
         return E_ASM_ERR;
 
-    node->data = (char *)calloc(count, DataSzToBytesSz(sz));
+    node->data = (char *)calloc(count, sz);
+    node->dataSz = count * sz;
     restoreSavedToken(parser->toks);
 
     eatBlanks(parser);
@@ -82,16 +84,20 @@ static asm_ecode parseDataDefDirectiveArgs(parser_s *parser, commandNode *node, 
            currTokenType(parser) == ASM_T_SIGNED_INT ||
            currTokenType(parser) == ASM_T_LABEL)
     {
+        count--;
 
-        if (currTokenType(parser) == ASM_T_FLOAT)
-            memcpy(node->data + dataIdx, &currTokenDblNumVal(parser), DataSzToBytesSz(sz));
+        if (currTokenType(parser) != ASM_T_LABEL)
+            memcpy(node->data + dataIdx, &currTokenNumVal(parser), sz);
         else
-            memcpy(node->data + dataIdx, &currTokenIntNumVal(parser), DataSzToBytesSz(sz));
+            addLabelImport(parser, currTokenVal(parser), (uint64_t *)(node->data + dataIdx));
 
-        dataIdx += DataSzToBytesSz(sz);
+        dataIdx += sz;
 
         eatToken(parser, currTokenType(parser));
-        eatBlanks(parser);
+        eatSP(parser);
+
+        if (count == 0)
+            break;
 
         if (currTokenType(parser) != ASM_T_COMMA)
             break;
@@ -109,7 +115,7 @@ asm_ecode parseDataDefDirective(parser_s *parser, commandNode *node)
     for (size_t i = 0; i < sizeof(dataDirectives) / sizeof(dataDirective); i++)
     {
         if (strcmp(dataDirectives[i].name, node->name) == 0)
-            return parseDataDefDirectiveArgs(parser, node, dataDirectives[i].sz);
+            return parseDataDefDirectiveArgs(parser, node, DataSzToBytesSz(dataDirectives[i].sz));
     }
 
     return E_ASM_INSUFF_TOKEN;

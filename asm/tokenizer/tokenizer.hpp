@@ -45,8 +45,7 @@ const size_t maxTokenValLen = 24;
 struct token_s
 {
   char val[maxTokenValLen + 1]; // polymorf
-  double dblNumVal;             // TODO: remove this field
-  int64_t intNumVal;
+  int64_t numVal;
 
   e_asm_token_type type;
 

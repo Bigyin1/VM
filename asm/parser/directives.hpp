@@ -4,8 +4,8 @@
 
 #include "parser.hpp"
 
-static asm_ecode parseDataDefDirective(parser_s *parser, commandNode *node);
+asm_ecode parseDataDefDirective(parser_s *parser, commandNode *node);
 
-static asm_ecode parseControlDirective(parser_s *parser, commandNode *node);
+asm_ecode parseControlDirective(parser_s *parser, commandNode *node);
 
 #endif

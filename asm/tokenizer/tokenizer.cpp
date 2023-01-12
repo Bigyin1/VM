@@ -105,17 +105,17 @@ static bool checkNumberToken(tokenizer_s *t)
         if (read < numLen)
             return false;
 
-        t->currToken->dblNumVal = dblNum;
+        memcpy(&t->currToken->numVal, &dblNum, sizeof(double));
         t->currToken->type = ASM_T_FLOAT;
     }
     else if (sign == '-')
     {
-        t->currToken->intNumVal = num;
+        t->currToken->numVal = num;
         t->currToken->type = ASM_T_SIGNED_INT;
     }
     else
     {
-        t->currToken->intNumVal = num;
+        t->currToken->numVal = num;
         t->currToken->type = ASM_T_UNSIGNED_INT;
     }
 
@@ -154,7 +154,7 @@ static bool checkAsciiCharToken(tokenizer_s *t)
     if (backslash[0] && c != '\\')
         c &= 0b00111111;
 
-    t->currToken->intNumVal = c;
+    t->currToken->numVal = c;
 
     t->currToken->type = ASM_T_UNSIGNED_INT;
 

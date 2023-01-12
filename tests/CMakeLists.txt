@@ -10,6 +10,9 @@ set(source_files
     ../asm/parser/parser.cpp
     ../asm/parser/utils.cpp
     ../asm/parser/labels.cpp
+    ../asm/parser/directives.cpp
+    ../asm/parser/section_parser.cpp
+    ../asm/parser/command_parser.cpp
 
     ../vm/instructions/decode.cpp
     ../vm/instructions/encode.cpp

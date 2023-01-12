@@ -8,6 +8,8 @@ set(source_files
     parser/utils.cpp
     parser/labels.cpp
     parser/directives.cpp
+    parser/section_parser.cpp
+    parser/command_parser.cpp
 
     ../vm/instructions/decode.cpp
     ../vm/instructions/encode.cpp

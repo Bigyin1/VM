@@ -2,6 +2,8 @@
 #include <assert.h>
 #include "../asm/assembler/assembler.hpp"
 #include "instructions/instructions.hpp"
+#include "instructions/run.hpp"
+#include "instructions/decode.hpp"
 #include "instructions/registers/registers.hpp"
 #include "devices/rom.hpp"
 #include "devices/ram.hpp"
@@ -144,7 +146,7 @@ static int execNextInstruction(CPU *cpu)
 
     Instruction instr = {0};
 
-    InstrDecErr err = Decode(&instr, reader);
+    InstrEncDecErr err = Decode(&instr, reader);
     if (err == INSTR_NOT_EXIST)
     {
         printf("vm: bad instruction; finished executing\n");
@@ -163,7 +165,7 @@ static int execNextInstruction(CPU *cpu)
 
     cpu->regIP += (ftell(reader) - posPrev);
 
-    if (instr.im->runFunc(cpu, &instr) < 0)
+    if (Run(cpu, &instr) < 0)
         return -1;
 
     return 0;

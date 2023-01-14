@@ -1,12 +1,13 @@
 /** @file */
-#ifndef CPU_INSTR_META_HPP
-#define CPU_INSTR_META_HPP
+#ifndef CPU_INSTRUCTS_HPP
+#define CPU_INSTRUCTS_HPP
 
 #include <cstddef>
 #include <stdint.h>
 
 #include <stdio.h>
 #include "argument.hpp"
+#include "opcodes.hpp"
 #include "../vm.hpp"
 
 typedef enum JumpType
@@ -38,7 +39,7 @@ typedef struct Instruction
 
 } Instruction;
 
-typedef enum InstrDecErr
+typedef enum InstrEncDecErr
 {
 
     INSTR_UNKNOWN,
@@ -46,11 +47,7 @@ typedef enum InstrDecErr
     INSTR_NOT_EXIST,
     INSTR_OK,
 
-} InstrDecErr;
-
-typedef InstrDecErr (*DecFunc)(Instruction *, FILE *);
-typedef size_t (*EncFunc)(Instruction *, FILE *, bool);
-typedef int (*RunFunc)(CPU *, Instruction *);
+} InstrEncDecErr;
 
 typedef struct ArgSet
 {
@@ -64,42 +61,16 @@ typedef const char *InstructionName;
 struct InstructionMeta
 {
     InstructionName Name;
-    uint8_t OpCode;
+    InstrOpCode OpCode;
     ArgSet ArgSets[8];
-    EncFunc encFunc;
-    DecFunc decFunc;
-    RunFunc runFunc;
 };
-
-typedef enum InstrOpCode
-{
-    RET = 0,
-    LD,
-    ST,
-    MOV,
-    PUSH,
-    POP,
-    ADD,
-    ADDF,
-    SUB,
-    SUBF,
-    MUL,
-    MULF,
-    DIV,
-    DIVF,
-    JMP,
-    CALL,
-    CMP,
-    HALT,
-
-} InstrOpCode;
 
 extern const InstructionMeta instructions[];
 
-InstrDecErr NewInstruction(InstructionName name, Instruction *instr, size_t *sz);
+InstrEncDecErr NewInstruction(InstructionName name, Instruction *instr);
 
-InstrDecErr Decode(Instruction *ins, FILE *r);
+const InstructionMeta *FindInsMetaByOpCode(InstrOpCode opCode);
 
-int Encode(Instruction *ins, FILE *w);
+const InstructionMeta *FindInsMetaByName(InstructionName name);
 
 #endif

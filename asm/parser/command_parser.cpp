@@ -2,6 +2,7 @@
 #include <string.h>
 #include <math.h>
 #include "../../vm/instructions/registers/registers.hpp"
+#include "../../vm/instructions/encode.hpp"
 #include "command_parser.hpp"
 #include "labels.hpp"
 #include "utils.hpp"
@@ -278,8 +279,7 @@ static asm_ecode parseInstrPostfix(parser_s *parser, commandNode *node)
 static asm_ecode createInstruction(parser_s *parser, commandNode *node)
 {
 
-    size_t sz = 0;
-    InstrDecErr err = NewInstruction(node->name, &node->instr, &sz);
+    InstrEncDecErr err = NewInstruction(node->name, &node->instr);
     if (err == INSTR_UNKNOWN)
     {
         printf("asm: unknown mnemonic: %s; line: %zu\n", node->name, node->line);
@@ -291,7 +291,7 @@ static asm_ecode createInstruction(parser_s *parser, commandNode *node)
         return E_ASM_ERR;
     }
 
-    parser->currSection->currOffset += sz;
+    parser->currSection->currOffset += EvalInstrSize(&node->instr);
 
     return E_ASM_OK;
 }

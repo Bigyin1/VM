@@ -64,7 +64,7 @@ static int readFromAddr(CPU *cpu, size_t addr, void *val, DataSize sz)
     return 0;
 }
 
-int runRET(CPU *cpu, Instruction *ins)
+static int run_ret(CPU *cpu, Instruction *ins)
 {
     assert(cpu != NULL);
     assert(ins != NULL);
@@ -144,7 +144,7 @@ static uint64_t signExtendValue(uint64_t val, DataSize sz)
     return val;
 }
 
-int runLD(CPU *cpu, Instruction *ins)
+static int run_ld(CPU *cpu, Instruction *ins)
 {
     assert(cpu != NULL);
     assert(ins != NULL);
@@ -153,28 +153,28 @@ int runLD(CPU *cpu, Instruction *ins)
 
     uint64_t val = 0;
 
-    if (readFromAddr(cpu, addr, &val, (DataSize)ins->DataSz) < 0)
+    if (readFromAddr(cpu, addr, &val, ins->DataSz) < 0)
         return -1;
 
-    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, (DataSize)ins->DataSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, ins->DataSz) : val;
 
     return 0;
 }
 
-int runST(CPU *cpu, Instruction *ins)
+static int run_st(CPU *cpu, Instruction *ins)
 {
     assert(cpu != NULL);
     assert(ins != NULL);
 
     size_t addr = getEffectiveAddress(cpu, &ins->Arg2);
 
-    if (writeToAddr(cpu, addr, cpu->gpRegs[ins->Arg1.RegNum], (DataSize)ins->DataSz) < 0)
+    if (writeToAddr(cpu, addr, cpu->gpRegs[ins->Arg1.RegNum], ins->DataSz) < 0)
         return -1;
 
     return 0;
 }
 
-int runMOV(CPU *cpu, Instruction *ins)
+static int run_mov(CPU *cpu, Instruction *ins)
 {
     assert(cpu != NULL);
     assert(ins != NULL);
@@ -185,12 +185,12 @@ int runMOV(CPU *cpu, Instruction *ins)
     else
         val = cpu->gpRegs[ins->Arg2.RegNum];
 
-    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, (DataSize)ins->Arg2._immArgSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, ins->Arg2._immArgSz) : val;
 
     return 0;
 }
 
-int runPUSH(CPU *cpu, Instruction *ins)
+static int run_push(CPU *cpu, Instruction *ins)
 {
     assert(cpu != NULL);
     assert(ins != NULL);
@@ -203,7 +203,7 @@ int runPUSH(CPU *cpu, Instruction *ins)
     else
         val = cpu->gpRegs[ins->Arg1.RegNum];
 
-    if (writeToAddr(cpu, addr, val, (DataSize)ins->DataSz) < 0)
+    if (writeToAddr(cpu, addr, val, ins->DataSz) < 0)
         return -1;
 
     switch (ins->DataSz)
@@ -228,7 +228,7 @@ int runPUSH(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runPOP(CPU *cpu, Instruction *ins)
+static int run_pop(CPU *cpu, Instruction *ins)
 {
     assert(cpu != NULL);
     assert(ins != NULL);
@@ -256,15 +256,15 @@ int runPOP(CPU *cpu, Instruction *ins)
 
     uint64_t val = 0;
 
-    if (readFromAddr(cpu, addr, &val, (DataSize)ins->DataSz) < 0)
+    if (readFromAddr(cpu, addr, &val, ins->DataSz) < 0)
         return -1;
 
-    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, (DataSize)ins->DataSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, ins->DataSz) : val;
 
     return 0;
 }
 
-int runADD(CPU *cpu, Instruction *ins)
+static int run_add(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
@@ -281,7 +281,7 @@ int runADD(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runADDF(CPU *cpu, Instruction *ins)
+static int run_addf(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
@@ -303,7 +303,7 @@ int runADDF(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runSUB(CPU *cpu, Instruction *ins)
+static int run_sub(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
@@ -326,7 +326,7 @@ int runSUB(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runSUBF(CPU *cpu, Instruction *ins)
+static int run_subf(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
@@ -348,7 +348,7 @@ int runSUBF(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runMUL(CPU *cpu, Instruction *ins)
+static int run_mul(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
@@ -365,7 +365,7 @@ int runMUL(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runMULF(CPU *cpu, Instruction *ins)
+static int run_mulf(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
@@ -387,7 +387,7 @@ int runMULF(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runDIV(CPU *cpu, Instruction *ins)
+static int run_div(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
@@ -404,7 +404,7 @@ int runDIV(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runDIVF(CPU *cpu, Instruction *ins)
+static int run_divf(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
@@ -426,7 +426,7 @@ int runDIVF(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runJMP(CPU *cpu, Instruction *ins)
+static int run_jmp(CPU *cpu, Instruction *ins)
 {
 
     JumpType jmpType = ins->JmpType;
@@ -471,7 +471,7 @@ int runJMP(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runCALL(CPU *cpu, Instruction *ins)
+static int run_call(CPU *cpu, Instruction *ins)
 {
     size_t addr = 0;
 
@@ -488,7 +488,7 @@ int runCALL(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runCMP(CPU *cpu, Instruction *ins)
+static int run_cmp(CPU *cpu, Instruction *ins)
 {
 
     uint64_t val = 0;
@@ -508,7 +508,7 @@ int runCMP(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-int runHALT(CPU *cpu, Instruction *ins)
+static int run_halt(CPU *cpu, Instruction *ins)
 {
     assert(cpu != NULL);
     assert(ins != NULL);
@@ -516,4 +516,30 @@ int runHALT(CPU *cpu, Instruction *ins)
     cpu->running = false;
 
     return 0;
+}
+
+typedef int (*RunFunc)(CPU *, Instruction *);
+
+static RunFunc getRunFunc(InstrOpCode opCode)
+{
+    switch (opCode)
+    {
+
+#define INSTR(name, opCode, ...) \
+    case opCode:                 \
+        return run_##name;
+
+#include "instructionsMeta.inc"
+
+#undef INSTR
+
+    default:
+        break;
+    }
+}
+
+int Run(CPU *cpu, Instruction *ins)
+{
+
+    return getRunFunc(ins->im->OpCode)(cpu, ins);
 }

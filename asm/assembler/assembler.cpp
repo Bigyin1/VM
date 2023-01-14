@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "../errors.hpp"
-#include "../../vm/instructions/instructions.hpp"
+#include "../../vm/instructions/encode.hpp"
 #include "assembler.hpp"
 
 static e_asm_codes writeHeader(size_t codeSz, FILE *out)
@@ -20,7 +20,7 @@ static e_asm_codes writeCode(commandNode *commands, FILE *out)
 
     for (size_t i = 0; commands[i].name != NULL; i++)
     {
-        Encode(&commands[i].instr, out);
+        Encode(&commands[i].instr, out); // TODO: handle errors
     }
 
     return E_ASM_OK;

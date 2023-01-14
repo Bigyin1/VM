@@ -3,19 +3,20 @@
 #include <string.h>
 #include "../asm/assemble.hpp"
 #include "../vm/instructions/instructions.hpp"
+#include "../vm/instructions/decode.hpp"
 #include "../asm/assembler/assembler.hpp"
 
 Instruction testIns[] = {
 
     {
-        .im = &instructions[RET],
+        .im = &instructions[ins_ret],
         .Arg1 = {.Type = ArgNone},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
     },
 
     {
-        .im = &instructions[LD],
+        .im = &instructions[ins_ld],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgImmIndirect, .Imm = 123},
         .ArgSetIdx = 2,
@@ -24,13 +25,13 @@ Instruction testIns[] = {
     },
 
     {
-        .im = &instructions[LD],
+        .im = &instructions[ins_ld],
         .Arg1 = {.Type = ArgRegister, .RegNum = 1},
         .Arg2 = {.Type = ArgImmIndirect, .Imm = 1},
         .ArgSetIdx = 2,
     },
     {
-        .im = &instructions[ST],
+        .im = &instructions[ins_st],
         .Arg1 = {.Type = ArgRegister, .RegNum = 2},
         .Arg2 = {
             .Type = ArgRegisterOffsetIndirect,
@@ -40,67 +41,67 @@ Instruction testIns[] = {
         .ArgSetIdx = 1,
     },
     {
-        .im = &instructions[ST],
+        .im = &instructions[ins_st],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgRegisterIndirect, .RegNum = 2},
         .ArgSetIdx = 0,
         .DataSz = DataDByte,
     },
     {
-        .im = &instructions[MOV],
+        .im = &instructions[ins_mov],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgImm, .Imm = (uint64_t)-1, ._immArgSz = DataByte},
         .ArgSetIdx = 1,
     },
     {
-        .im = &instructions[MOV],
+        .im = &instructions[ins_mov],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgImm, .Imm = (uint64_t)-1, ._immArgSz = DataByte},
         .ArgSetIdx = 1,
         .SignExtend = 1,
     },
     {
-        .im = &instructions[MOV],
+        .im = &instructions[ins_mov],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgRegister, .RegNum = 1},
         .ArgSetIdx = 0,
     },
     {
-        .im = &instructions[MOV],
+        .im = &instructions[ins_mov],
         .Arg1 = {.Type = ArgRegister, .RegNum = 1},
         .Arg2 = {.Type = ArgImm, .Imm = 256, ._immArgSz = DataDByte},
         .ArgSetIdx = 1,
     },
     {
-        .im = &instructions[MOV],
+        .im = &instructions[ins_mov],
         .Arg1 = {.Type = ArgRegister, .RegNum = 2},
         .Arg2 = {.Type = ArgImm, .Imm = 4659770375504729735U, ._immArgSz = DataWord},
         .ArgSetIdx = 1,
     },
 
     {
-        .im = &instructions[PUSH],
+        .im = &instructions[ins_push],
         .Arg1 = {.Type = ArgImm, .Imm = 13876515361109783347U, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 1,
         .DataSz = DataWord,
     },
     {
-        .im = &instructions[PUSH],
+        .im = &instructions[ins_push],
         .Arg1 = {.Type = ArgRegister, .RegNum = 1},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .DataSz = DataWord,
     },
     {
-        .im = &instructions[PUSH],
+        .im = &instructions[ins_push],
         .Arg1 = {.Type = ArgImm, .Imm = 128, ._immArgSz = DataByte},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 1,
         .DataSz = DataByte,
     },
     {
-        .im = &instructions[POP],
+        .im = &instructions[ins_pop],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
@@ -108,32 +109,32 @@ Instruction testIns[] = {
     },
 
     {
-        .im = &instructions[ADD],
+        .im = &instructions[ins_add],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgRegister, .RegNum = 1},
         .ArgSetIdx = 0,
     },
 
     {
-        .im = &instructions[MUL],
+        .im = &instructions[ins_mul],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgImm, .Imm = 3, ._immArgSz = DataByte},
         .ArgSetIdx = 1,
     },
     {
-        .im = &instructions[MULF],
+        .im = &instructions[ins_mulf],
         .Arg1 = {.Type = ArgRegister, .RegNum = 1},
         .Arg2 = {.Type = ArgImm, .Imm = 4653142004841054208, ._immArgSz = DataWord},
         .ArgSetIdx = 1,
     },
     {
-        .im = &instructions[DIVF],
+        .im = &instructions[ins_divf],
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgImm, .Imm = 4611686018427387904, ._immArgSz = DataWord},
         .ArgSetIdx = 1,
     },
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
@@ -141,7 +142,7 @@ Instruction testIns[] = {
     },
 
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 1, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
@@ -149,56 +150,56 @@ Instruction testIns[] = {
     },
 
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 11, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 21, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpEQ,
     },
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 26, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 29, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 32, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 35, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 37, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
-        .im = &instructions[JMP],
+        .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 41, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
@@ -390,7 +391,7 @@ int main()
     }
 
     Instruction instr = {0};
-    InstrDecErr err = INSTR_OK;
+    InstrEncDecErr err = INSTR_OK;
 
     size_t i = 0;
     while (!feof(f))

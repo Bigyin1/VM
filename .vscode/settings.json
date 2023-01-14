@@ -17,6 +17,7 @@
         "cstdio": "cpp",
         "string": "cpp",
         "__config": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "*.inc": "cpp"
     }
 }

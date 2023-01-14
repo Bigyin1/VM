@@ -60,8 +60,6 @@ static bool checkSectNameToken(tokenizer_s *t)
 
     int wordLen = 0;
 
-    short colon = 0;
-
     if (sscanf(t->input, ".%"
                          "24"
                          "[a-zA-Z]%n",
@@ -75,8 +73,28 @@ static bool checkSectNameToken(tokenizer_s *t)
     return true;
 }
 
+static bool checkHexNum(tokenizer_s *t)
+{
+
+    int wordLen = 0;
+
+    if (sscanf(t->input, "0x"
+                         "%llx%n",
+               &t->currToken->numVal, &wordLen) == 0)
+        return false;
+
+    t->currToken->type = ASM_T_UNSIGNED_INT;
+
+    t->column += wordLen;
+    t->input += wordLen;
+    return true;
+}
+
 static bool checkNumberToken(tokenizer_s *t)
 {
+
+    if (checkHexNum(t))
+        return true;
 
     int numLen = 0;
     sscanf(t->input, "%*[0-9.+-]%n", &numLen);

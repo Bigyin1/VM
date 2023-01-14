@@ -1,17 +1,18 @@
 
-.data 4096 # load address
+#.data 4096 # load address
 
-hello:
-db 'H', 'e', 'l', 'l', 'o',
-    ' ', 'W' , 'o', 'r', 'l', 'd', '\@'
+#hello:
+#db 'H', 'e', 'l', 'l', 'o',
+   # ' ', 'W' , 'o', 'r', 'l', 'd', 0
+    
 
-array1:
-ddb 12, 13
+#array1:
+#ddb 12, 13
 
-array2:
-dhw 454545, 56566
+#array2:
+#dhw 454545, 56566
 
-dw :array1, :array2
+#dw :array1, :array2
 
 
 

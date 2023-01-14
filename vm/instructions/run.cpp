@@ -525,8 +525,8 @@ static RunFunc getRunFunc(InstrOpCode opCode)
     switch (opCode)
     {
 
-#define INSTR(name, opCode, ...) \
-    case opCode:                 \
+#define INSTR(name, opCode, argSets) \
+    case opCode:                     \
         return run_##name;
 
 #include "instructionsMeta.inc"

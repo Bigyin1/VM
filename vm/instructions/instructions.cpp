@@ -8,16 +8,19 @@
 
 const InstructionMeta instructions[] = {
 
-#define INSTR(name, opCode, ...)       \
+#define COMMA ,
+
+#define INSTR(name, opCode, argSets)   \
     {                                  \
         .Name = #name,                 \
         .OpCode = InstrOpCode(opCode), \
-        .ArgSets = __VA_ARGS__,        \
+        .ArgSets = argSets,            \
     },
 
 #include "instructionsMeta.inc"
 
 #undef INSTR
+#undef COMMA
 
 };
 

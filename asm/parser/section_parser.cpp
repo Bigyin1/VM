@@ -56,6 +56,9 @@ asm_ecode parseSectionNode(parser_s *parser, sectionNode *sectNode)
         if (currTokenType(parser) == ASM_T_EOF)
             break;
 
+        if (currTokenType(parser) == ASM_T_SECTION_NAME)
+            break;
+
         if (reallocCommands(sectNode) < 0)
             return E_ASM_ERR;
     }

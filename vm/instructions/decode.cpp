@@ -291,8 +291,8 @@ DecFunc getDecoder(InstrOpCode opCode)
     switch (opCode)
     {
 
-#define INSTR(name, opCode, ...) \
-    case opCode:                 \
+#define INSTR(name, opCode, argSets) \
+    case opCode:                     \
         return decode_##name;
 
 #include "instructionsMeta.inc"

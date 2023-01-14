@@ -232,8 +232,8 @@ static EncFunc getEncFunc(InstrOpCode opCode)
     switch (opCode)
     {
 
-#define INSTR(name, opCode, ...) \
-    case opCode:                 \
+#define INSTR(name, opCode, argSets) \
+    case opCode:                     \
         return encode_##name;
 
 #include "instructionsMeta.inc"

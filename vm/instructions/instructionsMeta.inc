@@ -1,138 +1,119 @@
 
 
-
 #ifndef INSTR
 
-#error "No INSTR macros"
+#error "No INSTR macro"
 
 #endif
 
 INSTR(ret, 0,
       {
-          {.First = ArgNone, .Second = ArgNone},
-      }
-)
+          {.First = ArgNone COMMA .Second = ArgNone} COMMA
+      })
 
 INSTR(ld, 1,
-        {
-          {.First = ArgRegister, .Second = ArgRegisterIndirect},
-          {.First = ArgRegister, .Second = ArgRegisterOffsetIndirect},
-          {.First = ArgRegister, .Second = ArgImmIndirect},
-          {.First = ArgRegister, .Second = ArgImmOffsetIndirect},
-        }
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImmIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImmOffsetIndirect} COMMA
+      }
 )
 
 INSTR(st, 2,
       {
-          {.First = ArgRegister, .Second = ArgRegisterIndirect},
-          {.First = ArgRegister, .Second = ArgRegisterOffsetIndirect},
-          {.First = ArgRegister, .Second = ArgImmIndirect},
-          {.First = ArgRegister, .Second = ArgImmOffsetIndirect},
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImmIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImmOffsetIndirect} COMMA
       }
 
 )
 
 INSTR(mov, 3,
       {
-          {.First = ArgRegister, .Second = ArgRegister},
-          {.First = ArgRegister, .Second = ArgImm},
-      }
-)
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(push, 4,
       {
-          {.First = ArgRegister, .Second = ArgNone},
-          {.First = ArgImm, .Second = ArgNone},
-      }
-)
+          {.First = ArgRegister COMMA .Second = ArgNone} COMMA
+          {.First = ArgImm COMMA .Second = ArgNone} COMMA
+      })
 
 INSTR(pop, 5,
-        {
-            {.First = ArgRegister, .Second = ArgNone},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgNone} COMMA
+      })
 
 INSTR(add, 6,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(addf, 7,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(sub, 8,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(subf, 9,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(mul, 10,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(mulf, 11,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(div, 12,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(divf, 13,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(jmp, 14,
-        {
-            {.First = ArgImm, .Second = ArgNone},
-            {.First = ArgRegister, .Second = ArgNone},
-        }
-)
+      {
+          {.First = ArgImm COMMA .Second = ArgNone} COMMA
+          {.First = ArgRegister COMMA .Second = ArgNone} COMMA
+      })
 
 INSTR(call, 15,
-        {
-            {.First = ArgImm, .Second = ArgNone},
-            {.First = ArgRegister, .Second = ArgNone},
-        }
-)
+      {
+          {.First = ArgImm COMMA .Second = ArgNone} COMMA
+          {.First = ArgRegister COMMA .Second = ArgNone} COMMA
+      })
 
 INSTR(cmp, 16,
-        {
-            {.First = ArgRegister, .Second = ArgRegister},
-            {.First = ArgRegister, .Second = ArgImm},
-        }
-)
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+      })
 
 INSTR(halt, 17,
       {
-          {.First = ArgNone, .Second = ArgNone},
-      }
-)
-
-
+          {.First = ArgNone COMMA .Second = ArgNone} COMMA
+      })

@@ -18,6 +18,5 @@
         "string": "cpp",
         "__config": "cpp",
         "random": "cpp",
-        "*.inc": "cpp"
     }
 }

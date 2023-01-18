@@ -1,9 +1,9 @@
 #include <string.h>
 #include "utils.hpp"
 #include "assemble.hpp"
-#include "tokenizer/tokenizer.hpp"
-#include "parser/parser.hpp"
-#include "assembler/assembler.hpp"
+#include "tokenizer.hpp"
+#include "parser.hpp"
+#include "encoder.hpp"
 
 e_asm_codes assemble(FILE *in, FILE *out)
 {
@@ -30,8 +30,8 @@ e_asm_codes assemble(FILE *in, FILE *out)
     if (parseTokens(&parser) == E_ASM_ERR)
         return E_ASM_ERR;
 
-    assembler_s as = {.parser = &parser, .out = out};
-    if (assemble(&as) == E_ASM_ERR)
+    AsmEncoder as = {.parser = &parser, .out = out};
+    if (AsnEncode(&as) == E_ASM_ERR)
         return E_ASM_ERR;
 
     fclose(out);

@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include "argument.hpp"
 #include "opcodes.hpp"
-#include "../vm.hpp"
 
 typedef enum JumpType
 {
@@ -23,7 +22,23 @@ typedef enum JumpType
 
 } JumpType;
 
-typedef struct InstructionMeta InstructionMeta;
+typedef struct ArgSet
+{
+    ArgType First;
+    ArgType Second;
+
+} ArgSet;
+
+typedef const char *InstructionName;
+
+struct InstructionMeta
+{
+    InstructionName Name;
+    InstrOpCode OpCode;
+    ArgSet ArgSets[8];
+};
+
+extern const InstructionMeta instructions[];
 
 typedef struct Instruction
 {
@@ -48,24 +63,6 @@ typedef enum InstrEncDecErr
     INSTR_OK,
 
 } InstrEncDecErr;
-
-typedef struct ArgSet
-{
-    ArgType First;
-    ArgType Second;
-
-} ArgSet;
-
-typedef const char *InstructionName;
-
-struct InstructionMeta
-{
-    InstructionName Name;
-    InstrOpCode OpCode;
-    ArgSet ArgSets[8];
-};
-
-extern const InstructionMeta instructions[];
 
 InstrEncDecErr NewInstruction(InstructionName name, Instruction *instr);
 

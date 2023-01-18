@@ -27,4 +27,6 @@ typedef struct Device
 
 } Device;
 
+Device *FindDevice(Device *devices, size_t addr);
+
 #endif

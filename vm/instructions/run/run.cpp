@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include "instructions.hpp"
-#include "registers/registers.hpp"
+#include "registers.hpp"
 #include "run.hpp"
 
 static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
@@ -9,7 +9,7 @@ static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
 
     assert(cpu != NULL);
 
-    Device *dev = FindDevice(cpu, addr);
+    Device *dev = FindDevice(cpu->dev, addr);
     if (dev == NULL)
     {
         printf("vm: unmapped address: %zu\n", cpu->regIP);
@@ -39,7 +39,7 @@ static int readFromAddr(CPU *cpu, size_t addr, void *val, DataSize sz)
 
     assert(cpu != NULL);
 
-    Device *dev = FindDevice(cpu, addr);
+    Device *dev = FindDevice(cpu->dev, addr);
     if (dev == NULL)
     {
         printf("vm: unmapped address: %zu\n", cpu->regIP);
@@ -536,6 +536,8 @@ static RunFunc getRunFunc(InstrOpCode opCode)
     default:
         break;
     }
+
+    return NULL;
 }
 
 int Run(CPU *cpu, Instruction *ins)

@@ -2,9 +2,6 @@
 #include <string.h>
 #include <ctype.h>
 #include "instructions.hpp"
-#include "encode.hpp"
-#include "decode.hpp"
-#include "run.hpp"
 
 const InstructionMeta instructions[] = {
 

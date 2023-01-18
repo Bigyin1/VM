@@ -7,6 +7,14 @@
 
 static const char *spaces = " \t";
 
+typedef struct token_meta_s
+{
+
+    e_asm_token_type type;
+    const char *val;
+
+} token_meta_s;
+
 const token_meta_s generalTokens[] = {
     {ASM_T_L_PAREN, "["},
     {ASM_T_R_PAREN, "]"},

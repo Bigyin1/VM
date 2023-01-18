@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdint.h>
 #include "../errors.hpp"
-#include "../../vm/instructions/encode.hpp"
-#include "assembler.hpp"
+#include "encode.hpp"
+#include "encoder.hpp"
 
 static e_asm_codes writeHeader(size_t codeSz, FILE *out)
 {
@@ -26,7 +26,7 @@ static e_asm_codes writeCode(commandNode *commands, FILE *out)
     return E_ASM_OK;
 }
 
-asm_ecode assemble(assembler_s *as)
+asm_ecode AsnEncode(AsmEncoder *as)
 {
     assert(as != NULL);
 

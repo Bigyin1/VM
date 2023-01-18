@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <stdint.h>
 #include <stdio.h>
-#include "../instructions/instructions.hpp"
 
 typedef struct ROM
 {

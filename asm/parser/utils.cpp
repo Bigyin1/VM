@@ -1,7 +1,7 @@
 
 #include <assert.h>
 #include "utils.hpp"
-#include "../tokenizer/tokenizer.hpp"
+#include "tokenizer.hpp"
 #include "../errors.hpp"
 
 asm_ecode eatToken(parser_s *p, e_asm_token_type type)

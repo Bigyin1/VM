@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../asm/assemble.hpp"
-#include "../vm/instructions/instructions.hpp"
-#include "../vm/instructions/decode.hpp"
-#include "../asm/assembler/assembler.hpp"
+#include "assemble.hpp"
+#include "instructions.hpp"
+#include "encoder.hpp"
+#include "decode.hpp"
 
 Instruction testIns[] = {
 

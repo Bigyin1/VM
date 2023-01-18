@@ -1,20 +1,19 @@
 #include <stdlib.h>
 #include <assert.h>
-#include "../asm/assembler/assembler.hpp"
-#include "instructions/instructions.hpp"
-#include "instructions/run.hpp"
-#include "instructions/decode.hpp"
-#include "instructions/registers/registers.hpp"
-#include "devices/rom.hpp"
-#include "devices/ram.hpp"
-#include "devices/console.hpp"
+#include "instructions.hpp"
+#include "run.hpp"
+#include "decode.hpp"
+#include "registers.hpp"
+#include "rom.hpp"
+#include "ram.hpp"
+#include "console.hpp"
 #include "vm.hpp"
 
 static bool checkMagic(FILE *prog)
 {
     uint32_t magic = 0;
     fread(&magic, sizeof(magic), 1, prog);
-    if (magic != magicHeader)
+    if (magic != 0xFAAFAAAF) /// TODO
     {
         printf("bad magic number in header\n");
         fclose(prog);
@@ -121,7 +120,7 @@ void DestructVM(CPU *cpu)
 
 static int execNextInstruction(CPU *cpu)
 {
-    Device *dev = FindDevice(cpu, cpu->regIP);
+    Device *dev = FindDevice(cpu->dev, cpu->regIP);
     if (dev == NULL)
     {
         printf("vm: unmapped address: %zu\n", cpu->regIP);
@@ -184,7 +183,7 @@ void RunVM(CPU *cpu)
         if (execNextInstruction(cpu) < 0)
             return;
 
-        for (size_t i = 0; i < SecondaryDevicesCount; i++)
+        for (size_t i = 0; i < MaxDevices; i++)
         {
             cpu->dev[i].tick(cpu->dev[i].concreteDevice);
         }

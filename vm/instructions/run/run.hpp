@@ -3,7 +3,7 @@
 #define CPU_INS_RUN_HPP
 
 #include "instructions.hpp"
-#include "../vm.hpp"
+#include "cpu.hpp"
 
 int Run(CPU *cpu, Instruction *ins);
 

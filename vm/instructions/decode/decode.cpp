@@ -302,6 +302,8 @@ DecFunc getDecoder(InstrOpCode opCode)
     default:
         break;
     }
+
+    return NULL;
 }
 
 static const uint8_t opCodeMask = 0b00011111;

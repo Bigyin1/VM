@@ -3,9 +3,9 @@
 #define ASM_PARSER_HPP
 
 #include <stddef.h>
-#include "../errors.hpp"
-#include "../tokenizer/tokenizer.hpp"
-#include "../../vm/instructions/instructions.hpp"
+#include "../../errors.hpp"
+#include "tokenizer.hpp"
+#include "instructions.hpp"
 
 typedef struct labelData
 {

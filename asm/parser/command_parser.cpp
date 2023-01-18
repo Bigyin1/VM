@@ -1,8 +1,8 @@
 #include <assert.h>
 #include <string.h>
 #include <math.h>
-#include "../../vm/instructions/registers/registers.hpp"
-#include "../../vm/instructions/encode.hpp"
+#include "registers.hpp"
+#include "encode.hpp"
 #include "command_parser.hpp"
 #include "labels.hpp"
 #include "utils.hpp"

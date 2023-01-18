@@ -1,24 +1,17 @@
 #include <assert.h>
-#include "../vm.hpp"
 #include "device.hpp"
 
-Device *FindDevice(CPU *cpu, size_t addr)
+Device *FindDevice(Device *devices, size_t addr)
 {
-    assert(cpu != NULL);
+    assert(devices != NULL);
 
-    if (cpu->ram.lowAddr <= addr && cpu->ram.highAddr >= addr)
-        return &cpu->ram;
-
-    if (cpu->rom.lowAddr <= addr && cpu->rom.highAddr >= addr)
-        return &cpu->rom;
-
-    for (size_t i = 0; i < SecondaryDevicesCount; i++)
+    for (size_t i = 0; devices[i].name; i++)
     {
-        if (cpu->dev[i].concreteDevice == NULL)
+        if (devices[i].concreteDevice == NULL)
             continue;
 
-        if (cpu->dev[i].lowAddr <= addr && cpu->dev[i].highAddr >= addr)
-            return &cpu->dev[i];
+        if (devices[i].lowAddr <= addr && devices[i].highAddr >= addr)
+            return &devices[i];
     }
 
     return NULL;

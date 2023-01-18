@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "instructions/instructions.hpp"
 #include "vm.hpp"
 
 int main(int argc, char **argv)

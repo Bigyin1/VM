@@ -1,76 +1,63 @@
+#include <string.h>
 #include "console.hpp"
+#include "argument.hpp"
 
 const size_t doubleMemAddr = 0;
 const size_t intMemAddr = 8;
 const size_t charMemAddr = 16;
 
-int ConstructMajesticConsole(MajesticConsole *con)
+int ConstructMajesticConsole(MajesticConsole *)
 {
-
-    con->reader = fmemopen(con->mem, sizeof(con->mem), "r");
-    con->writer = fmemopen(con->mem, sizeof(con->mem), "wb");
-
-    setvbuf(con->writer, NULL, _IONBF, 0);
 
     return 0;
 }
 
-void DestructMajesticConsole(MajesticConsole *con)
+void DestructMajesticConsole(MajesticConsole *)
 {
 
-    fclose(con->reader);
-    fclose(con->writer);
+    return;
 }
 
-FILE *MajesticConsoleGetReaderOnAddr(void *con, size_t addr)
+int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
 {
-    MajesticConsole *console = (MajesticConsole *)con;
+
+    // MajesticConsole *console = (MajesticConsole *)dev;
 
     if (addr == doubleMemAddr)
-        scanf("%lf", console->mem + doubleMemAddr);
+        scanf("%lf", data);
     else if (addr == intMemAddr)
-        scanf("%ld", console->mem + intMemAddr);
+        scanf("%ld", data);
     else if (addr == charMemAddr)
-        scanf("%c", console->mem + charMemAddr);
+        scanf("%c", data);
     else
-        return NULL;
+        return -1;
 
-    fseek(console->reader, addr, SEEK_SET);
-
-    return console->reader;
+    return 0;
 }
 
-FILE *MajesticConsoleGetWriterOnAddr(void *con, size_t addr)
+int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize)
 {
 
-    MajesticConsole *console = (MajesticConsole *)con;
+    // MajesticConsole *console = (MajesticConsole *)dev;
 
-    if (addr != doubleMemAddr && addr != intMemAddr && addr != charMemAddr)
-        return NULL;
+    if (addr == doubleMemAddr)
+    {
+        double d = 0;
+        memcpy(&d, &data, sizeof(double));
+        printf("%lf", d);
+    }
+    else if (addr == intMemAddr)
+        printf("%ld", data);
+    else if (addr == charMemAddr)
+        printf("%c", data);
+    else
+        return -1;
 
-    fseek(console->writer, addr, SEEK_SET);
-
-    console->_write = true;
-    console->_writeIdx = addr;
-
-    return console->writer;
+    return 0;
 }
 
-void MajesticConsoleTicker(void *con)
+void MajesticConsoleTicker(void *)
 {
-    MajesticConsole *console = (MajesticConsole *)con;
 
-    if (!console->_write)
-        return;
-
-    if (console->_writeIdx == doubleMemAddr)
-        printf("%lf", *(double *)(console->mem + doubleMemAddr));
-    else if (console->_writeIdx == intMemAddr)
-        printf("%lld", *(int64_t *)(console->mem + intMemAddr));
-    else if (console->_writeIdx == charMemAddr)
-        printf("%c", *(console->mem + charMemAddr));
-    else
-        return;
-
-    console->_write = false;
+    return; // TODO
 }

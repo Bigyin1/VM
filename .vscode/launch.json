@@ -12,10 +12,12 @@
                 "./testdata/out"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/asm",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "externalTerminal",
-            "MIMode": "lldb",
+            "osx": {
+                "MIMode": "lldb"
+            },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -33,13 +35,13 @@
             "args": [
                 "./testdata/out"
             ],
-            "internalConsoleOptions": "openOnSessionStart",
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/asm",
+            "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
             "osx": {
-                "MIMode": "lldb"
+                "externalConsole": true,
+                "MIMode": "lldb",
+                "internalConsoleOptions": "openOnSessionStart",
             },
             "setupCommands": [
                 {
@@ -57,7 +59,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/tests",
+            "cwd": "${command:cmake.launchTargetDirectory}",
             "environment": [],
             "console": "externalTerminal",
             "osx": {

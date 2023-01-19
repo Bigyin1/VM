@@ -5,15 +5,11 @@
 #include <cstddef>
 #include <stdint.h>
 #include <stdio.h>
+#include "argument.hpp"
 
 typedef struct MajesticConsole
 {
     char mem[sizeof(double) + sizeof(int64_t) + sizeof(char)];
-    bool _write;
-    size_t _writeIdx;
-
-    FILE *reader;
-    FILE *writer;
 
 } MajesticConsole;
 
@@ -21,9 +17,9 @@ int ConstructMajesticConsole(MajesticConsole *con);
 
 void DestructMajesticConsole(MajesticConsole *con);
 
-FILE *MajesticConsoleGetReaderOnAddr(void *con, size_t addr);
+int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz);
 
-FILE *MajesticConsoleGetWriterOnAddr(void *con, size_t addr);
+int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz);
 
 void MajesticConsoleTicker(void *con);
 

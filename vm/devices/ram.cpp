@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "ram.hpp"
 
 int ConstructRAM(RAM *ram, size_t sz)
@@ -12,9 +13,7 @@ int ConstructRAM(RAM *ram, size_t sz)
         return -1;
     }
     ram->reader = fmemopen(ram->mem, ram->sz, "r");
-    ram->writer = fmemopen(ram->mem, ram->sz, "wb");
 
-    setvbuf(ram->writer, NULL, _IONBF, 0);
     return 0;
 }
 
@@ -22,14 +21,13 @@ void DestructRAM(RAM *ram)
 {
 
     fclose(ram->reader);
-    fclose(ram->writer);
 
     free(ram->mem);
 }
 
-FILE *RAMGetReaderOnAddr(void *ramP, size_t addr)
+FILE *RAMGetReaderOnAddr(void *dev, size_t addr)
 {
-    RAM *ram = (RAM *)ramP;
+    RAM *ram = (RAM *)dev;
     if (addr >= ram->sz)
         return NULL;
 
@@ -38,13 +36,29 @@ FILE *RAMGetReaderOnAddr(void *ramP, size_t addr)
     return ram->reader;
 }
 
-FILE *RAMGetWriterOnAddr(void *ramP, size_t addr)
+int RAMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
 {
-    RAM *ram = (RAM *)ramP;
-    if (addr >= ram->sz)
-        return NULL;
+    RAM *ram = (RAM *)dev;
 
-    fseek(ram->writer, addr, SEEK_SET);
+    size_t toRead = DataSzToBytesSz(sz);
+    if (addr + toRead > ram->sz)
+        return -1;
 
-    return ram->writer;
+    memcpy(data, ram->mem, toRead);
+
+    return 0;
+}
+
+int RAMWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz)
+{
+
+    RAM *ram = (RAM *)dev;
+
+    size_t toRead = DataSzToBytesSz(sz);
+    if (addr + toRead > ram->sz)
+        return -1;
+
+    memcpy(ram->mem, &data, toRead);
+
+    return 0;
 }

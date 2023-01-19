@@ -13,10 +13,7 @@ typedef struct CPU
     int8_t statusReg;
     uint64_t gpRegs[16];
 
-    Device rom;
-    Device ram;
-
-    Device dev[MaxDevices]; // address space
+    Device devices[MaxDevices]; // address space
 
     bool running;
 } CPU;

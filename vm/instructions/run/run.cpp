@@ -9,55 +9,40 @@ static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
 
     assert(cpu != NULL);
 
-    Device *dev = FindDevice(cpu->dev, addr);
+    Device *dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
         printf("vm: unmapped address: %zu\n", cpu->regIP);
         return -1;
     }
 
-    FILE *writer = dev->getWriter(dev->concreteDevice, addr - dev->lowAddr);
-    if (writer == NULL)
+    int res = dev->writeTo(dev->concreteDevice, addr - dev->lowAddr, val, sz);
+    if (res < 0)
     {
         printf("vm: device %s unable to serve write request at address: %zu\n",
                dev->name, cpu->regIP - dev->lowAddr);
         return -1;
     }
-
-    if (fwrite(&val, DataSzToBytesSz(sz), 1, writer) == 0)
-    {
-        printf("vm: failed to write %d byte(s) at address %zu(device: %s)\n",
-               DataSzToBytesSz(sz), addr, dev->name);
-        return -1;
-    }
-
     return 0;
 }
 
-static int readFromAddr(CPU *cpu, size_t addr, void *val, DataSize sz)
+static int readFromAddr(CPU *cpu, size_t addr, uint64_t *val, DataSize sz)
 {
 
     assert(cpu != NULL);
 
-    Device *dev = FindDevice(cpu->dev, addr);
+    Device *dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
         printf("vm: unmapped address: %zu\n", cpu->regIP);
         return -1;
     }
 
-    FILE *reader = dev->getReader(dev->concreteDevice, addr - dev->lowAddr);
-    if (reader == NULL)
+    int res = dev->readFrom(dev->concreteDevice, addr - dev->lowAddr, val, sz);
+    if (res < 0)
     {
         printf("vm: device %s unable to serve read request at address: %zu\n",
                dev->name, cpu->regIP - dev->lowAddr);
-        return -1;
-    }
-
-    if (fread(val, DataSzToBytesSz(sz), 1, reader) == 0)
-    {
-        printf("vm: failed to read %d byte(s) from address %zu(device: %s)\n",
-               DataSzToBytesSz(sz), addr, dev->name);
         return -1;
     }
 

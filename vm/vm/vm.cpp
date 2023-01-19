@@ -9,6 +9,12 @@
 #include "console.hpp"
 #include "vm.hpp"
 
+static size_t romDevIdx = 0;
+static size_t ramDevIdx = 1;
+static size_t consoleDevIdx = 2;
+
+#define DEVICE(idx) cpu->devices[idx]
+
 static bool checkMagic(FILE *prog)
 {
     uint32_t magic = 0;
@@ -25,17 +31,18 @@ static bool checkMagic(FILE *prog)
 static int attachROM(CPU *cpu, size_t addr, size_t sz)
 {
 
-    cpu->rom.lowAddr = addr;
-    cpu->rom.highAddr = cpu->rom.lowAddr + sz - 1;
+    DEVICE(romDevIdx).lowAddr = addr;
+    DEVICE(romDevIdx).highAddr = DEVICE(romDevIdx).lowAddr + sz - 1;
 
-    cpu->rom.name = "ROM";
+    DEVICE(romDevIdx).name = "ROM";
 
-    cpu->rom.getReader = ROMGetReaderOnAddr;
-    cpu->rom.getWriter = ROMGetWriterOnAddr;
+    DEVICE(romDevIdx).getReader = ROMGetReaderOnAddr;
+    DEVICE(romDevIdx).readFrom = ROMReadFrom;
+    DEVICE(romDevIdx).writeTo = ROMWriteTo;
 
-    cpu->rom.concreteDevice = calloc(1, sizeof(ROM));
+    DEVICE(romDevIdx).concreteDevice = calloc(1, sizeof(ROM));
 
-    if (ConstructROM((ROM *)cpu->rom.concreteDevice, sz) < 0)
+    if (ConstructROM((ROM *)DEVICE(romDevIdx).concreteDevice, sz) < 0)
         return -1;
 
     return 0;
@@ -44,17 +51,18 @@ static int attachROM(CPU *cpu, size_t addr, size_t sz)
 static int attachRAM(CPU *cpu, size_t addr, size_t sz)
 {
 
-    cpu->ram.lowAddr = addr;
-    cpu->ram.highAddr = cpu->ram.lowAddr + sz - 1;
+    DEVICE(ramDevIdx).lowAddr = addr;
+    DEVICE(ramDevIdx).highAddr = DEVICE(ramDevIdx).lowAddr + sz - 1;
 
-    cpu->ram.name = "RAM";
+    DEVICE(ramDevIdx).name = "RAM";
 
-    cpu->ram.getReader = RAMGetReaderOnAddr;
-    cpu->ram.getWriter = RAMGetWriterOnAddr;
+    DEVICE(ramDevIdx).getReader = RAMGetReaderOnAddr;
+    DEVICE(ramDevIdx).readFrom = RAMReadFrom;
+    DEVICE(ramDevIdx).writeTo = RAMWriteTo;
 
-    cpu->ram.concreteDevice = calloc(1, sizeof(RAM));
+    DEVICE(ramDevIdx).concreteDevice = calloc(1, sizeof(RAM));
 
-    if (ConstructRAM((RAM *)cpu->ram.concreteDevice, sz) < 0)
+    if (ConstructRAM((RAM *)DEVICE(ramDevIdx).concreteDevice, sz) < 0)
         return -1;
 
     return 0;
@@ -63,18 +71,18 @@ static int attachRAM(CPU *cpu, size_t addr, size_t sz)
 static int attachConsole(CPU *cpu, size_t addr)
 {
 
-    cpu->dev[0].lowAddr = addr;
-    cpu->dev[0].highAddr = cpu->dev[0].lowAddr + sizeof(double) + sizeof(int64_t) + sizeof(char) - 1;
+    DEVICE(consoleDevIdx).lowAddr = addr;
+    DEVICE(consoleDevIdx).highAddr = DEVICE(consoleDevIdx).lowAddr + sizeof(double) + sizeof(int64_t) + sizeof(char) - 1;
 
-    cpu->dev[0].name = "Majestic Console";
+    DEVICE(consoleDevIdx).name = "Majestic Console";
 
-    cpu->dev[0].getReader = MajesticConsoleGetReaderOnAddr;
-    cpu->dev[0].getWriter = MajesticConsoleGetWriterOnAddr;
-    cpu->dev[0].tick = MajesticConsoleTicker;
+    DEVICE(consoleDevIdx).readFrom = MajesticConsoleReadFrom;
+    DEVICE(consoleDevIdx).writeTo = MajesticConsoleWriteTo;
+    DEVICE(consoleDevIdx).tick = MajesticConsoleTicker;
 
-    cpu->dev[0].concreteDevice = calloc(1, sizeof(MajesticConsole));
+    DEVICE(consoleDevIdx).concreteDevice = calloc(1, sizeof(MajesticConsole));
 
-    if (ConstructMajesticConsole((MajesticConsole *)cpu->dev[0].concreteDevice) < 0)
+    if (ConstructMajesticConsole((MajesticConsole *)DEVICE(consoleDevIdx).concreteDevice) < 0)
         return -1;
 
     return 0;
@@ -96,10 +104,10 @@ int InitVM(CPU *cpu, FILE *prog)
     if (attachConsole(cpu, 10000) < 0)
         return -1;
 
-    cpu->regIP = cpu->rom.lowAddr;
-    cpu->gpRegs[RSP] = cpu->ram.lowAddr; // SP
+    cpu->regIP = DEVICE(romDevIdx).lowAddr;
+    cpu->gpRegs[RSP] = DEVICE(ramDevIdx).lowAddr; // SP
 
-    if (LoadCode((ROM *)cpu->rom.concreteDevice, prog) < -1)
+    if (LoadCode((ROM *)DEVICE(romDevIdx).concreteDevice, prog) < -1)
         return -1;
 
     return 0;
@@ -109,27 +117,27 @@ void DestructVM(CPU *cpu)
 {
     assert(cpu != NULL);
 
-    DestructRAM((RAM *)cpu->ram.concreteDevice);
-    DestructROM((ROM *)cpu->rom.concreteDevice);
-    DestructMajesticConsole((MajesticConsole *)cpu->dev[0].concreteDevice);
+    DestructRAM((RAM *)DEVICE(ramDevIdx).concreteDevice);
+    DestructROM((ROM *)DEVICE(romDevIdx).concreteDevice);
+    DestructMajesticConsole((MajesticConsole *)DEVICE(consoleDevIdx).concreteDevice);
 
-    free(cpu->ram.concreteDevice);
-    free(cpu->rom.concreteDevice);
-    free(cpu->dev[0].concreteDevice);
+    free(DEVICE(ramDevIdx).concreteDevice);
+    free(DEVICE(romDevIdx).concreteDevice);
+    free(DEVICE(consoleDevIdx).concreteDevice);
 }
 
 static int execNextInstruction(CPU *cpu)
 {
-    Device *dev = FindDevice(cpu->dev, cpu->regIP);
+    Device *dev = FindDevice(cpu->devices, cpu->regIP);
     if (dev == NULL)
     {
         printf("vm: unmapped address: %zu\n", cpu->regIP);
         return -1;
     }
 
-    if (dev != &cpu->ram && dev != &cpu->rom)
+    if (dev->getReader == NULL)
     {
-        printf("vm: trying to execute instruction from %s\n", dev->name);
+        printf("vm: device %s unable to execute code\n");
         return -1;
     }
 
@@ -173,8 +181,6 @@ static int execNextInstruction(CPU *cpu)
 void RunVM(CPU *cpu)
 {
     assert(cpu != NULL);
-    assert(cpu->ram.concreteDevice != NULL);
-    assert(cpu->rom.concreteDevice != NULL);
 
     cpu->running = true;
 
@@ -183,9 +189,11 @@ void RunVM(CPU *cpu)
         if (execNextInstruction(cpu) < 0)
             return;
 
-        for (size_t i = 0; i < MaxDevices; i++)
+        for (size_t i = 0; cpu->devices[i].name; i++)
         {
-            cpu->dev[i].tick(cpu->dev[i].concreteDevice);
+            if (cpu->devices[i].tick == NULL)
+                continue;
+            cpu->devices[i].tick(cpu->devices[i].concreteDevice);
         }
     }
 }

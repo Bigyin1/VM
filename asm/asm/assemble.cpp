@@ -14,7 +14,6 @@ e_asm_codes assemble(FILE *in, FILE *out)
         perror("asm:");
         return E_ASM_ERR;
     }
-    fclose(in);
 
     tokenizer_s tokenizer = {0};
     if (tokenizerInit(&tokenizer, text) == E_ASM_ERR)

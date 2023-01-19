@@ -5,9 +5,7 @@
 #include <cstddef>
 #include <stdint.h>
 #include <stdio.h>
-
-typedef FILE *(*ReaderFunc)(void *dev, size_t addr);
-typedef FILE *(*WriterFunc)(void *dev, size_t addr);
+#include "argument.hpp"
 
 typedef void (*DevTickFunc)(void *dev);
 
@@ -20,8 +18,11 @@ typedef struct Device
 
     void *concreteDevice;
 
-    ReaderFunc getReader;
-    WriterFunc getWriter;
+    FILE *(*getReader)(void *dev, size_t addr);
+
+    int (*readFrom)(void *dev, size_t addr, uint64_t *data, DataSize sz);
+
+    int (*writeTo)(void *dev, size_t addr, uint64_t data, DataSize sz);
 
     DevTickFunc tick;
 

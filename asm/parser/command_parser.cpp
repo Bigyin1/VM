@@ -312,8 +312,8 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
     assert(node != NULL);
 
     char *name = currTokenVal(parser);
-
     node->offset = parser->currSection->currOffset;
+
     if (currTokenType(parser) == ASM_T_LABEL)
     {
         node->label = name;
@@ -336,7 +336,11 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
     if (eatToken(parser, ASM_T_ID) != PARSER_OK)
         return PARSER_BAD_COMMAND;
 
-    ParserErrCode err = parseDataDefDirective(parser, node);
+    ParserErrCode err = parseControlDirective(parser, node);
+    if (err != PARSER_INSUFF_TOKEN)
+        return err;
+
+    err = parseDataDefDirective(parser, node);
     if (err != PARSER_INSUFF_TOKEN)
         return err;
 

@@ -17,4 +17,14 @@ void eatUntillNL(Parser *p);
 
 DataSize evalImmMinDataSz(uint64_t val, TokenType type);
 
+#define currTokenType(p) (p)->toks->currToken->type
+
+#define currTokenVal(p) (p)->toks->currToken->val
+
+#define currTokenNumVal(p) (p)->toks->currToken->numVal
+
+#define currTokenLine(p) (p)->toks->currToken->line
+
+#define currTokenColumn(p) (p)->toks->currToken->column
+
 #endif

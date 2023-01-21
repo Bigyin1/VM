@@ -59,7 +59,7 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *n
 
     if (*sz == 0)
     {
-        ParserError *err = addNewParserError(parser, PARSER_BAD_CMD_POSTFIX);
+        ParserError *err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
 
         err->token = currTokenVal(parser);
         err->line = currTokenLine(parser);
@@ -125,6 +125,47 @@ ParserErrCode parseDataDefDirective(Parser *parser, commandNode *node)
     {
         if (strcmp(dataDirectives[i].name, node->name) == 0)
             return parseDataDefDirectiveArgs(parser, node, DataSzToBytesSz(dataDirectives[i].sz));
+    }
+
+    return PARSER_INSUFF_TOKEN;
+}
+
+ParserErrCode parseControlDirective(Parser *parser, commandNode *node)
+{
+
+    if (strcmp("equ", node->name) == 0)
+    {
+
+        eatSP(parser);
+
+        const char *symb = currTokenVal(parser);
+        if (eatToken(parser, ASM_T_LABEL) != PARSER_OK)
+            return PARSER_COMMAND_INV_ARGS;
+
+        eatSP(parser);
+
+        if (currTokenType(parser) == ASM_T_FLOAT ||
+            currTokenType(parser) == ASM_T_UNSIGNED_INT ||
+            currTokenType(parser) == ASM_T_SIGNED_INT)
+        {
+
+            if (defineNewLabel(parser, symb, currTokenNumVal(parser)) == PARSER_LABEL_REDEF)
+            {
+                ParserError *err = addNewParserError(parser, PARSER_LABEL_REDEF);
+
+                err->token = node->label;
+                err->line = currTokenLine(parser);
+            }
+            eatToken(parser, currTokenType(parser));
+
+            node->Type = CMD_CONTROL;
+            return PARSER_OK;
+        }
+        else
+        {
+            eatToken(parser, ASM_T_UNSIGNED_INT);
+            return PARSER_COMMAND_INV_ARGS;
+        }
     }
 
     return PARSER_INSUFF_TOKEN;

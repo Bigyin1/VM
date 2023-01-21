@@ -13,7 +13,7 @@ typedef enum CmdType
 
     CMD_INSTR,
     CMD_DATA_DEF,
-    // CMD_EQU,
+    CMD_CONTROL,
 
 } CmdType;
 
@@ -59,16 +59,6 @@ typedef struct Parser
 
     ParserError *err;
 } Parser;
-
-#define currTokenType(p) (p)->toks->currToken->type
-
-#define currTokenVal(p) (p)->toks->currToken->val
-
-#define currTokenNumVal(p) (p)->toks->currToken->numVal
-
-#define currTokenLine(p) (p)->toks->currToken->line
-
-#define currTokenColumn(p) (p)->toks->currToken->column
 
 ParserErrCode parseTokens(Parser *p);
 

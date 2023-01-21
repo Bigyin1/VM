@@ -17,6 +17,8 @@ dw :array1, :array2
 
 
 
+equ :consoleCharOut 10016
+
 .text 0
 
 main:
@@ -27,7 +29,7 @@ print:
 ld(b) r1, [r0]
 cmp r1, 0
 jmp(eq) :next
-st(b) r1, [10016]
+st(b) r1, [:consoleCharOut]
 add r0, 1
 jmp :print
 
@@ -38,7 +40,7 @@ next:
 
 
 mov r1, 32
-st(b) r1, [10016]
+st(b) r1, [:consoleCharOut]
 
 mov r1, 1000
 st r1, [10008]

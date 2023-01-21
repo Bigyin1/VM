@@ -14,6 +14,9 @@ int ConstructRAM(RAM *ram, size_t sz)
     }
     ram->reader = fmemopen(ram->mem, ram->sz, "r");
 
+    ram->writer = fmemopen(ram->mem, ram->sz, "w");
+    setvbuf(ram->writer, NULL, _IONBF, 0);
+
     return 0;
 }
 
@@ -21,6 +24,7 @@ void DestructRAM(RAM *ram)
 {
 
     fclose(ram->reader);
+    fclose(ram->writer);
 
     free(ram->mem);
 }
@@ -36,6 +40,17 @@ FILE *RAMGetReaderOnAddr(void *dev, size_t addr)
     return ram->reader;
 }
 
+FILE *RAMGetWriterOnAddr(void *dev, size_t addr)
+{
+    RAM *ram = (RAM *)dev;
+    if (addr >= ram->sz)
+        return NULL;
+
+    fseek(ram->writer, addr, SEEK_SET);
+
+    return ram->writer;
+}
+
 int RAMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
 {
     RAM *ram = (RAM *)dev;
@@ -44,7 +59,7 @@ int RAMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
     if (addr + toRead > ram->sz)
         return -1;
 
-    memcpy(data, ram->mem, toRead);
+    memcpy(data, ram->mem + addr, toRead);
 
     return 0;
 }

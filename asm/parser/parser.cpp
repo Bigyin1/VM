@@ -81,6 +81,10 @@ void parserFree(Parser *p)
     {
         sectionNode *currSect = p->sections + i;
 
+        for (size_t j = 0; j < currSect->commandsSz; j++)
+            if (currSect->commands[j].dataSz > 0)
+                free(currSect->commands[j].data);
+
         free(currSect->commands);
     }
 

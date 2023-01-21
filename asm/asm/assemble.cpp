@@ -49,8 +49,8 @@ int assemble(FILE *in, FILE *out)
     }
 
     AsmEncoder as = {.parser = &parser, .out = out};
-    if (Encode(&as) == E_ASM_ERR)
-        return E_ASM_ERR;
+    if (GenObjectFile(&as) < 0)
+        return -1;
 
     fclose(out);
 

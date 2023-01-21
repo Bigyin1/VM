@@ -12,6 +12,10 @@ int ConstructROM(ROM *rom, size_t sz)
         return -1;
     }
     rom->reader = fmemopen(rom->mem, rom->sz, "r");
+    rom->writer = fmemopen(rom->mem, rom->sz, "w");
+
+    setvbuf(rom->writer, NULL, _IONBF, 0);
+
     return 0;
 }
 
@@ -19,6 +23,7 @@ void DestructROM(ROM *rom)
 {
 
     fclose(rom->reader);
+    fclose(rom->writer);
 
     free(rom->mem);
 }
@@ -34,6 +39,17 @@ FILE *ROMGetReaderOnAddr(void *dev, size_t addr)
     return rom->reader;
 }
 
+FILE *ROMGetWriterOnAddr(void *dev, size_t addr)
+{
+    ROM *rom = (ROM *)dev;
+    if (addr >= rom->sz)
+        return NULL;
+
+    fseek(rom->writer, addr, SEEK_SET);
+
+    return rom->writer;
+}
+
 int ROMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
 {
     ROM *ram = (ROM *)dev;
@@ -42,7 +58,7 @@ int ROMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
     if (addr + toRead > ram->sz)
         return -1;
 
-    memcpy(data, ram->mem, toRead);
+    memcpy(data, ram->mem + addr, toRead);
 
     return 0;
 }

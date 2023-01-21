@@ -1,25 +1,40 @@
 
-#.data 4096 # load address
+.data 4096 # load address
 
 
-#hello:
-#db 'H', 'e', 'l', 'l', 'o',
-   # ' ', 'W' , 'o', 'r', 'l', 'd', 0
+hello:
+db 'H', 'e', 'l', 'l', 'o',
+    ' ', 'W' , 'o', 'r', 'l', 'd','\J', 0
     
 
-#array1:
-#ddb 12, 13
+array1:
+ddb 12, 13
 
-#array2:
-#dhw 454545, 56566
+array2:
+dhw 454545, 56566
 
-#dw :array1, :array2
+dw :array1, :array2
 
 
 
 .text 0
-ld r2, [10000]
-st r2, [10000]
+
+main:
+
+mov r0, :hello
+
+print:
+ld(b) r1, [r0]
+cmp r1, 0
+jmp(eq) :next
+st(b) r1, [10016]
+add r0, 1
+jmp :print
+
+
+next:
+#ld r2, [10000]
+#st r2, [10000]
 
 
 mov r1, 32

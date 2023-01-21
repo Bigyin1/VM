@@ -9,30 +9,6 @@
 #include "directives.hpp"
 #include "errors.hpp"
 
-static DataSize evalImmMinDataSz(u_int64_t val, TokenType type)
-{
-    if (type == ASM_T_UNSIGNED_INT)
-    {
-        uint64_t uVal = val;
-        if (uVal <= UINT8_MAX)
-            return DataByte;
-        if (uVal <= UINT16_MAX)
-            return DataDByte;
-        if (uVal <= UINT32_MAX)
-            return DataHalfWord;
-        return DataWord;
-    }
-    int64_t sVal = val;
-
-    if (sVal <= INT8_MAX && sVal >= INT8_MIN)
-        return DataByte;
-    if (sVal <= INT16_MAX && sVal >= INT16_MIN)
-        return DataDByte;
-    if (sVal <= INT32_MAX && sVal >= INT32_MIN)
-        return DataHalfWord;
-    return DataWord;
-}
-
 static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argument *arg)
 {
     assert(parser != NULL);
@@ -306,8 +282,8 @@ static ParserErrCode parseInstrPostfix(Parser *parser, commandNode *node)
 static ParserErrCode createInstruction(Parser *parser, commandNode *node)
 {
 
-    InstrEncDecErr err = NewInstruction(node->name, &node->instr);
-    if (err == INSTR_UNKNOWN)
+    InstrEncDecErr instrErr = NewInstruction(node->name, &node->instr);
+    if (instrErr == INSTR_UNKNOWN)
     {
 
         ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_COMMAND);
@@ -316,7 +292,7 @@ static ParserErrCode createInstruction(Parser *parser, commandNode *node)
         err->line = node->line;
         return PARSER_OK;
     }
-    if (err == INSTR_WRONG_OPERANDS)
+    if (instrErr == INSTR_WRONG_OPERANDS)
     {
         ParserError *err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
 
@@ -342,7 +318,7 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
     {
         node->label = name;
 
-        if (defineNewLabel(parser, node->label, parser->currSection->addr + node->offset) < 0)
+        if (defineNewLabel(parser, node->label, parser->currSection->addr + node->offset) == PARSER_LABEL_REDEF)
         {
             ParserError *err = addNewParserError(parser, PARSER_LABEL_REDEF);
 
@@ -364,6 +340,8 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
     if (err != PARSER_INSUFF_TOKEN)
         return err;
 
+    node->Type = CMD_INSTR;
+
     if (currTokenType(parser) == ASM_T_L_SIMP_PAREN)
     {
         eatToken(parser, ASM_T_L_SIMP_PAREN);
@@ -378,7 +356,9 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
 
     eatSP(parser);
 
-    parseCommandArg(parser, node, &node->instr.Arg1);
+    err = parseCommandArg(parser, node, &node->instr.Arg1);
+    if (err != PARSER_OK)
+        return err;
 
     eatSP(parser);
 
@@ -387,7 +367,9 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
         eatToken(parser, ASM_T_COMMA);
         eatSP(parser);
 
-        parseCommandArg(parser, node, &node->instr.Arg2);
+        err = parseCommandArg(parser, node, &node->instr.Arg2);
+        if (err != PARSER_OK)
+            return err;
     }
 
     return createInstruction(parser, node);

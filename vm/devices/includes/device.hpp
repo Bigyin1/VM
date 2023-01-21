@@ -20,11 +20,13 @@ typedef struct Device
 
     FILE *(*getReader)(void *dev, size_t addr);
 
+    FILE *(*getWriter)(void *dev, size_t addr);
+
     int (*readFrom)(void *dev, size_t addr, uint64_t *data, DataSize sz);
 
     int (*writeTo)(void *dev, size_t addr, uint64_t data, DataSize sz);
 
-    DevTickFunc tick;
+    DevTickFunc tick; // TODO
 
 } Device;
 

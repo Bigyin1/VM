@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "binformat.hpp"
 #include "assemble.hpp"
 #include "instructions.hpp"
-#include "encoder.hpp"
 #include "decode.hpp"
 
 Instruction testIns[] = {
@@ -344,27 +344,50 @@ static bool instrEq(Instruction *ins1, Instruction *ins2)
     return true;
 }
 
-static FILE *checkMagic(char buf[1024])
+static FILE *getTextSectionData(char *buf, size_t sz)
 {
 
-    FILE *f = fmemopen(buf, 1024, "r");
+    FILE *f = fmemopen(buf, sz, "r");
 
-    uint32_t magic = 0;
-    fread(&magic, sizeof(magic), 1, f);
-    if (magic != magicHeader)
+    BinformatHeader hdr = {0};
+
+    if (getObjFileHeader(f, &hdr) < 0)
+    {
+        perror("getTextSectionData: ");
+        fclose(f);
+        return NULL;
+    }
+
+    if (hdr.magic != magicHeader)
     {
         printf("bad magic number in header\n");
         fclose(f);
         return NULL;
     }
 
-    size_t codeSz = 0;
-    fread(&codeSz, sizeof(codeSz), 1, f);
+    if (hdr.sectionsCount != 2)
+    {
+        printf("insufficient test code format\n");
+        fclose(f);
+        return NULL;
+    }
+    printf("%zu\n", sizeof(BinformatHeader) + sizeof(SectionHeader) + sizeof(SectionHeader));
+
+    SectionHeader *sectHdrs = getSectionHeaders(f, hdr.sectionsCount);
+    if (sectHdrs == NULL)
+    {
+        perror("getTextSectionData: ");
+        fclose(f);
+        return NULL;
+    }
+
+    SectionHeader *textSect = sectHdrs + 0;
+
+    free(sectHdrs);
     fclose(f);
 
-    f = fmemopen(buf, sizeof(magicHeader) + sizeof(codeSz) + codeSz, "r");
+    f = fmemopen(buf + textSect->offset, textSect->size, "r");
 
-    fseek(f, sizeof(magicHeader) + sizeof(codeSz), SEEK_SET);
     return f;
 }
 
@@ -374,17 +397,17 @@ int main()
     if (in == NULL)
         return 1;
 
-    char buf[1024] = {0};
+    char buf[2048] = {0};
 
     FILE *out = fmemopen(buf, sizeof(buf), "wb");
     if (out == NULL)
         return 1;
 
-    if (assemble(in, out) == E_ASM_ERR)
+    if (assemble(in, out) < 0)
         return 1;
 
     FILE *f = NULL;
-    if ((f = checkMagic(buf)) == NULL)
+    if ((f = getTextSectionData(buf, sizeof(buf))) == NULL)
     {
         printf("FAILED\n");
         return 1;

@@ -14,8 +14,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "console": "externalTerminal",
             "osx": {
+                "console": "externalTerminal",
                 "MIMode": "lldb"
             },
             "setupCommands": [
@@ -61,8 +61,8 @@
             "stopAtEntry": false,
             "cwd": "${command:cmake.launchTargetDirectory}",
             "environment": [],
-            "console": "externalTerminal",
             "osx": {
+                "console": "externalTerminal",
                 "MIMode": "lldb"
             },
             "setupCommands": [

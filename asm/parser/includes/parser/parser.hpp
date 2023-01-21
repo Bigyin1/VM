@@ -3,21 +3,10 @@
 #define ASM_PARSER_HPP
 
 #include <stddef.h>
+#include "symtab.hpp"
 #include "tokenizer/tokenizer.hpp"
 #include "parser/errors.hpp"
 #include "instructions.hpp"
-
-typedef struct labelData
-{
-    const char *label;
-    uint64_t val;
-
-    uint64_t *imports[16];
-    size_t importsSz;
-
-    bool present;
-
-} labelData;
 
 typedef enum CmdType
 {
@@ -64,8 +53,7 @@ typedef struct Parser
 
     sectionNode *currSection;
 
-    labelData labels[64];
-    size_t labelsSz;
+    symbolTable symTab;
 
     Tokenizer *toks;
 

@@ -1,6 +1,6 @@
 
 .text 0
-ins_1:
+main:
 ret
 
 ins_2:
@@ -46,7 +46,7 @@ mulf r1, 1234.0
 divf r0, 2.00
 
 
-jmp(neq) :ins_1
+jmp(neq) :main
 jmp :ins_2
 jmp :ins_3
 jmp(eq) :ins_4

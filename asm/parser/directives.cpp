@@ -112,6 +112,9 @@ static ParserErrCode parseDataDefDirectiveArgs(Parser *parser, commandNode *node
         eatBlanks(parser);
     }
 
+    node->Type = CMD_DATA_DEF;
+    parser->currSection->currOffset += node->dataSz;
+
     return PARSER_OK;
 }
 

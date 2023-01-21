@@ -13,6 +13,7 @@ typedef struct RAM
     size_t sz;
 
     FILE *reader;
+    FILE *writer;
 
 } RAM;
 
@@ -25,5 +26,7 @@ int RAMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz);
 int RAMWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz);
 
 FILE *RAMGetReaderOnAddr(void *ram, size_t addr);
+
+FILE *RAMGetWriterOnAddr(void *ram, size_t addr);
 
 #endif

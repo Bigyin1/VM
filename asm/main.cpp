@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     if (in == NULL)
     {
         perror(argv[1]);
-        return NULL;
+        return 1;
     }
 
     FILE *out = fopen(argv[2], "w");

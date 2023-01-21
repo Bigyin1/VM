@@ -4,17 +4,16 @@
 
 #include <stdio.h>
 #include "parser/parser.hpp"
-#include "../../errors.hpp"
-
-const uint32_t magicHeader = 0xFAAFAAAF;
 
 typedef struct AsmEncoder
 {
     Parser *parser;
     FILE *out;
 
+    size_t offset;
+
 } AsmEncoder;
 
-asm_ecode Encode(AsmEncoder *as);
+int GenObjectFile(AsmEncoder *as);
 
 #endif

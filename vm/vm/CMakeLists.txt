@@ -1,7 +1,7 @@
-add_library(vm_lib vm.cpp)
+add_library(vm_lib vm.cpp loader.cpp init.cpp)
 
 target_link_libraries(vm_lib
-    PRIVATE instr_run instr_decode project_options project_warnings
+    PRIVATE binformat instr_run instr_decode project_options project_warnings
     PUBLIC cpu
 )
 

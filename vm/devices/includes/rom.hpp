@@ -13,6 +13,7 @@ typedef struct ROM
     size_t sz;
 
     FILE *reader;
+    FILE *writer;
 
 } ROM;
 
@@ -22,10 +23,10 @@ void DestructROM(ROM *rom);
 
 FILE *ROMGetReaderOnAddr(void *rom, size_t addr);
 
+FILE *ROMGetWriterOnAddr(void *rom, size_t addr);
+
 int ROMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz);
 
 int ROMWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz);
-
-int LoadCode(ROM *rom, FILE *in);
 
 #endif

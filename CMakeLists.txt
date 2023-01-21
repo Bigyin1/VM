@@ -29,6 +29,8 @@ target_compile_options(project_warnings INTERFACE
 	-Wvariadic-macros -Wno-literal-suffix -Wno-missing-field-initializers
 	-Wno-narrowing -Wno-old-style-cast -Wno-varargs -Wstack-protector)
 
+add_subdirectory(binformat)
+
 add_subdirectory(vm)
 
 add_subdirectory(asm)

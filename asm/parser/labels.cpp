@@ -5,69 +5,87 @@
 ParserErrCode defineNewLabel(Parser *p, const char *label, uint64_t val)
 {
 
-    for (size_t i = 0; i < p->labelsSz; i++)
+    for (size_t i = 0; i < p->symTab.symbolsSz; i++)
     {
-        if (strcmp(p->labels[i].label, label) == 0)
+        symbolData *sd = &p->symTab.symbols[i];
+        if (strcmp(sd->label, label) == 0)
         {
-            if (p->labels[i].present)
+            if (sd->present)
                 return PARSER_LABEL_REDEF;
 
-            p->labels[i].label = label;
-            p->labels[i].present = true;
-            p->labels[i].val = val;
+            sd->label = label;
+            sd->present = true;
+            sd->val = val;
 
             return PARSER_OK;
         }
     }
 
-    p->labels[p->labelsSz].label = label;
-    p->labels[p->labelsSz].present = true;
-    p->labels[p->labelsSz].val = val;
+    p->symTab.symbols[p->symTab.symbolsSz].label = label;
+    p->symTab.symbols[p->symTab.symbolsSz].present = true;
+    p->symTab.symbols[p->symTab.symbolsSz].val = val;
 
-    p->labelsSz++;
+    p->symTab.symbolsSz++;
     return PARSER_OK;
 }
 
 void addLabelImport(Parser *p, const char *label, uint64_t *v)
 {
 
-    for (size_t i = 0; i < p->labelsSz; i++)
+    for (size_t i = 0; i < p->symTab.symbolsSz; i++)
     {
-        if (strcmp(p->labels[i].label, label) == 0)
+        symbolData *sd = &p->symTab.symbols[i];
+        if (strcmp(sd->label, label) == 0)
         {
 
-            size_t impSz = p->labels[i].importsSz;
+            size_t impSz = sd->importsSz;
 
-            p->labels[i].imports[impSz] = v;
+            sd->imports[impSz] = v;
 
-            p->labels[i].importsSz++;
+            sd->importsSz++;
 
             return;
         }
     }
 
-    p->labels[p->labelsSz].label = label;
-    p->labels[p->labelsSz].imports[0] = v;
-    p->labels[p->labelsSz].importsSz++;
+    p->symTab.symbols[p->symTab.symbolsSz].label = label;
+    p->symTab.symbols[p->symTab.symbolsSz].imports[0] = v;
+    p->symTab.symbols[p->symTab.symbolsSz].importsSz++;
 
-    p->labelsSz++;
+    p->symTab.symbolsSz++;
 }
 
 ParserErrCode resolveImports(Parser *p)
 {
 
-    for (size_t i = 0; i < p->labelsSz; i++)
+    for (size_t i = 0; i < p->symTab.symbolsSz; i++)
     {
-        labelData *ld = &p->labels[i];
-        if (!ld->present)
+        symbolData *sd = &p->symTab.symbols[i];
+        if (!sd->present)
         {
             ParserError *err = addNewParserError(p, PARSER_LABEL_UNDEFIEND);
 
-            err->token = ld->label;
+            err->token = sd->label;
         }
 
-        for (size_t j = 0; j < ld->importsSz; j++)
-            *ld->imports[j] = ld->val;
+        for (size_t j = 0; j < sd->importsSz; j++)
+            *sd->imports[j] = sd->val;
     }
     return PARSER_OK;
+}
+
+const symbolData *findSymbolByName(symbolTable *symTab, const char *name)
+{
+
+    for (size_t i = 0; i < symTab->symbolsSz; i++)
+    {
+        symbolData *sd = &symTab->symbols[i];
+        if (!sd->present)
+            continue;
+
+        if (strcmp(sd->label, name) == 0)
+            return sd;
+    }
+
+    return NULL;
 }

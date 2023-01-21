@@ -30,11 +30,14 @@ enum TokenType
 
 };
 
-const size_t maxTokenValLen = 24;
+#define MAX_TOKEN_LEN 24
+
+#define STR(s) #s
+#define XSTR(s) STR(s)
 
 struct Token
 {
-    char val[maxTokenValLen + 1];
+    char val[MAX_TOKEN_LEN + 1];
     int64_t numVal;
 
     TokenType type;
@@ -48,6 +51,9 @@ typedef struct Token Token;
 struct Tokenizer
 {
     Token *tokens;
+    size_t tokensSz;
+    size_t tokensCap;
+
     Token *currToken;
 
     Token *saved;

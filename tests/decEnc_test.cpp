@@ -371,7 +371,6 @@ static FILE *getTextSectionData(char *buf, size_t sz)
         fclose(f);
         return NULL;
     }
-    printf("%zu\n", sizeof(BinformatHeader) + sizeof(SectionHeader) + sizeof(SectionHeader));
 
     SectionHeader *sectHdrs = getSectionHeaders(f, hdr.sectionsCount);
     if (sectHdrs == NULL)

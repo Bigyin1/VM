@@ -25,7 +25,10 @@ int main(int argc, char **argv)
     }
 
     if (assemble(in, out) < 0)
+    {
+        perror("asm: ");
         return 1;
+    }
 
     return 0;
 }

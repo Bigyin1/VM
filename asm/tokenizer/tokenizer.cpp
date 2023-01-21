@@ -47,13 +47,9 @@ static bool checkLabelToken(Tokenizer *t)
 
     short colon = 0;
 
-    if (sscanf(t->input, ":%"
-                         "24"
-                         "[a-zA-Z0-9_]%n",
+    if (sscanf(t->input, ":%" XSTR(MAX_TOKEN_LEN) "[a-zA-Z0-9_]%n",
                t->currToken->val, &wordLen) == 0 &&
-        sscanf(t->input, "%"
-                         "24"
-                         "[a-zA-Z0-9_]%1[:]%n",
+        sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[a-zA-Z0-9_]%1[:]%n",
                t->currToken->val, &colon, &wordLen) != 2)
         return false;
 
@@ -69,9 +65,7 @@ static bool checkSectNameToken(Tokenizer *t)
 
     int wordLen = 0;
 
-    if (sscanf(t->input, ".%"
-                         "24"
-                         "[a-zA-Z]%n",
+    if (sscanf(t->input, ".%" XSTR(MAX_TOKEN_LEN) "[a-zA-Z]%n",
                t->currToken->val, &wordLen) == 0)
         return false;
 
@@ -159,7 +153,7 @@ static bool checkIdToken(Tokenizer *t)
     if (wordLen == 0)
         return false;
 
-    sscanf(t->input, "%24[0-9a-zA-Z]", t->currToken->val);
+    sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[0-9a-zA-Z]", t->currToken->val);
     t->currToken->type = ASM_T_ID;
 
     t->column += wordLen;
@@ -215,16 +209,43 @@ static bool checkSimpleTokens(Tokenizer *t)
     return false;
 }
 
+static Token *reallocTokens(Tokenizer *t)
+{
+    if (t->tokensSz < t->tokensCap)
+    {
+        t->tokensSz++;
+        return t->tokens + t->tokensSz - 1;
+    }
+
+    size_t newCap = t->tokensCap * 2;
+    Token *newToks = (Token *)realloc(t->tokens, newCap * sizeof(Token));
+    if (newToks == NULL)
+        return NULL;
+
+    t->currToken = newToks + t->tokensCap;
+    memset(t->currToken, 0, sizeof(Token) * (newCap - t->tokensCap));
+    t->tokens = newToks;
+    t->tokensCap = newCap;
+
+    t->tokensSz++;
+    return t->tokens + t->tokensSz - 1;
+}
+
 int Tokenize(Tokenizer *t)
 {
 
     int err = 0;
     char *textStart = t->input;
 
-    t->currToken = t->tokens;
-
-    for (; *t->input != '\0'; t->currToken++)
+    for (; *t->input != '\0';)
     {
+        t->currToken = reallocTokens(t);
+        if (t->currToken == NULL)
+        {
+            free(textStart);
+            return -1;
+        }
+
         t->currToken->column = t->column;
         t->currToken->line = t->line;
 
@@ -260,8 +281,8 @@ int Tokenize(Tokenizer *t)
 
         if (addUnknownTokenError(t) < 0)
         {
-            err = -1;
-            break;
+            free(textStart);
+            return -1;
         }
     }
 
@@ -280,9 +301,12 @@ int tokenizerInit(Tokenizer *t, char *input)
     t->line = 1;
 
     t->currToken = NULL;
-    t->tokens = (Token *)calloc(1024, sizeof(Token)); // TODO: change to list
+    t->tokens = (Token *)calloc(128, sizeof(Token));
     if (t->tokens == NULL)
         return -1;
+
+    t->tokensCap = 128;
+    t->tokensSz = 0;
 
     return 0;
 }

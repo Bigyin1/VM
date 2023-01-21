@@ -191,24 +191,7 @@ static int run_push(CPU *cpu, Instruction *ins)
     if (writeToAddr(cpu, addr, val, ins->DataSz) < 0)
         return -1;
 
-    switch (ins->DataSz)
-    {
-    case DataWord:
-        cpu->gpRegs[RSP] += 8;
-        break;
-
-    case DataByte:
-        cpu->gpRegs[RSP] += 1;
-        break;
-
-    case DataDByte:
-        cpu->gpRegs[RSP] += 2;
-        break;
-
-    case DataHalfWord:
-        cpu->gpRegs[RSP] += 4;
-        break;
-    }
+    cpu->gpRegs[RSP] += DataSzToBytesSz(ins->DataSz);
 
     return 0;
 }
@@ -218,24 +201,7 @@ static int run_pop(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    switch (ins->DataSz)
-    {
-    case DataWord:
-        cpu->gpRegs[RSP] -= 8;
-        break;
-
-    case DataByte:
-        cpu->gpRegs[RSP] -= 1;
-        break;
-
-    case DataDByte:
-        cpu->gpRegs[RSP] -= 2;
-        break;
-
-    case DataHalfWord:
-        cpu->gpRegs[RSP] -= 4;
-        break;
-    }
+    cpu->gpRegs[RSP] -= DataSzToBytesSz(ins->DataSz);
 
     size_t addr = cpu->gpRegs[RSP];
 

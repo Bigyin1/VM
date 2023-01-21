@@ -9,7 +9,7 @@ int addUnknownTokenError(Tokenizer *t)
     if (newErr == NULL)
         return -1;
 
-    char *text = (char *)calloc(maxTokenValLen + 1, sizeof(char));
+    char *text = (char *)calloc(MAX_TOKEN_LEN + 1, sizeof(char));
     if (text == NULL)
     {
         free(newErr);
@@ -22,7 +22,8 @@ int addUnknownTokenError(Tokenizer *t)
     newErr->text = text;
 
     int wordLen = 0;
-    sscanf(t->input, "%24s%n", newErr->text, &wordLen);
+    sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "s%n",
+           newErr->text, &wordLen);
 
     t->input += wordLen;
     t->column += wordLen;

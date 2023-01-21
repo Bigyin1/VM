@@ -28,6 +28,34 @@ const RegMeta regs[] = {
         .RegCode = R5,
     },
     {
+        .Name = "r6",
+        .RegCode = R6,
+    },
+    {
+        .Name = "r7",
+        .RegCode = R7,
+    },
+    {
+        .Name = "r8",
+        .RegCode = R8,
+    },
+    {
+        .Name = "r9",
+        .RegCode = R9,
+    },
+    {
+        .Name = "r10",
+        .RegCode = R10,
+    },
+    {
+        .Name = "r11",
+        .RegCode = R11,
+    },
+    {
+        .Name = "r12",
+        .RegCode = R12,
+    },
+    {
         .Name = "rbp",
         .RegCode = RBP,
     },

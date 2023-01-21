@@ -26,7 +26,7 @@ static e_asm_codes writeCode(commandNode *commands, FILE *out)
     return E_ASM_OK;
 }
 
-asm_ecode AsnEncode(AsmEncoder *as)
+asm_ecode Encode(AsmEncoder *as)
 {
     assert(as != NULL);
 

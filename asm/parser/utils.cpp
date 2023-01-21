@@ -1,24 +1,29 @@
 
 #include <assert.h>
 #include "utils.hpp"
-#include "tokenizer.hpp"
-#include "../errors.hpp"
+#include "tokenizer/tokenizer.hpp"
+#include "errors.hpp"
 
-asm_ecode eatToken(parser_s *p, e_asm_token_type type)
+ParserErrCode eatToken(Parser *p, TokenType type)
 {
     assert(p != NULL);
 
     if (currTokenType(p) != type)
     {
-        printf(PARSE_ERROR, p->toks->currToken->line, p->toks->currToken->column);
-        return E_ASM_ERR;
+        ParserError *err = addNewParserError(p, PARSER_INSUFF_TOKEN);
+        err->got = currTokenType(p);
+        err->expected = type;
+        err->line = currTokenLine(p);
+        err->column = currTokenColumn(p);
+
+        return PARSER_INSUFF_TOKEN;
     }
 
     getNextToken(p->toks);
-    return E_ASM_OK;
+    return PARSER_OK;
 }
 
-void eatNL(parser_s *p)
+void eatNL(Parser *p)
 {
     assert(p != NULL);
 
@@ -28,7 +33,7 @@ void eatNL(parser_s *p)
     }
 }
 
-void eatSP(parser_s *p)
+void eatSP(Parser *p)
 {
     assert(p != NULL);
 
@@ -39,7 +44,7 @@ void eatSP(parser_s *p)
     }
 }
 
-void eatBlanks(parser_s *p)
+void eatBlanks(Parser *p)
 {
     assert(p != NULL);
 
@@ -49,4 +54,12 @@ void eatBlanks(parser_s *p)
     {
         getNextToken(p->toks);
     }
+}
+
+void eatUntillNL(Parser *p)
+{
+
+    assert(p != NULL);
+    while (currTokenType(p) != ASM_T_NL)
+        getNextToken(p->toks);
 }

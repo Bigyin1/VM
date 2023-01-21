@@ -5,9 +5,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
-#include "../../errors.hpp"
+#include "tokenizer/errors.hpp"
 
-enum e_asm_token_type
+enum TokenType
 {
     ASM_T_EOF,
     ASM_T_ID,
@@ -32,47 +32,51 @@ enum e_asm_token_type
 
 const size_t maxTokenValLen = 24;
 
-struct token_s
+struct Token
 {
     char val[maxTokenValLen + 1];
     int64_t numVal;
 
-    e_asm_token_type type;
+    TokenType type;
 
     size_t line;
     size_t column;
 };
 
-typedef struct token_s token_s;
+typedef struct Token Token;
 
-struct tokenizer_s
+struct Tokenizer
 {
-    token_s *tokens;
-    token_s *currToken;
+    Token *tokens;
+    Token *currToken;
 
-    token_s *saved;
+    Token *saved;
 
     char *input;
     size_t line;
     size_t column;
+
+    TokenizerError *err;
 };
 
-typedef struct tokenizer_s tokenizer_s;
+typedef struct Tokenizer Tokenizer;
 
-asm_ecode tokenizerInit(tokenizer_s *t, char *input);
+int tokenizerInit(Tokenizer *t, char *input);
 
-asm_ecode tokenize(tokenizer_s *t);
+int Tokenize(Tokenizer *t);
 
-token_s *getNextToken(tokenizer_s *t);
+Token *getNextToken(Tokenizer *t);
 
-token_s *peekNextToken(tokenizer_s *t);
+Token *peekNextToken(Tokenizer *t);
 
-token_s *saveCurrToken(tokenizer_s *t);
+Token *saveCurrToken(Tokenizer *t);
 
-token_s *restoreSavedToken(tokenizer_s *t);
+Token *restoreSavedToken(Tokenizer *t);
 
-void tokenizerFree(tokenizer_s *t);
+void tokenizerFree(Tokenizer *t);
 
-void tokenizerDump(tokenizer_s *t, FILE *out);
+void tokenizerDump(Tokenizer *t, FILE *out);
+
+const char *tokenTypeVerbose(TokenType t);
 
 #endif

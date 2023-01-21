@@ -1,7 +1,8 @@
 #include <string.h>
+#include "errors.hpp"
 #include "labels.hpp"
 
-int defineNewLabel(parser_s *p, const char *label, uint64_t val)
+ParserErrCode defineNewLabel(Parser *p, const char *label, uint64_t val)
 {
 
     for (size_t i = 0; i < p->labelsSz; i++)
@@ -9,13 +10,13 @@ int defineNewLabel(parser_s *p, const char *label, uint64_t val)
         if (strcmp(p->labels[i].label, label) == 0)
         {
             if (p->labels[i].present)
-                return -1;
+                return PARSER_LABEL_REDEF;
 
             p->labels[i].label = label;
             p->labels[i].present = true;
             p->labels[i].val = val;
 
-            return 0;
+            return PARSER_OK;
         }
     }
 
@@ -24,10 +25,10 @@ int defineNewLabel(parser_s *p, const char *label, uint64_t val)
     p->labels[p->labelsSz].val = val;
 
     p->labelsSz++;
-    return 0;
+    return PARSER_OK;
 }
 
-void addLabelImport(parser_s *p, const char *label, uint64_t *v)
+void addLabelImport(Parser *p, const char *label, uint64_t *v)
 {
 
     for (size_t i = 0; i < p->labelsSz; i++)
@@ -52,7 +53,7 @@ void addLabelImport(parser_s *p, const char *label, uint64_t *v)
     p->labelsSz++;
 }
 
-int resolveImports(parser_s *p)
+ParserErrCode resolveImports(Parser *p)
 {
 
     for (size_t i = 0; i < p->labelsSz; i++)
@@ -60,12 +61,13 @@ int resolveImports(parser_s *p)
         labelData *ld = &p->labels[i];
         if (!ld->present)
         {
-            printf("asm: label: %s is not definded\n", ld->label);
-            return -2;
+            ParserError *err = addNewParserError(p, PARSER_LABEL_UNDEFIEND);
+
+            err->token = ld->label;
         }
 
         for (size_t j = 0; j < ld->importsSz; j++)
             *ld->imports[j] = ld->val;
     }
-    return 0;
+    return PARSER_OK;
 }

@@ -5,6 +5,6 @@
 #include <stdio.h>
 #include "../../errors.hpp"
 
-e_asm_codes assemble(FILE *in, FILE *out);
+int assemble(FILE *in, FILE *out);
 
 #endif

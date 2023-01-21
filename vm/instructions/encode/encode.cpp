@@ -241,7 +241,7 @@ static EncFunc getEncFunc(InstrOpCode opCode)
 #undef INSTR
 
     default:
-        break;
+        return NULL;
     }
 }
 
@@ -258,5 +258,10 @@ int Encode(Instruction *ins, FILE *w)
 size_t EvalInstrSize(Instruction *ins)
 {
 
-    return getEncFunc(ins->im->OpCode)(ins, NULL, true);
+    EncFunc func = getEncFunc(ins->im->OpCode);
+
+    if (func)
+        return func(ins, NULL, true);
+
+    return 0;
 }

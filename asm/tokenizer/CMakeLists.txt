@@ -1,6 +1,6 @@
-add_library(asm_tokenizer tokenizer.cpp)
+add_library(asm_tokenizer tokenizer.cpp utils.cpp errors.cpp)
 
 target_link_libraries(asm_tokenizer
     PRIVATE project_options project_warnings)
 
-target_include_directories(asm_tokenizer PUBLIC includes)
+target_include_directories(asm_tokenizer PUBLIC includes PRIVATE .)

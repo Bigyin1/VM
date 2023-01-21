@@ -1,36 +1,55 @@
 #include <string.h>
 #include "utils.hpp"
 #include "assemble.hpp"
-#include "tokenizer.hpp"
-#include "parser.hpp"
+#include "tokenizer/tokenizer.hpp"
+#include "parser/parser.hpp"
 #include "encoder.hpp"
 
-e_asm_codes assemble(FILE *in, FILE *out)
+int assemble(FILE *in, FILE *out)
 {
 
     char *text = readFile(in);
     if (text == NULL)
+        return -1;
+
+    Tokenizer tokenizer = {0};
+    if (tokenizerInit(&tokenizer, text) < 0)
+        return -1;
+
+    if (Tokenize(&tokenizer) < 0)
+        return -1;
+
+    if (tokenizer.err != NULL)
     {
-        perror("asm:");
-        return E_ASM_ERR;
+        reportErrors(tokenizer.err, stderr);
+        tokenizerFree(&tokenizer);
+        return 0;
     }
 
-    tokenizer_s tokenizer = {0};
-    if (tokenizerInit(&tokenizer, text) == E_ASM_ERR)
-        return E_ASM_ERR;
+    Parser parser = {0};
+    if (initParser(&parser, &tokenizer) < 0)
+        return -1;
 
-    if (tokenize(&tokenizer) == E_ASM_ERR)
-        return E_ASM_ERR;
-
-    parser_s parser = {0};
-    if (initParser(&parser, &tokenizer) == E_ASM_ERR)
-        return E_ASM_ERR;
-
-    if (parseTokens(&parser) == E_ASM_ERR)
-        return E_ASM_ERR;
+    ParserErrCode err = parseTokens(&parser);
+    if (err == PARSER_SYSTEM_ERR)
+    {
+        perror("asm:");
+        if (parser.err != NULL)
+            reportParserErrors(parser.err, stderr);
+        tokenizerFree(&tokenizer);
+        parserFree(&parser);
+        return -1;
+    }
+    else if (parser.err != NULL)
+    {
+        reportParserErrors(parser.err, stderr);
+        tokenizerFree(&tokenizer);
+        parserFree(&parser);
+        return 0;
+    }
 
     AsmEncoder as = {.parser = &parser, .out = out};
-    if (AsnEncode(&as) == E_ASM_ERR)
+    if (Encode(&as) == E_ASM_ERR)
         return E_ASM_ERR;
 
     fclose(out);
@@ -38,5 +57,5 @@ e_asm_codes assemble(FILE *in, FILE *out)
     tokenizerFree(&tokenizer);
     parserFree(&parser);
 
-    return E_ASM_OK;
+    return 0;
 }

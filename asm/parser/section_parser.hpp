@@ -2,9 +2,8 @@
 #ifndef ASM_SECTION_PARSER_HPP
 #define ASM_SECTION_PARSER_HPP
 
-#include "../errors.hpp"
-#include "parser.hpp"
+#include "parser/parser.hpp"
 
-asm_ecode parseSectionNode(parser_s *parser, sectionNode *sectNode);
+ParserErrCode parseSectionNode(Parser *parser, sectionNode *sectNode);
 
 #endif

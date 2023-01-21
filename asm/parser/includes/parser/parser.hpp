@@ -3,8 +3,8 @@
 #define ASM_PARSER_HPP
 
 #include <stddef.h>
-#include "../../errors.hpp"
-#include "tokenizer.hpp"
+#include "tokenizer/tokenizer.hpp"
+#include "parser/errors.hpp"
 #include "instructions.hpp"
 
 typedef struct labelData
@@ -57,7 +57,7 @@ typedef struct sectionNode
 
 } sectionNode;
 
-typedef struct parser_s
+typedef struct Parser
 {
     sectionNode *sections;
     size_t sectionsSz;
@@ -67,8 +67,10 @@ typedef struct parser_s
     labelData labels[64];
     size_t labelsSz;
 
-    tokenizer_s *toks;
-} parser_s;
+    Tokenizer *toks;
+
+    ParserError *err;
+} Parser;
 
 #define currTokenType(p) (p)->toks->currToken->type
 
@@ -76,10 +78,14 @@ typedef struct parser_s
 
 #define currTokenNumVal(p) (p)->toks->currToken->numVal
 
-asm_ecode parseTokens(parser_s *p);
+#define currTokenLine(p) (p)->toks->currToken->line
 
-asm_ecode initParser(parser_s *p, tokenizer_s *toks);
+#define currTokenColumn(p) (p)->toks->currToken->column
 
-void parserFree(parser_s *p);
+ParserErrCode parseTokens(Parser *p);
+
+int initParser(Parser *p, Tokenizer *toks);
+
+void parserFree(Parser *p);
 
 #endif

@@ -2,15 +2,16 @@
 #ifndef ASM_PARSER_UTILS_HPP
 #define ASM_PARSER_UTILS_HPP
 
-#include "../errors.hpp"
-#include "parser.hpp"
+#include "parser/parser.hpp"
 
-asm_ecode eatToken (parser_s *p, e_asm_token_type type);
+ParserErrCode eatToken(Parser *p, TokenType type);
 
-void eatNL(parser_s *p);
+void eatNL(Parser *p);
 
-void eatSP(parser_s *p);
+void eatSP(Parser *p);
 
-void eatBlanks(parser_s *p);
+void eatBlanks(Parser *p);
+
+void eatUntillNL(Parser *p);
 
 #endif

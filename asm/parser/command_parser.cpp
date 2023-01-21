@@ -7,8 +7,9 @@
 #include "labels.hpp"
 #include "utils.hpp"
 #include "directives.hpp"
+#include "errors.hpp"
 
-static DataSize evalImmMinDataSz(u_int64_t val, e_asm_token_type type)
+static DataSize evalImmMinDataSz(u_int64_t val, TokenType type)
 {
     if (type == ASM_T_UNSIGNED_INT)
     {
@@ -32,7 +33,7 @@ static DataSize evalImmMinDataSz(u_int64_t val, e_asm_token_type type)
     return DataWord;
 }
 
-static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument *arg)
+static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argument *arg)
 {
     assert(parser != NULL);
     assert(node != NULL);
@@ -50,11 +51,11 @@ static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument 
             arg->Type = ArgImmOffsetIndirect;
 
             eatToken(parser, currTokenType(parser));
-            return E_ASM_OK;
+            return PARSER_OK;
         }
 
         arg->Type = ArgImmIndirect;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
     else if (currTokenType(parser) == ASM_T_UNSIGNED_INT)
     {
@@ -68,23 +69,32 @@ static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument 
             arg->Type = ArgImmOffsetIndirect;
 
             eatToken(parser, currTokenType(parser));
-            return E_ASM_OK;
+            return PARSER_OK;
         }
 
         arg->Type = ArgImmIndirect;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
     else
     {
-        int regNum = FindRegByName(currTokenVal(parser));
+        size_t line = currTokenLine(parser);
+        size_t column = currTokenColumn(parser);
+        const char *regVal = currTokenVal(parser);
+
+        if (eatToken(parser, ASM_T_ID) != PARSER_OK)
+            return PARSER_BAD_COMMAND;
+
+        int regNum = FindRegByName(regVal);
 
         if (regNum < 0)
         {
-            printf("asm: unknown register: %s, line: %zu\n", currTokenVal(parser), node->line);
-            return E_ASM_ERR;
+            ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_REGISTER);
+
+            err->token = regVal;
+            err->line = line;
+            err->column = column;
         }
         arg->RegNum = (uint8_t)regNum;
-        eatToken(parser, ASM_T_ID);
 
         if (currTokenType(parser) == ASM_T_SIGNED_INT ||
             currTokenType(parser) == ASM_T_UNSIGNED_INT) // [r0+128]
@@ -93,21 +103,21 @@ static asm_ecode parseIndirectArg(parser_s *parser, commandNode *node, Argument 
             arg->Type = ArgRegisterOffsetIndirect;
 
             eatToken(parser, currTokenType(parser));
-            return E_ASM_OK;
+            return PARSER_OK;
         }
 
         arg->Type = ArgRegisterIndirect;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 }
 
-static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *arg)
+static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument *arg)
 {
     assert(parser != NULL);
     assert(node != NULL);
 
     if (currTokenType(parser) == ASM_T_NL || currTokenType(parser) == ASM_T_EOF)
-        return E_ASM_OK;
+        return PARSER_OK;
 
     if (currTokenType(parser) == ASM_T_LABEL)
     {
@@ -142,161 +152,185 @@ static asm_ecode parseCommandArg(parser_s *parser, commandNode *node, Argument *
         int regNum = FindRegByName(currTokenVal(parser));
         if (regNum < 0)
         {
-            printf("asm: unknown register: %s ;line: %zu\n", currTokenVal(parser), node->line);
-            return E_ASM_ERR;
+            ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_REGISTER);
+
+            err->token = currTokenVal(parser);
+            err->line = currTokenLine(parser);
+            err->column = currTokenColumn(parser);
         }
+
         arg->RegNum = (uint8_t)regNum;
         arg->Type = ArgRegister;
         eatToken(parser, ASM_T_ID);
     }
     else
     {
-        if (eatToken(parser, ASM_T_L_PAREN) != E_ASM_OK)
-            return E_ASM_ERR;
+        if (eatToken(parser, ASM_T_L_PAREN) != PARSER_OK)
+            getNextToken(parser->toks);
 
         eatSP(parser);
 
-        if (parseIndirectArg(parser, node, arg) != E_ASM_OK)
-            return E_ASM_ERR;
+        ParserErrCode err = parseIndirectArg(parser, node, arg);
+        if (err != PARSER_OK)
+            return err;
 
         eatSP(parser);
 
-        if (eatToken(parser, ASM_T_R_PAREN) != E_ASM_OK)
-            return E_ASM_ERR;
+        if (eatToken(parser, ASM_T_R_PAREN) != PARSER_OK)
+            getNextToken(parser->toks);
     }
 
-    return E_ASM_OK;
+    return PARSER_OK;
 }
 
-static asm_ecode parseJumpPostfix(commandNode *node, const char *postfix)
+static ParserErrCode parseJumpPostfix(commandNode *node, const char *postfix)
 {
     if (strcmp(postfix, "eq") == 0)
     {
         node->instr.JmpType = JumpEQ;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "neq") == 0)
     {
         node->instr.JmpType = JumpNEQ;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "g") == 0)
     {
         node->instr.JmpType = JumpG;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "ge") == 0)
     {
         node->instr.JmpType = JumpGE;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "l") == 0)
     {
         node->instr.JmpType = JumpL;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "le") == 0)
     {
         node->instr.JmpType = JumpLE;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
-    return E_ASM_ERR;
+    return PARSER_INSUFF_TOKEN;
 }
 
-static asm_ecode parseInstrPostfix(parser_s *parser, commandNode *node)
+static ParserErrCode parseInstrPostfix(Parser *parser, commandNode *node)
 {
 
     const char *postfix = currTokenVal(parser);
-    if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
-        return E_ASM_ERR;
+    size_t line = currTokenLine(parser);
+    size_t column = currTokenColumn(parser);
+
+    if (eatToken(parser, ASM_T_ID) != PARSER_OK)
+        return PARSER_BAD_COMMAND;
 
     if (strcmp(node->name, "jmp") == 0)
     {
-        if (parseJumpPostfix(node, postfix) == E_ASM_OK)
-            return E_ASM_OK;
+        if (parseJumpPostfix(node, postfix) == PARSER_OK)
+            return PARSER_OK;
 
-        printf("asm: invalid jump postfix: %s; line: %zu\n", postfix, node->line);
-        return E_ASM_ERR;
+        ParserError *err = addNewParserError(parser, PARSER_BAD_CMD_POSTFIX);
+
+        err->token = postfix;
+        err->line = line;
+        err->column = column;
+
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "b") == 0)
     {
         node->instr.DataSz = DataByte;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "s") == 0)
     {
         node->instr.DataSz = DataWord;
         node->instr.SignExtend = 1;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "bs") == 0)
     {
         node->instr.DataSz = DataByte;
         node->instr.SignExtend = 1;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "db") == 0)
     {
         node->instr.DataSz = DataDByte;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "dbs") == 0)
     {
         node->instr.DataSz = DataDByte;
         node->instr.SignExtend = 1;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "hw") == 0)
     {
         node->instr.DataSz = DataHalfWord;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
     if (strcmp(postfix, "hws") == 0)
     {
         node->instr.DataSz = DataHalfWord;
         node->instr.SignExtend = 1;
-        return E_ASM_OK;
+        return PARSER_OK;
     }
 
-    printf("asm: invalid data postfix: %s; line: %zu\n", postfix, node->line);
+    ParserError *err = addNewParserError(parser, PARSER_BAD_CMD_POSTFIX);
 
-    return E_ASM_ERR;
+    err->token = postfix;
+    err->line = line;
+    err->column = column;
+
+    return PARSER_OK;
 }
 
-static asm_ecode createInstruction(parser_s *parser, commandNode *node)
+static ParserErrCode createInstruction(Parser *parser, commandNode *node)
 {
 
     InstrEncDecErr err = NewInstruction(node->name, &node->instr);
     if (err == INSTR_UNKNOWN)
     {
-        printf("asm: unknown mnemonic: %s; line: %zu\n", node->name, node->line);
-        return E_ASM_ERR;
+
+        ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_COMMAND);
+
+        err->token = node->name;
+        err->line = node->line;
+        return PARSER_OK;
     }
     if (err == INSTR_WRONG_OPERANDS)
     {
-        printf("asm: invalid operands for %s; line: %zu\n", node->name, node->line);
-        return E_ASM_ERR;
+        ParserError *err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
+
+        err->token = node->name;
+        err->line = node->line;
+        return PARSER_OK;
     }
 
     parser->currSection->currOffset += EvalInstrSize(&node->instr);
 
-    return E_ASM_OK;
+    return PARSER_OK;
 }
 
-asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
+ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
 {
     assert(parser != NULL);
     assert(node != NULL);
@@ -310,8 +344,11 @@ asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
 
         if (defineNewLabel(parser, node->label, parser->currSection->addr + node->offset) < 0)
         {
-            printf("asm: label: %s redefinded on %zu\n", node->label, parser->toks->currToken->line);
-            return E_ASM_ERR;
+            ParserError *err = addNewParserError(parser, PARSER_LABEL_REDEF);
+
+            err->token = node->label;
+            err->line = currTokenLine(parser);
+            err->column = currTokenColumn(parser);
         }
         eatToken(parser, ASM_T_LABEL);
         eatBlanks(parser);
@@ -320,27 +357,28 @@ asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
     node->line = parser->toks->currToken->line;
 
     node->name = currTokenVal(parser);
-    if (eatToken(parser, ASM_T_ID) != E_ASM_OK)
-        return E_ASM_ERR;
+    if (eatToken(parser, ASM_T_ID) != PARSER_OK)
+        return PARSER_BAD_COMMAND;
 
-    e_asm_codes err = parseDataDefDirective(parser, node);
-    if (err != E_ASM_INSUFF_TOKEN)
+    ParserErrCode err = parseDataDefDirective(parser, node);
+    if (err != PARSER_INSUFF_TOKEN)
         return err;
 
     if (currTokenType(parser) == ASM_T_L_SIMP_PAREN)
     {
         eatToken(parser, ASM_T_L_SIMP_PAREN);
-        if (parseInstrPostfix(parser, node) != E_ASM_OK)
-            return E_ASM_ERR;
 
-        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != E_ASM_OK)
-            return E_ASM_ERR;
+        err = parseInstrPostfix(parser, node);
+        if (err != PARSER_OK)
+            return err;
+
+        if (eatToken(parser, ASM_T_R_SIMP_PAREN) != PARSER_OK)
+            getNextToken(parser->toks);
     }
 
     eatSP(parser);
 
-    if (parseCommandArg(parser, node, &node->instr.Arg1) != E_ASM_OK)
-        return E_ASM_ERR;
+    parseCommandArg(parser, node, &node->instr.Arg1);
 
     eatSP(parser);
 
@@ -349,8 +387,7 @@ asm_ecode parseCommandNode(parser_s *parser, commandNode *node)
         eatToken(parser, ASM_T_COMMA);
         eatSP(parser);
 
-        if (parseCommandArg(parser, node, &node->instr.Arg2) != E_ASM_OK)
-            return E_ASM_ERR;
+        parseCommandArg(parser, node, &node->instr.Arg2);
     }
 
     return createInstruction(parser, node);

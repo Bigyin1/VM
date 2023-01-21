@@ -1,0 +1,33 @@
+
+#.data 4096 # load address
+
+
+#hello:
+#db 'H', 'e', 'l', 'l', 'o',
+   # ' ', 'W' , 'o', 'r', 'l', 'd', 0
+    
+
+#array1:
+#ddb 12, 13
+
+#array2:
+#dhw 454545, 56566
+
+#dw :array1, :array2
+
+
+
+.text 
+ldd t2, [10000]
+st r2, (10000)
+
+
+mov r1, 32 st(b) r1, [10016]
+
+mof r1, tt
+st r1, [10008]
+
+mov(b) r1, '\J'
+st(b) r1, [10016]
+
+halt

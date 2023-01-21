@@ -2,12 +2,12 @@
 #ifndef ASM_LABELS_HPP
 #define ASM_LABELS_HPP
 
-#include "parser.hpp"
+#include "parser/parser.hpp"
 
-int defineNewLabel(parser_s *p, const char *label, uint64_t val);
+ParserErrCode defineNewLabel(Parser *p, const char *label, uint64_t val);
 
-void addLabelImport(parser_s *p, const char *label, uint64_t *v);
+void addLabelImport(Parser *p, const char *label, uint64_t *v);
 
-int resolveImports(parser_s *p);
+ParserErrCode resolveImports(Parser *p);
 
 #endif

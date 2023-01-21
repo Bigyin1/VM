@@ -3,6 +3,7 @@
 #include "directives.hpp"
 #include "utils.hpp"
 #include "labels.hpp"
+#include "errors.hpp"
 
 typedef struct dataDirective
 {
@@ -32,7 +33,7 @@ static const dataDirective dataDirectives[] = {
 
 };
 
-static asm_ecode getDataDefDirectiveArgsCount(parser_s *parser, commandNode *node, size_t *sz)
+static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *node, size_t *sz)
 {
 
     saveCurrToken(parser->toks);
@@ -58,18 +59,23 @@ static asm_ecode getDataDefDirectiveArgsCount(parser_s *parser, commandNode *nod
 
     if (*sz == 0)
     {
-        printf("asm: bad data defenition directive argument; line: %zu\n", node->line);
-        return E_ASM_ERR;
+        ParserError *err = addNewParserError(parser, PARSER_BAD_CMD_POSTFIX);
+
+        err->token = currTokenVal(parser);
+        err->line = currTokenLine(parser);
+        err->column = currTokenColumn(parser);
+
+        return PARSER_COMMAND_INV_ARGS;
     }
-    return E_ASM_OK;
+    return PARSER_OK;
 }
 
-static asm_ecode parseDataDefDirectiveArgs(parser_s *parser, commandNode *node, size_t sz)
+static ParserErrCode parseDataDefDirectiveArgs(Parser *parser, commandNode *node, size_t sz)
 {
     size_t count = 0;
-
-    if (getDataDefDirectiveArgsCount(parser, node, &count) == E_ASM_ERR)
-        return E_ASM_ERR;
+    ParserErrCode err = getDataDefDirectiveArgsCount(parser, node, &count);
+    if (err != PARSER_OK)
+        return err;
 
     node->data = (char *)calloc(count, sz);
     node->dataSz = count * sz;
@@ -106,10 +112,10 @@ static asm_ecode parseDataDefDirectiveArgs(parser_s *parser, commandNode *node, 
         eatBlanks(parser);
     }
 
-    return E_ASM_OK;
+    return PARSER_OK;
 }
 
-asm_ecode parseDataDefDirective(parser_s *parser, commandNode *node)
+ParserErrCode parseDataDefDirective(Parser *parser, commandNode *node)
 {
 
     for (size_t i = 0; i < sizeof(dataDirectives) / sizeof(dataDirective); i++)
@@ -118,5 +124,5 @@ asm_ecode parseDataDefDirective(parser_s *parser, commandNode *node)
             return parseDataDefDirectiveArgs(parser, node, DataSzToBytesSz(dataDirectives[i].sz));
     }
 
-    return E_ASM_INSUFF_TOKEN;
+    return PARSER_INSUFF_TOKEN;
 }

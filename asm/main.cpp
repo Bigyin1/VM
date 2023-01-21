@@ -24,7 +24,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (assemble(in, out) == E_ASM_ERR)
+    if (assemble(in, out) < 0)
         return 1;
 
     return 0;

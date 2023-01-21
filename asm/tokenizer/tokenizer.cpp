@@ -3,14 +3,15 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "tokenizer.hpp"
+#include "tokenizer/tokenizer.hpp"
+#include "errors.hpp"
 
 static const char *spaces = " \t";
 
 typedef struct token_meta_s
 {
 
-    e_asm_token_type type;
+    TokenType type;
     const char *val;
 
 } token_meta_s;
@@ -25,7 +26,7 @@ const token_meta_s generalTokens[] = {
     {ASM_T_NL, "\n"},
 };
 
-static bool checkSimpleToken(tokenizer_s *t, e_asm_token_type type, const char *tokVal)
+static bool checkSimpleToken(Tokenizer *t, TokenType type, const char *tokVal)
 {
 
     size_t tokLen = strlen(tokVal);
@@ -39,7 +40,7 @@ static bool checkSimpleToken(tokenizer_s *t, e_asm_token_type type, const char *
     return true;
 }
 
-static bool checkLabelToken(tokenizer_s *t)
+static bool checkLabelToken(Tokenizer *t)
 {
 
     int wordLen = 0;
@@ -63,7 +64,7 @@ static bool checkLabelToken(tokenizer_s *t)
     return true;
 }
 
-static bool checkSectNameToken(tokenizer_s *t)
+static bool checkSectNameToken(Tokenizer *t)
 {
 
     int wordLen = 0;
@@ -81,7 +82,7 @@ static bool checkSectNameToken(tokenizer_s *t)
     return true;
 }
 
-static bool checkHexNum(tokenizer_s *t)
+static bool checkHexNum(Tokenizer *t)
 {
 
     int wordLen = 0;
@@ -98,7 +99,7 @@ static bool checkHexNum(tokenizer_s *t)
     return true;
 }
 
-static bool checkNumberToken(tokenizer_s *t)
+static bool checkNumberToken(Tokenizer *t)
 {
 
     if (checkHexNum(t))
@@ -150,7 +151,7 @@ static bool checkNumberToken(tokenizer_s *t)
     return true;
 }
 
-static bool checkIdToken(tokenizer_s *t)
+static bool checkIdToken(Tokenizer *t)
 {
 
     int wordLen = 0;
@@ -166,7 +167,7 @@ static bool checkIdToken(tokenizer_s *t)
     return true;
 }
 
-static bool checkAsciiCharToken(tokenizer_s *t)
+static bool checkAsciiCharToken(Tokenizer *t)
 {
 
     int wordLen = 0;
@@ -189,7 +190,7 @@ static bool checkAsciiCharToken(tokenizer_s *t)
     return true;
 }
 
-static bool checkSimpleTokens(tokenizer_s *t)
+static bool checkSimpleTokens(Tokenizer *t)
 {
     for (size_t i = 0; i < sizeof(generalTokens) / sizeof(generalTokens[0]); i++)
     {
@@ -214,10 +215,10 @@ static bool checkSimpleTokens(tokenizer_s *t)
     return false;
 }
 
-asm_ecode tokenize(tokenizer_s *t)
+int Tokenize(Tokenizer *t)
 {
 
-    asm_ecode err = E_ASM_OK;
+    int err = 0;
     char *textStart = t->input;
 
     t->currToken = t->tokens;
@@ -257,11 +258,11 @@ asm_ecode tokenize(tokenizer_s *t)
         if (checkIdToken(t))
             continue;
 
-        printf("asm: unknown token at line: %zu, column: %zu\n",
-               t->currToken->line,
-               t->currToken->column);
-        err = E_ASM_INSUFF_TOKEN;
-        break;
+        if (addUnknownTokenError(t) < 0)
+        {
+            err = -1;
+            break;
+        }
     }
 
     t->currToken->type = ASM_T_EOF;
@@ -272,24 +273,21 @@ asm_ecode tokenize(tokenizer_s *t)
     return err;
 }
 
-asm_ecode tokenizerInit(tokenizer_s *t, char *input)
+int tokenizerInit(Tokenizer *t, char *input)
 {
     t->input = input;
     t->column = 1;
     t->line = 1;
 
     t->currToken = NULL;
-    t->tokens = (token_s *)calloc(1024, sizeof(token_s)); // TODO: change to list
+    t->tokens = (Token *)calloc(1024, sizeof(Token)); // TODO: change to list
     if (t->tokens == NULL)
-    {
-        perror("asm: ");
-        return E_ASM_ERR;
-    }
+        return -1;
 
-    return E_ASM_OK;
+    return 0;
 }
 
-token_s *getNextToken(tokenizer_s *t)
+Token *getNextToken(Tokenizer *t)
 {
     assert(t != NULL);
 
@@ -306,7 +304,7 @@ token_s *getNextToken(tokenizer_s *t)
     return t->currToken;
 }
 
-token_s *saveCurrToken(tokenizer_s *t)
+Token *saveCurrToken(Tokenizer *t)
 {
     assert(t != NULL);
 
@@ -315,7 +313,7 @@ token_s *saveCurrToken(tokenizer_s *t)
     return t->currToken;
 }
 
-token_s *restoreSavedToken(tokenizer_s *t)
+Token *restoreSavedToken(Tokenizer *t)
 {
     assert(t != NULL);
 
@@ -324,7 +322,7 @@ token_s *restoreSavedToken(tokenizer_s *t)
     return t->currToken;
 }
 
-token_s *peekNextToken(tokenizer_s *t)
+Token *peekNextToken(Tokenizer *t)
 {
     assert(t != NULL);
 
@@ -340,9 +338,18 @@ token_s *peekNextToken(tokenizer_s *t)
     return t->currToken + 1;
 }
 
-void tokenizerFree(tokenizer_s *t)
+void tokenizerFree(Tokenizer *t)
 {
     assert(t != NULL);
+
+    while (t->err != NULL)
+    {
+        TokenizerError *err = t->err;
+
+        free(err->text);
+        t->err = t->err->next;
+        free(err);
+    }
 
     free(t->tokens);
 }

@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "instructions.hpp"
-#include "run.hpp"
-#include "decode.hpp"
 #include "registers.hpp"
 #include "rom.hpp"
 #include "ram.hpp"
@@ -58,11 +56,12 @@ static int attachRAM(CPU *cpu, size_t addr, size_t sz)
     return 0;
 }
 
-static int attachConsole(CPU *cpu, size_t addr)
+static int attachConsole(CPU *cpu, size_t addr, FILE *r, FILE *w)
 {
 
     DEVICE(consoleDevIdx).lowAddr = addr;
-    DEVICE(consoleDevIdx).highAddr = DEVICE(consoleDevIdx).lowAddr + sizeof(double) + sizeof(int64_t) + sizeof(char) - 1;
+    DEVICE(consoleDevIdx).highAddr = DEVICE(consoleDevIdx).lowAddr +
+                                     MajesticConsoleMemSize - 1;
 
     DEVICE(consoleDevIdx).name = "Majestic Console";
 
@@ -72,7 +71,7 @@ static int attachConsole(CPU *cpu, size_t addr)
 
     DEVICE(consoleDevIdx).concreteDevice = calloc(1, sizeof(MajesticConsole));
 
-    if (ConstructMajesticConsole((MajesticConsole *)DEVICE(consoleDevIdx).concreteDevice) < 0)
+    if (ConstructMajesticConsole((MajesticConsole *)DEVICE(consoleDevIdx).concreteDevice, r, w) < 0)
         return -1;
 
     return 0;
@@ -88,7 +87,7 @@ int InitVM(CPU *cpu, FILE *prog)
     if (attachRAM(cpu, 4096, 4096) < 0)
         return -1;
 
-    if (attachConsole(cpu, 10000) < 0)
+    if (attachConsole(cpu, 10000, stdin, stdout) < 0)
         return -1;
 
     cpu->regIP = DEVICE(romDevIdx).lowAddr;

@@ -12,15 +12,15 @@ static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
     Device *dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
-        printf("vm: unmapped address: %zu\n", cpu->regIP);
+        fprintf(stderr, "vm: unmapped address: %zu\n", addr);
         return -1;
     }
 
     int res = dev->writeTo(dev->concreteDevice, addr - dev->lowAddr, val, sz);
     if (res < 0)
     {
-        printf("vm: device %s unable to serve write request at address: %zu\n",
-               dev->name, cpu->regIP - dev->lowAddr);
+        fprintf(stderr, "vm: device %s unable to serve write request at address: %zu\n",
+                dev->name, cpu->regIP - dev->lowAddr);
         return -1;
     }
     return 0;
@@ -34,15 +34,15 @@ static int readFromAddr(CPU *cpu, size_t addr, uint64_t *val, DataSize sz)
     Device *dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
-        printf("vm: unmapped address: %zu\n", cpu->regIP);
+        fprintf(stderr, "vm: unmapped address: %zu\n", addr);
         return -1;
     }
 
     int res = dev->readFrom(dev->concreteDevice, addr - dev->lowAddr, val, sz);
     if (res < 0)
     {
-        printf("vm: device %s unable to serve read request at address: %zu\n",
-               dev->name, cpu->regIP - dev->lowAddr);
+        fprintf(stderr, "vm: device %s unable to serve read request at address: %zu\n",
+                dev->name, cpu->regIP - dev->lowAddr);
         return -1;
     }
 

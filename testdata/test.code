@@ -1,5 +1,5 @@
 
-.data 4096 # load address
+.data 6000 # load address
 
 
 hello:
@@ -18,20 +18,34 @@ dw :array1, :array2
 
 
 equ :consoleCharOut 10016
+equ :conXCoord      10017
+equ :conYCoord      10019
+equ :conColor       10021
 
 .text 0
 
 main:
 
-mov r0, :hello
 
-print:
-ld(b) r1, [r0]
-cmp r1, 0
+
+
+mov r0, 228
+
+mov r1, 0
+mov r2, 0
+
+
+line:
+cmp r0, 0
 jmp(eq) :next
-st(b) r1, [:consoleCharOut]
-add r0, 1
-jmp :print
+sub r0, 1
+st(db) r1, [:conXCoord]
+st(db) r2, [:conYCoord]
+st(b) r0, [:conColor]
+add r1, 1
+add r2, 1
+jmp :line
+
 
 
 next:
@@ -39,13 +53,8 @@ next:
 #st r2, [10000]
 
 
-mov r1, 32
-st(b) r1, [:consoleCharOut]
-
-mov r1, 1000
-st r1, [10008]
 
 mov(b) r1, '\J'
-st(b) r1, [10016]
+st(b) r1, [:consoleCharOut]
 
 halt

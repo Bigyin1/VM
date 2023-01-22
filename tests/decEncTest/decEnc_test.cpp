@@ -390,11 +390,20 @@ static FILE *getTextSectionData(char *buf, size_t sz)
     return f;
 }
 
-int main()
+int main(int argc, char **argv)
 {
-    FILE *in = fopen("test.code", "r");
-    if (in == NULL)
+    if (argc != 2)
+    {
+        fprintf(stderr, "wrong count of arguments\n");
         return 1;
+    }
+
+    FILE *in = fopen(argv[1], "r");
+    if (in == NULL)
+    {
+        perror("decEncTest: ");
+        return 1;
+    }
 
     char buf[2048] = {0};
 

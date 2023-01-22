@@ -7,13 +7,25 @@
 #include <stdio.h>
 #include "argument.hpp"
 
+const size_t MajesticConsoleMemSize = sizeof(double) +
+                                      sizeof(int64_t) +
+                                      sizeof(char) +
+                                      sizeof(uint16_t) +
+                                      sizeof(uint16_t) +
+                                      sizeof(char);
+
 typedef struct MajesticConsole
 {
-    char mem[sizeof(double) + sizeof(int64_t) + sizeof(char)];
+    char mem[MajesticConsoleMemSize];
+
+    FILE *r;
+    FILE *w;
+
+    uint grPipeFD;
 
 } MajesticConsole;
 
-int ConstructMajesticConsole(MajesticConsole *con);
+int ConstructMajesticConsole(MajesticConsole *con, FILE *r, FILE *w);
 
 void DestructMajesticConsole(MajesticConsole *con);
 

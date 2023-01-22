@@ -30,7 +30,7 @@ ParserErrCode parseSectionNode(Parser *parser, sectionNode *sectNode)
     assert(parser != NULL);
     assert(sectNode != NULL);
 
-    sectNode->commandsCap = 16;
+    sectNode->commandsCap = 48;
     sectNode->commands = (commandNode *)calloc(sectNode->commandsCap, sizeof(commandNode));
     if (sectNode->commands == NULL)
         return PARSER_SYSTEM_ERR;

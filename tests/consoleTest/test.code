@@ -1,0 +1,37 @@
+
+
+
+
+.text 0
+equ :consoleCharOut 10016
+equ :conXCoord      10017
+equ :conYCoord      10019
+equ :conColor       10021
+
+main:
+
+mov r0, 128
+
+mov r1, 0
+mov r2, 0
+
+
+line:
+
+cmp r0, 0
+jmp(eq) :next
+
+
+st(db)  r1, [:conXCoord]
+st(db)  r2, [:conYCoord]
+st(b)   r0, [:conColor]
+
+add r1, 1
+add r2, 1
+
+sub r0, 1
+jmp :line
+
+next:
+
+halt

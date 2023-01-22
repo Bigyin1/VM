@@ -23,7 +23,7 @@ typedef struct commandNode
 
     const char *label;
     const char *name;
-    Instruction instr;
+    Instruction instr; // TODO change to pointer
 
     char *data; // data defenition directive data
     size_t dataSz;

@@ -45,12 +45,18 @@ int assemble(FILE *in, FILE *out)
         reportParserErrors(parser.err, stderr);
         tokenizerFree(&tokenizer);
         parserFree(&parser);
-        return 0;
+        return -1;
     }
 
     AsmEncoder as = {.parser = &parser, .out = out};
     if (GenObjectFile(&as) < 0)
+    {
+        fclose(out);
+
+        tokenizerFree(&tokenizer);
+        parserFree(&parser);
         return -1;
+    }
 
     fclose(out);
 

@@ -21,7 +21,7 @@ typedef struct symbolTable
 {
     symbolData symbols[64];
     size_t symbolsSz;
-};
+} symbolTable;
 
 const symbolData *findSymbolByName(symbolTable *symTab, const char *name);
 

@@ -34,7 +34,7 @@ static int readFromAddr(CPU *cpu, size_t addr, uint64_t *val, DataSize sz)
     Device *dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
-        fprintf(stderr, "vm: unmapped address: %zu\n", addr);
+        fprintf(stderr, "2 vm: unmapped address: %zu\n, cpu: %zu", addr, cpu->regIP);
         return -1;
     }
 

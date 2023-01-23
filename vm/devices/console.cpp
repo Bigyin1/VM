@@ -20,6 +20,8 @@ int ConstructMajesticConsole(MajesticConsole *con, FILE *r, FILE *w)
 
     con->r = r;
     con->w = w;
+    setvbuf(con->w, NULL, _IONBF, 0);
+    setvbuf(con->r, NULL, _IONBF, 0);
     return 0;
 }
 
@@ -36,12 +38,14 @@ int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize)
 
     MajesticConsole *console = (MajesticConsole *)dev;
 
+    int n = 0;
+
     if (addr == doubleMemAddr)
-        fscanf(console->r, "%lf", data);
+        n = fscanf(console->r, "%lf", data);
     else if (addr == intMemAddr)
-        fscanf(console->r, "%ld", data);
+        n = fscanf(console->r, "%ld", data);
     else if (addr == charMemAddr)
-        fscanf(console->r, "%c", data);
+        n = fscanf(console->r, "%c", data);
     else
         return -1;
 
@@ -53,24 +57,28 @@ int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize)
 
     MajesticConsole *console = (MajesticConsole *)dev;
 
+    int n = 0;
     if (addr == doubleMemAddr)
     {
         double d = 0;
         memcpy(&d, &data, sizeof(double));
-        fprintf(console->w, "%lf", d);
+        n = fprintf(console->w, "%lf", d);
     }
     else if (addr == intMemAddr)
     {
         int64_t i = (int64_t)data;
-        fprintf(console->w, "%ld", i);
+        n = fprintf(console->w, "%ld", i);
     }
     else if (addr == charMemAddr)
     {
         char c = (char)data;
-        fprintf(console->w, "%c", c);
+        n = fprintf(console->w, "%c", c);
     }
     else if (addr == xCoordMemAddr || addr == yCoordMemAddr)
+    {
         memcpy(console->mem + addr, &data, sizeof(uint16_t));
+        return 0;
+    }
 
     else if (addr == colorMemAddr)
     {
@@ -81,6 +89,7 @@ int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize)
             fprintf(stderr, "vm: console: broken graphics\n");
             return -1;
         }
+        return 0;
     }
 
     else

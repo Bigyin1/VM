@@ -11,21 +11,21 @@ static int execNextInstruction(CPU *cpu)
     Device *dev = FindDevice(cpu->devices, cpu->regIP);
     if (dev == NULL)
     {
-        printf("vm: unmapped address: %zu\n", cpu->regIP);
+        fprintf(stderr, "vm: unmapped address: cpu: %zu \n", cpu->regIP);
         return -1;
     }
 
     if (dev->getReader == NULL)
     {
-        printf("vm: device %s unable to execute code\n");
+        fprintf(stderr, "vm: device %s unable to execute code\n");
         return -1;
     }
 
     FILE *reader = dev->getReader(dev->concreteDevice, cpu->regIP - dev->lowAddr);
     if (reader == NULL)
     {
-        printf("vm: device %s unable to serve execute request at address: %zu\n",
-               dev->name, cpu->regIP - dev->lowAddr);
+        fprintf(stderr, "vm: device %s unable to serve execute request at address: %zu\n",
+                dev->name, cpu->regIP - dev->lowAddr);
         return -1;
     }
 
@@ -36,17 +36,17 @@ static int execNextInstruction(CPU *cpu)
     InstrEncDecErr err = Decode(&instr, reader);
     if (err == INSTR_NOT_EXIST)
     {
-        printf("vm: bad instruction; finished executing\n");
+        fprintf(stderr, "vm: bad instruction; finished executing\n");
         return -1;
     }
     if (err == INSTR_UNKNOWN)
     {
-        printf("vm: met unknown opcode\n");
+        fprintf(stderr, "vm: met unknown opcode\n");
         return -1;
     }
     if (err == INSTR_WRONG_OPERANDS)
     {
-        printf("vm: instruction %u: unknown arguments set\n", instr.im->OpCode);
+        fprintf(stderr, "vm: instruction %u: unknown arguments set\n", instr.im->OpCode);
         return -1;
     }
 

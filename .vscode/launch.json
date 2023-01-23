@@ -2,17 +2,46 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(gdb) Подключить",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/server/progs/my_vm",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Включить автоматическое форматирование для gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Задать для варианта приложения дизассемблирования значение Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "processId": 609988
+        },
+        {
             "name": "Launch server",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/server/server.go",
+            "program": "${workspaceFolder}/server/.",
             "cwd": "${workspaceFolder}/server/progs",
+            "args": [],
+        },
+        {
+            "name": "Launch test",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/tests/numConsTest/consTest.go",
+            "cwd": "${workspaceFolder}",
             "args": [
-                "./my_asm",
-                "./my_vm",
-                "./test.code",
-                "./out"
+                "server/progs/my_asm",
+                "server/progs/my_vm",
+                "tests/numConsTest/test.code",
+                "tests/numConsTest/out"
             ],
         },
         {

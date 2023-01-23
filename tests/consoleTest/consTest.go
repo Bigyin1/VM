@@ -53,9 +53,7 @@ func main() {
 		fmt.Println(errBuf.String())
 		os.Exit(1)
 	}
-
 	graphicsConWrite.Close()
-
 	iters := 128
 	for i := 0; i < iters; i++ {
 		var x uint16
@@ -66,7 +64,7 @@ func main() {
 		err = binary.Read(graphicsConRead, binary.LittleEndian, &y)
 		err = binary.Read(graphicsConRead, binary.LittleEndian, &color)
 		if err != nil {
-			fmt.Printf("met error: %s while reading graphics console", err)
+			fmt.Printf("met error: %s while reading graphics console\n", err)
 			os.Exit(1)
 		}
 

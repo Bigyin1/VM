@@ -11,7 +11,7 @@ static int execNextInstruction(CPU *cpu)
     Device *dev = FindDevice(cpu->devices, cpu->regIP);
     if (dev == NULL)
     {
-        fprintf(stderr, "vm: unmapped address: cpu: %zu \n", cpu->regIP);
+        fprintf(stderr, "vm: unmapped address: %zu\n", cpu->regIP);
         return -1;
     }
 

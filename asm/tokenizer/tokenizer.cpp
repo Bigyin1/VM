@@ -234,7 +234,6 @@ static Token *reallocTokens(Tokenizer *t)
 int Tokenize(Tokenizer *t)
 {
 
-    int err = 0;
     char *textStart = t->input;
 
     for (; *t->input != '\0';)
@@ -286,12 +285,19 @@ int Tokenize(Tokenizer *t)
         }
     }
 
+    t->currToken = reallocTokens(t);
+    if (t->currToken == NULL)
+    {
+        free(textStart);
+        return -1;
+    }
+
     t->currToken->type = ASM_T_EOF;
     t->currToken = NULL;
 
     free(textStart);
 
-    return err;
+    return 0;
 }
 
 int tokenizerInit(Tokenizer *t, char *input)

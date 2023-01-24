@@ -1,3 +1,2 @@
 add_subdirectory(decEncTest)
-add_subdirectory(consoleTest)
-add_subdirectory(numConsTest)
+add_subdirectory(end2end)

@@ -41,9 +41,15 @@ int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize)
     int n = 0;
 
     if (addr == doubleMemAddr)
+    {
         n = fscanf(console->r, "%lf", data);
+        fscanf(console->r, "%*c");
+    }
     else if (addr == intMemAddr)
+    {
         n = fscanf(console->r, "%ld", data);
+        fscanf(console->r, "%*c");
+    }
     else if (addr == charMemAddr)
         n = fscanf(console->r, "%c", data);
     else

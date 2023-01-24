@@ -1,16 +1,12 @@
 
-
-
-
 .text 0
-equ :consoleCharOut 10016
 equ :conXCoord      10017
 equ :conYCoord      10019
 equ :conColor       10021
 
 main:
 
-mov r0, 128
+mov r0, 512
 
 mov r1, 0
 mov r2, 0

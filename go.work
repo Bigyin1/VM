@@ -2,6 +2,5 @@ go 1.19
 
 use (
 	./server
-	./tests/consoleTest
-	./tests/numConsTest
+	./tests/end2end
 )

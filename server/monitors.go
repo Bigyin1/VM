@@ -33,7 +33,7 @@ func (r *Runner) readMonitor() {
 				return
 			}
 
-			_, err = r.vmConsoleWriter.Write(append([]byte(conReq.Data), '\n'))
+			_, err = r.vmConsoleWriter.Write([]byte(conReq.Data))
 			if err != nil {
 				log.Printf("readMonitor error: %v", err)
 				return

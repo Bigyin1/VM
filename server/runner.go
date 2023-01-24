@@ -104,7 +104,9 @@ func (r *Runner) monitorVM() error {
 	procChan := make(chan struct{}, 1)
 	go func() {
 		r.vmProc.Wait()
+
 		procChan <- struct{}{}
+
 		log.Printf("process %d exited; status: %s",
 			r.vmProc.Process.Pid, r.vmProc.ProcessState.String())
 	}()
@@ -129,7 +131,10 @@ func (r *Runner) monitorVM() error {
 
 func (r *Runner) compile() (*os.File, error) {
 
-	code := <-r.request
+	code, ok := <-r.request
+	if !ok {
+		return nil, fmt.Errorf("no data to compile")
+	}
 
 	asmTextFile, err := ioutil.TempFile(".", "text")
 	if err != nil {

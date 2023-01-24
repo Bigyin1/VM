@@ -20,8 +20,8 @@ type Client struct {
 func (c *Client) readConn() {
 	defer func() {
 		c.cancel()
-		c.conn.Close()
 		close(c.req)
+		c.conn.Close()
 	}()
 
 	c.conn.SetReadLimit(maxMessageSize)

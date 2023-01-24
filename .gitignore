@@ -1,3 +1,4 @@
 *build
 *deps
 server/progs
+tests/end2end/progs

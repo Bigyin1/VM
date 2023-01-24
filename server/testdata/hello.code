@@ -47,6 +47,3 @@ printHelloFunc:
 
     end:
     ret
-
-
-

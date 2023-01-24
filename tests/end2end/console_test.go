@@ -35,6 +35,7 @@ func TestConsole(t *testing.T) {
 	if t.Failed() {
 		return
 	}
+
 	defer os.Remove(binFile.Name())
 
 	vm := testVM{t: t}

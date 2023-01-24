@@ -129,6 +129,8 @@ func (r *Runner) monitorVM() error {
 
 }
 
+const compileSuccessMessage = "Compiled successfully\n"
+
 func (r *Runner) compile() (*os.File, error) {
 
 	code, ok := <-r.request
@@ -181,7 +183,7 @@ func (r *Runner) compile() (*os.File, error) {
 
 	succMes := textResp{
 		MessageType: generalMessageType,
-		Message:     "Compiled successfully\n",
+		Message:     compileSuccessMessage,
 	}
 
 	err = r.responseJson(succMes)

@@ -431,10 +431,12 @@ static int run_call(CPU *cpu, Instruction *ins)
     else if (ins->Arg1.Type == ArgRegister)
         addr = ins->Arg1.RegNum;
 
-    if (writeToAddr(cpu, cpu->gpRegs[RSP], addr, DataWord) < 0)
+    if (writeToAddr(cpu, cpu->gpRegs[RSP], cpu->regIP, DataWord) < 0)
         return -1;
 
     cpu->gpRegs[RSP] += 8;
+
+    cpu->regIP = addr;
 
     return 0;
 }

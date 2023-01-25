@@ -3,14 +3,14 @@
 #include <stdint.h>
 #include "binformat.hpp"
 #include "encode.hpp"
-#include "encoder.hpp"
+#include "asmencoder/asmencoder.hpp"
 
 static size_t evalStrTabSize()
 {
     return 0;
 }
 
-static int writeHeader(AsmEncoder *as)
+static EncErrCode writeHeader(AsmEncoder *as)
 {
     BinformatHeader header = {0};
     header.magic = magicHeader;
@@ -23,19 +23,20 @@ static int writeHeader(AsmEncoder *as)
     if (sd == NULL)
     {
         fprintf(stderr, "asm: entrypoint symbol \"main\" not found\n");
-        return -1;
+        return ENC_USER_ERROR;
     }
 
     header.entrypoint = sd->val;
 
-    fwrite(&header, sizeof(header), 1, as->out);
+    if (fwrite(&header, sizeof(header), 1, as->out) == 0)
+        return ENC_SYSTEM_ERROR;
 
     as->offset += (sizeof(header) + header.sectionsCount * sizeof(SectionHeader));
 
-    return 0;
+    return ENC_OK;
 }
 
-static int writeSectionsHeaders(AsmEncoder *as)
+static EncErrCode writeSectionsHeaders(AsmEncoder *as)
 {
     assert(as != NULL);
 
@@ -49,7 +50,8 @@ static int writeSectionsHeaders(AsmEncoder *as)
         sect.nameIdx = 0; // TODO string table
         sect.size = as->parser->sections[i].currOffset;
 
-        fwrite(&sect, sizeof(sect), 1, as->out);
+        if (fwrite(&sect, sizeof(sect), 1, as->out) == 0)
+            return ENC_SYSTEM_ERROR;
 
         as->offset += sect.size;
     }
@@ -59,52 +61,57 @@ static int writeSectionsHeaders(AsmEncoder *as)
     stringTabSect.offset = as->offset;
     stringTabSect.nameIdx = 0;
 
-    fwrite(&stringTabSect, sizeof(stringTabSect), 1, as->out);
+    if (fwrite(&stringTabSect, sizeof(stringTabSect), 1, as->out) == 0)
+        return ENC_SYSTEM_ERROR;
 
     as->offset += stringTabSect.size;
 
-    return 0;
+    return ENC_OK;
 }
 
-static int writeSectionData(sectionNode *sect, FILE *out)
+static EncErrCode writeSectionData(sectionNode *sect, FILE *out)
 {
 
     for (size_t i = 0; i < sect->commandsSz; i++)
     {
         if (sect->commands[i].Type == CMD_INSTR)
-            Encode(&sect->commands[i].instr, out);
+        {
+            if (Encode(&sect->commands[i].instr, out) != 0)
+                return ENC_SYSTEM_ERROR;
+        }
         else if (sect->commands[i].Type == CMD_DATA_DEF)
-            fwrite(sect->commands[i].data, 1, sect->commands[i].dataSz, out);
+            if (fwrite(sect->commands[i].data, 1, sect->commands[i].dataSz, out) == 0)
+                return ENC_SYSTEM_ERROR;
     }
 
-    return 0;
+    return ENC_OK;
 }
 
-static int writeSectionsData(AsmEncoder *as)
+static EncErrCode writeSectionsData(AsmEncoder *as)
 {
     for (size_t i = 0; i < as->parser->sectionsSz; i++)
     {
-
-        writeSectionData(&as->parser->sections[i], as->out);
+        EncErrCode err = writeSectionData(&as->parser->sections[i], as->out);
+        if (err != ENC_OK)
+            return err;
     }
 
-    // TODO str table
+    // TODO: str table
 
-    return 0;
+    return ENC_OK;
 }
 
-int GenObjectFile(AsmEncoder *as)
+EncErrCode GenObjectFile(AsmEncoder *as)
 {
     assert(as != NULL);
 
-    if (writeHeader(as) != 0)
-        return -1;
+    EncErrCode err = writeHeader(as);
+    if (err != ENC_OK)
+        return err;
 
-    if (writeSectionsHeaders(as) != 0)
-        return -1;
+    err = writeSectionsHeaders(as);
+    if (err != ENC_OK)
+        return err;
 
-    if (writeSectionsData(as) != 0)
-        return -1;
-
-    return 0;
+    return writeSectionsData(as);
 }

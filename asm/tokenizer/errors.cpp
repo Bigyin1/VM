@@ -28,13 +28,13 @@ int addUnknownTokenError(Tokenizer *t)
     t->input += wordLen;
     t->column += wordLen;
 
-    if (t->err == NULL)
+    if (t->userErrors == NULL)
     {
-        t->err = newErr;
+        t->userErrors = newErr;
         return 0;
     }
 
-    TokenizerError *curr = t->err;
+    TokenizerError *curr = t->userErrors;
     while (curr->next)
         curr = curr->next;
 

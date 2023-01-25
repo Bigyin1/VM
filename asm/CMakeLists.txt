@@ -1,7 +1,7 @@
 
 add_subdirectory(tokenizer)
 add_subdirectory(parser)
-add_subdirectory(encoder)
+add_subdirectory(asmencoder)
 add_subdirectory(asm)
 
 add_executable(my_asm main.cpp)

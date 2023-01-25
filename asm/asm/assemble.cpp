@@ -1,67 +1,58 @@
 #include <string.h>
 #include "utils.hpp"
-#include "assemble.hpp"
+#include "assemble/assemble.hpp"
 #include "tokenizer/tokenizer.hpp"
 #include "parser/parser.hpp"
-#include "encoder.hpp"
+#include "asmencoder/asmencoder.hpp"
 
-int assemble(FILE *in, FILE *out)
+AsmErrCode assemble(FILE *in, FILE *out)
 {
 
     char *text = readFile(in);
     if (text == NULL)
-        return -1;
+        return ASM_SYSTEM_ERROR;
 
     Tokenizer tokenizer = {0};
-    if (tokenizerInit(&tokenizer, text) < 0)
-        return -1;
+    if (TokenizerInit(&tokenizer, text) != TOK_OK)
+        return ASM_SYSTEM_ERROR;
 
-    if (Tokenize(&tokenizer) < 0)
-        return -1;
+    if (Tokenize(&tokenizer) != TOK_OK)
+        return ASM_SYSTEM_ERROR;
 
-    if (tokenizer.err != NULL)
+    if (tokenizer.userErrors != NULL)
     {
-        reportErrors(tokenizer.err, stderr);
+        reportErrors(tokenizer.userErrors, stderr);
         tokenizerFree(&tokenizer);
-        return 0;
+        return ASM_USER_ERROR;
     }
 
     Parser parser = {0};
-    if (initParser(&parser, &tokenizer) < 0)
-        return -1;
+    if (ParserInit(&parser, &tokenizer) != PARSER_OK)
+        return ASM_SYSTEM_ERROR;
 
-    ParserErrCode err = parseTokens(&parser);
-    if (err == PARSER_SYSTEM_ERR)
+    if (ParseTokens(&parser) != PARSER_OK)
+        return ASM_SYSTEM_ERROR;
+
+    if (parser.userErrors != NULL)
     {
-        perror("asm:");
-        if (parser.err != NULL)
-            reportParserErrors(parser.err, stderr);
+        reportParserErrors(parser.userErrors, stderr);
         tokenizerFree(&tokenizer);
         parserFree(&parser);
-        return -1;
-    }
-    else if (parser.err != NULL)
-    {
-        reportParserErrors(parser.err, stderr);
-        tokenizerFree(&tokenizer);
-        parserFree(&parser);
-        return -1;
+        return ASM_USER_ERROR;
     }
 
     AsmEncoder as = {.parser = &parser, .out = out};
-    if (GenObjectFile(&as) < 0)
-    {
-        fclose(out);
-
-        tokenizerFree(&tokenizer);
-        parserFree(&parser);
-        return -1;
-    }
+    EncErrCode err = GenObjectFile(&as);
 
     fclose(out);
-
     tokenizerFree(&tokenizer);
     parserFree(&parser);
 
-    return 0;
+    if (err == ENC_USER_ERROR)
+        return ASM_USER_ERROR;
+
+    if (err == ENC_SYSTEM_ERROR)
+        return ASM_SYSTEM_ERROR;
+
+    return ASM_OK;
 }

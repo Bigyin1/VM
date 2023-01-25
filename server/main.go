@@ -35,7 +35,6 @@ var vmPath = flag.String("vm", "./progs/my_vm", "vm path")
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
 
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true } // remove
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)

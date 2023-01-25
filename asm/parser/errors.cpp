@@ -10,13 +10,13 @@ ParserError *addNewParserError(Parser *p, ParserErrCode eCode)
 
     newErr->code = eCode;
 
-    if (p->err == NULL)
+    if (p->userErrors == NULL)
     {
-        p->err = newErr;
+        p->userErrors = newErr;
         return newErr;
     }
 
-    ParserError *curr = p->err;
+    ParserError *curr = p->userErrors;
     while (curr->next)
         curr = curr->next;
 
@@ -74,7 +74,7 @@ void reportParserErrors(ParserError *err, FILE *f)
 
         case PARSER_INSUFF_TOKEN:
         {
-            fprintf(f, "asm: line: %zu column: %zu: got: %s   expected: %s\n",
+            fprintf(f, "asm: line: %zu column: %zu: got: %s  expected: %s\n",
                     err->line, err->column,
                     tokenTypeVerbose(err->got), tokenTypeVerbose(err->expected));
             break;

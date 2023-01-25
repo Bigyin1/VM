@@ -62,14 +62,14 @@ struct Tokenizer
     size_t line;
     size_t column;
 
-    TokenizerError *err;
+    TokenizerError *userErrors;
 };
 
 typedef struct Tokenizer Tokenizer;
 
-int tokenizerInit(Tokenizer *t, char *input);
+TokErrCode TokenizerInit(Tokenizer *t, char *input);
 
-int Tokenize(Tokenizer *t);
+TokErrCode Tokenize(Tokenizer *t);
 
 Token *getNextToken(Tokenizer *t);
 

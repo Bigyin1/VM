@@ -1,4 +1,4 @@
-add_library(asm_encoder encoder.cpp)
+add_library(asm_encoder asmencoder.cpp)
 
 target_link_libraries(asm_encoder
     PRIVATE binformat instr_encode project_options project_warnings

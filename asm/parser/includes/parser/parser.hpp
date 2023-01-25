@@ -23,13 +23,14 @@ typedef struct commandNode
 
     const char *label;
     const char *name;
-    Instruction instr; // TODO change to pointer
+    Instruction instr; // TODO !!! change to pointer
 
     char *data; // data defenition directive data
     size_t dataSz;
 
     size_t line;
-    size_t offset;
+
+    size_t offset; // instr offset in section
 
 } commandNode;
 
@@ -57,12 +58,12 @@ typedef struct Parser
 
     Tokenizer *toks;
 
-    ParserError *err;
+    ParserError *userErrors;
 } Parser;
 
-ParserErrCode parseTokens(Parser *p);
+ParserErrCode ParseTokens(Parser *p);
 
-int initParser(Parser *p, Tokenizer *toks);
+ParserErrCode ParserInit(Parser *p, Tokenizer *toks);
 
 void parserFree(Parser *p);
 

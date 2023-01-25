@@ -231,7 +231,7 @@ static Token *reallocTokens(Tokenizer *t)
     return t->tokens + t->tokensSz - 1;
 }
 
-int Tokenize(Tokenizer *t)
+TokErrCode Tokenize(Tokenizer *t)
 {
 
     char *textStart = t->input;
@@ -242,7 +242,7 @@ int Tokenize(Tokenizer *t)
         if (t->currToken == NULL)
         {
             free(textStart);
-            return -1;
+            return TOK_SYTEM_ERROR;
         }
 
         t->currToken->column = t->column;
@@ -281,7 +281,7 @@ int Tokenize(Tokenizer *t)
         if (addUnknownTokenError(t) < 0)
         {
             free(textStart);
-            return -1;
+            return TOK_SYTEM_ERROR;
         }
     }
 
@@ -289,7 +289,7 @@ int Tokenize(Tokenizer *t)
     if (t->currToken == NULL)
     {
         free(textStart);
-        return -1;
+        return TOK_SYTEM_ERROR;
     }
 
     t->currToken->type = ASM_T_EOF;
@@ -297,10 +297,10 @@ int Tokenize(Tokenizer *t)
 
     free(textStart);
 
-    return 0;
+    return TOK_OK;
 }
 
-int tokenizerInit(Tokenizer *t, char *input)
+TokErrCode TokenizerInit(Tokenizer *t, char *input)
 {
     t->input = input;
     t->column = 1;
@@ -309,12 +309,12 @@ int tokenizerInit(Tokenizer *t, char *input)
     t->currToken = NULL;
     t->tokens = (Token *)calloc(128, sizeof(Token));
     if (t->tokens == NULL)
-        return -1;
+        return TOK_SYTEM_ERROR;
 
     t->tokensCap = 128;
     t->tokensSz = 0;
 
-    return 0;
+    return TOK_OK;
 }
 
 Token *getNextToken(Tokenizer *t)
@@ -372,12 +372,12 @@ void tokenizerFree(Tokenizer *t)
 {
     assert(t != NULL);
 
-    while (t->err != NULL)
+    while (t->userErrors != NULL)
     {
-        TokenizerError *err = t->err;
+        TokenizerError *err = t->userErrors;
 
         free(err->text);
-        t->err = t->err->next;
+        t->userErrors = t->userErrors->next;
         free(err);
     }
 

@@ -39,7 +39,6 @@ class VMClient {
                 this.processMessage(data)
             }
 
-
         })
 
     }
@@ -68,4 +67,4 @@ class VMClient {
 }
 
 
-let cmClient = new VMClient("ws://127.0.0.1:8080/ws")
+let cmClient = new VMClient("ws://localhost:8080/ws") // TODO configuration

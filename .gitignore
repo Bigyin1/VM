@@ -2,3 +2,4 @@
 *deps
 server/progs
 tests/end2end/progs
+go.work.sum

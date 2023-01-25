@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "assemble.hpp"
+#include <stdlib.h>
+#include "assemble/assemble.hpp"
 
 int main(int argc, char **argv)
 {
@@ -7,28 +8,31 @@ int main(int argc, char **argv)
     if (argc != 3)
     {
         printf("Wrong args count\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     FILE *in = fopen(argv[1], "r");
     if (in == NULL)
     {
         perror(argv[1]);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     FILE *out = fopen(argv[2], "w");
     if (out == NULL)
     {
         perror(argv[2]);
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    if (assemble(in, out) < 0)
+    AsmErrCode err = assemble(in, out);
+    if (err == ASM_SYSTEM_ERROR)
     {
         perror("asm");
-        return 1;
+        return EXIT_FAILURE;
     }
+    if (err == ASM_USER_ERROR)
+        return EXIT_FAILURE;
 
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -143,7 +143,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
     else
     {
         if (eatToken(parser, ASM_T_L_PAREN) != PARSER_OK)
-            getNextToken(parser->toks);
+            return PARSER_BAD_COMMAND;
 
         eatSP(parser);
 
@@ -154,7 +154,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
         eatSP(parser);
 
         if (eatToken(parser, ASM_T_R_PAREN) != PARSER_OK)
-            getNextToken(parser->toks);
+            return PARSER_BAD_COMMAND;
     }
 
     return PARSER_OK;
@@ -236,7 +236,7 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
             return err;
 
         if (eatToken(parser, ASM_T_R_SIMP_PAREN) != PARSER_OK)
-            getNextToken(parser->toks);
+            return PARSER_BAD_COMMAND;
     }
 
     eatSP(parser);

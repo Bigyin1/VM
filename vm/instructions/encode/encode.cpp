@@ -247,12 +247,12 @@ static EncFunc getEncFunc(InstrOpCode opCode)
 
 int Encode(Instruction *ins, FILE *w)
 {
-
     uint8_t byte1 = encInstrHeader(ins->im->OpCode, ins->ArgSetIdx);
     fwrite(&byte1, 1, 1, w);
 
     getEncFunc(ins->im->OpCode)(ins, w, false);
-    return 0;
+
+    return ferror(w);
 }
 
 size_t EvalInstrSize(Instruction *ins)
@@ -260,7 +260,7 @@ size_t EvalInstrSize(Instruction *ins)
 
     EncFunc func = getEncFunc(ins->im->OpCode);
 
-    if (func)
+    if (func != NULL)
         return func(ins, NULL, true);
 
     return 0;

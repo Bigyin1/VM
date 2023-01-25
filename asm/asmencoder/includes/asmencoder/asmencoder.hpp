@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include "parser/parser.hpp"
+#include "errors.hpp"
 
 typedef struct AsmEncoder
 {
@@ -14,6 +15,6 @@ typedef struct AsmEncoder
 
 } AsmEncoder;
 
-int GenObjectFile(AsmEncoder *as);
+EncErrCode GenObjectFile(AsmEncoder *as);
 
 #endif

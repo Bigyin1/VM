@@ -9,6 +9,9 @@
 typedef enum TokErrCode
 {
     TOK_UNKNOWN,
+
+    TOK_SYTEM_ERROR,
+    TOK_OK,
 } TokErrCode;
 
 typedef struct TokenizerError

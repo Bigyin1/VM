@@ -28,7 +28,7 @@ static ParserErrCode reallocSections(Parser *parser)
     return PARSER_OK;
 }
 
-ParserErrCode parseTokens(Parser *parser)
+ParserErrCode ParseTokens(Parser *parser)
 {
     assert(parser != NULL);
 
@@ -66,13 +66,13 @@ ParserErrCode parseTokens(Parser *parser)
     return resolveImports(parser);
 }
 
-int initParser(Parser *p, Tokenizer *toks)
+ParserErrCode ParserInit(Parser *p, Tokenizer *toks)
 {
     assert(p != NULL);
 
     p->toks = toks;
 
-    return 0;
+    return PARSER_OK;
 }
 
 void parserFree(Parser *p)
@@ -88,10 +88,10 @@ void parserFree(Parser *p)
         free(currSect->commands);
     }
 
-    while (p->err != NULL)
+    while (p->userErrors != NULL)
     {
-        ParserError *err = p->err;
-        p->err = p->err->next;
+        ParserError *err = p->userErrors;
+        p->userErrors = p->userErrors->next;
 
         free(err);
     }

@@ -1,7 +1,7 @@
 .data 5096
 
 hello:
-db 'H', 'e', 'l', 'l', 'o', ' ', 'W' , 'o', 'r', 'l', 'd', '\J', 0
+db 'H', 'e', 'l', 'l', 'o', ' ', 'W' , 'o', 'r', 'l', 'd', 0
 
 
 equ :consoleChar    10016

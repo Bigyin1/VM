@@ -143,6 +143,7 @@ func (r *Runner) compile() (*os.File, error) {
 		log.Printf("failed to create temp file: %s\n", err)
 		return nil, err
 	}
+	defer os.Remove(asmTextFile.Name())
 
 	_, err = asmTextFile.Write(code)
 	if err != nil {
@@ -155,8 +156,6 @@ func (r *Runner) compile() (*os.File, error) {
 		log.Printf("failed to create temp file: %s\n", err)
 		return nil, err
 	}
-
-	defer os.Remove(asmTextFile.Name())
 
 	asmTextFile.Close()
 	asmBinFile.Close()
@@ -172,6 +171,8 @@ func (r *Runner) compile() (*os.File, error) {
 	err = cmd.Run()
 	if err != nil {
 		log.Printf("asembler error: %s\n", err.(*exec.ExitError).String())
+
+		os.Remove(asmBinFile.Name())
 
 		errMes := textResp{
 			MessageType: errorMessageType,

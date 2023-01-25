@@ -62,7 +62,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		vmExePath:  *vmPath,
 		asmExePath: *asmPath,
 		ctx:        ctx,
-		cancel:     cancel}
+		cancel:     cancel,
+	}
 
 	go client.readConn()
 	go client.writeConn()
@@ -70,9 +71,22 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	runner.Start()
 }
 
+const staticPath = "../web/" // TODO
+
+func serveStatic(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.Path)
+
+	if "."+r.URL.Path == "./" {
+		http.ServeFile(w, r, staticPath+"index.html")
+		return
+	}
+	http.ServeFile(w, r, staticPath+r.URL.Path)
+}
+
 func main() {
 	flag.Parse()
 
+	http.HandleFunc("/", serveStatic)
 	http.HandleFunc("/ws", serveWs)
 
 	err := http.ListenAndServe(*addr, nil)

@@ -1,0 +1,71 @@
+.console {
+    background-color: black;
+
+    grid-column: 1 / 1;
+    grid-row: 2 / 2;
+
+    font-weight: normal;
+
+    resize: none;
+    overflow-y: scroll;
+
+    padding: 10px;
+    border-radius: 4px;
+
+    font-size: 14px;
+
+}
+
+
+.codeInput .console::-webkit-scrollbar {
+    width: 10px;
+}
+
+.codeInput .console::-webkit-scrollbar-track {
+    background-color: #edeadf;
+    border-radius: 10px;
+}
+
+.codeInput .console::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: burlywood;
+}
+
+
+.row {
+
+    display: flex;
+    align-items: center;
+}
+
+.rowPrompt {
+
+
+    vertical-align: middle
+}
+
+
+.rowInput {
+
+    background-color: black;
+    color: white;
+    border: 0;
+    margin: 4px;
+    outline: 0px;
+    white-space: nowrap;
+    min-width: 20%;
+    overflow: hidden;
+    display: inline-block;
+
+    min-height: 16px;
+}
+
+/* [contenteditable="true"].rowInput br {
+    display: none;
+
+}
+
+[contenteditable="true"].rowInput * {
+    display: inline;
+    white-space: nowrap;
+} */

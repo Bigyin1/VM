@@ -18,8 +18,9 @@ type Runner struct {
 	vmExePath  string
 	asmExePath string
 
-	response chan<- []byte
-	request  <-chan []byte
+	textResponse   chan<- []byte
+	binaryResponse chan<- []byte
+	request        <-chan []byte
 
 	vmProc *exec.Cmd
 
@@ -42,11 +43,20 @@ func (r *Runner) responseJson(val interface{}) error {
 	}
 
 	select {
-	case r.response <- b:
+	case r.textResponse <- b:
 	case <-r.ctx.Done():
 	}
 
 	return nil
+}
+
+func (r *Runner) responseBinary(data []byte) {
+
+	select {
+	case r.binaryResponse <- data:
+	case <-r.ctx.Done():
+	}
+
 }
 
 func (r *Runner) setupVM(exeFile string) error {
@@ -112,7 +122,7 @@ func (r *Runner) monitorVM() error {
 	}()
 
 	wg := &sync.WaitGroup{}
-	go r.readMonitor()
+	go r.inputMonitor()
 
 	wg.Add(3)
 	go r.monitorConsoleOut(wg)
@@ -170,7 +180,7 @@ func (r *Runner) compile() (*os.File, error) {
 
 	err = cmd.Run()
 	if err != nil {
-		log.Printf("asembler error: %s\n", err.(*exec.ExitError).String())
+		log.Printf("error while assembling. exit code: %s\n", err.(*exec.ExitError).String())
 
 		os.Remove(asmBinFile.Name())
 
@@ -198,7 +208,10 @@ func (r *Runner) compile() (*os.File, error) {
 
 func (r *Runner) Start() error {
 
-	defer close(r.response)
+	defer func() {
+		close(r.textResponse)
+		close(r.binaryResponse)
+	}()
 
 	BinFile, err := r.compile()
 	if err != nil {

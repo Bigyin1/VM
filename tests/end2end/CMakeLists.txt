@@ -2,9 +2,9 @@
 
 set(vm_name "my_vm")
 
-add_custom_target(test_get_exe_files COMMAND)
+add_custom_target(end2end_get_exe_files COMMAND)
 
-add_custom_command(TARGET test_get_exe_files POST_BUILD
+add_custom_command(TARGET end2end_get_exe_files POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rm -r -f ${CMAKE_CURRENT_SOURCE_DIR}/progs
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/progs
     COMMAND ${CMAKE_COMMAND} -E copy

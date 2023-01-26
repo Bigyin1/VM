@@ -7,21 +7,31 @@
 #include <stdio.h>
 #include "argument.hpp"
 
-const size_t MajesticConsoleMemSize = sizeof(double) +
-                                      sizeof(int64_t) +
-                                      sizeof(char) +
-                                      sizeof(uint16_t) +
-                                      sizeof(uint16_t) +
-                                      sizeof(char);
+#pragma pack(push, 1)
+
+typedef struct MajesticConsoleMemMap
+{
+    double doubleInOut;
+    int64_t intInOut;
+    char charInOut;
+
+    uint16_t screenX;
+    uint16_t screenY;
+    char rgb[3];
+
+} MajesticConsoleMemMap;
+#pragma pack(pop)
+
+const size_t MajesticConsoleMemSize = sizeof(MajesticConsoleMemMap);
 
 typedef struct MajesticConsole
 {
-    char mem[MajesticConsoleMemSize];
+    MajesticConsoleMemMap mem;
 
     FILE *r;
     FILE *w;
 
-    uint grPipeFD;
+    int graphicsPipeFD;
 
 } MajesticConsole;
 

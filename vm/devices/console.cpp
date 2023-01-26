@@ -16,7 +16,7 @@ int ConstructMajesticConsole(MajesticConsole *con, FILE *r, FILE *w)
 {
     struct stat st;
     if (fstat(3, &st) == 0)
-        con->grPipeFD = 3;
+        con->graphicsPipeFD = 3;
 
     con->r = r;
     con->w = w;
@@ -36,65 +36,90 @@ void DestructMajesticConsole(MajesticConsole *con)
     return;
 }
 
-int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize)
+int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
 {
 
     MajesticConsole *console = (MajesticConsole *)dev;
 
-    if (addr == doubleMemAddr)
+    if (addr == offsetof(MajesticConsoleMemMap, doubleInOut))
     {
+        if (sz != DataWord)
+            return -1;
+
         fscanf(console->r, "%lf", data);
         fscanf(console->r, "%*c"); // read out newline
     }
-    else if (addr == intMemAddr)
+    else if (addr == offsetof(MajesticConsoleMemMap, intInOut))
     {
         fscanf(console->r, "%ld", data);
         fscanf(console->r, "%*c");
     }
-    else if (addr == charMemAddr)
+    else if (addr == offsetof(MajesticConsoleMemMap, charInOut))
+    {
+        if (sz != DataByte)
+            return -1;
+
         fscanf(console->r, "%c", data);
+    }
     else
         return -1;
 
     return 0;
 }
 
-int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize)
+int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz)
 {
 
     MajesticConsole *console = (MajesticConsole *)dev;
 
-    if (addr == doubleMemAddr)
+    if (addr == offsetof(MajesticConsoleMemMap, doubleInOut))
     {
+        if (sz != DataWord)
+            return -1;
+
         double d = 0;
         memcpy(&d, &data, sizeof(double));
         fprintf(console->w, "%lf", d);
     }
-    else if (addr == intMemAddr)
+    else if (addr == offsetof(MajesticConsoleMemMap, intInOut))
     {
         int64_t i = (int64_t)data;
         fprintf(console->w, "%ld", i);
     }
-    else if (addr == charMemAddr)
+    else if (addr == offsetof(MajesticConsoleMemMap, charInOut))
     {
+        if (sz != DataByte)
+            return -1;
+
         char c = (char)data;
         fprintf(console->w, "%c", c);
     }
-    else if (addr == xCoordMemAddr || addr == yCoordMemAddr)
+    else if (addr == offsetof(MajesticConsoleMemMap, screenX))
     {
-        memcpy(console->mem + addr, &data, sizeof(uint16_t));
+        if (sz != DataDByte)
+            return -1;
+
+        console->mem.screenX = (uint16_t)data;
+        return 0;
+    }
+    else if (addr == offsetof(MajesticConsoleMemMap, screenY))
+    {
+        if (sz != DataDByte)
+            return -1;
+
+        console->mem.screenY = (uint16_t)data;
         return 0;
     }
 
-    else if (addr == colorMemAddr)
+    else if (addr == offsetof(MajesticConsoleMemMap, rgb))
     {
-        console->mem[addr] = char(data);
-        if (write(console->grPipeFD, console->mem + xCoordMemAddr,
-                  2 * sizeof(uint16_t) + sizeof(char)) == -1)
-        {
-            fprintf(stderr, "vm: console: broken graphics\n");
+        if (sz != DataHalfWord)
             return -1;
-        }
+
+        memcpy(console->mem.rgb, &data, sizeof(console->mem.rgb));
+
+        write(console->graphicsPipeFD, &console->mem.screenX,
+              sizeof(console->mem.screenX) + sizeof(console->mem.screenY) + sizeof(console->mem.rgb));
         return 0;
     }
 

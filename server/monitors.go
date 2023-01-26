@@ -2,19 +2,17 @@ package main
 
 import (
 	"bufio"
-	"encoding/binary"
 	"encoding/json"
 	"io"
 	"log"
 	"sync"
-	"unsafe"
 )
 
-func (r *Runner) readMonitor() {
+func (r *Runner) inputMonitor() {
 
 	defer func() {
 		r.vmConsoleWriter.Close()
-		log.Printf("readMonitor done")
+		log.Printf("done")
 	}()
 
 	for {
@@ -29,13 +27,13 @@ func (r *Runner) readMonitor() {
 
 			err := json.Unmarshal(buf, &conReq)
 			if err != nil {
-				log.Printf("readMonitor error: %v", err)
+				log.Printf("error: %v", err)
 				return
 			}
 
 			_, err = r.vmConsoleWriter.Write([]byte(conReq.Data))
 			if err != nil {
-				log.Printf("readMonitor error: %v", err)
+				log.Printf("error: %v", err)
 				return
 			}
 
@@ -53,7 +51,7 @@ func (r *Runner) monitorConsoleOut(wg *sync.WaitGroup) {
 	defer func() {
 		r.vmConsoleReader.Close()
 		wg.Done()
-		log.Printf("monitorConsoleOut done")
+		log.Printf("done")
 	}()
 
 	consBuf := make([]byte, 128)
@@ -61,7 +59,7 @@ func (r *Runner) monitorConsoleOut(wg *sync.WaitGroup) {
 
 		n, err := r.vmConsoleReader.Read(consBuf)
 		if err != nil && err != io.EOF {
-			log.Printf("monitorConsoleOut error: %v", err)
+			log.Printf("error: %v", err)
 			return
 		}
 		if n == 0 {
@@ -86,13 +84,13 @@ func (r *Runner) monitorGraphicsOut(wg *sync.WaitGroup) {
 
 	}()
 
-	currPoint := point{}
-	sz := unsafe.Sizeof(currPoint.X) + unsafe.Sizeof(currPoint.Y) + unsafe.Sizeof(currPoint.Color)
+	const vmMajesticConsoleScreenFrameLen = 7 // TODO config ???
 
-	graphicsBuf := make([]byte, sz)
 	for {
 
-		n, err := r.vmGraphicsReader.Read(graphicsBuf)
+		pointFrameBuf := make([]byte, vmMajesticConsoleScreenFrameLen)
+
+		n, err := r.vmGraphicsReader.Read(pointFrameBuf)
 		if err != nil && err != io.EOF {
 			log.Printf("monitorGraphicsOut error: %v", err)
 			return
@@ -101,16 +99,12 @@ func (r *Runner) monitorGraphicsOut(wg *sync.WaitGroup) {
 			return
 		}
 
-		if n != len(graphicsBuf) {
+		if n != len(pointFrameBuf) {
 			log.Printf("monitorGraphicsOut error: got invalid point data of size: %d", n)
 			return
 		}
 
-		currPoint.X = binary.LittleEndian.Uint16(graphicsBuf)
-		currPoint.Y = binary.LittleEndian.Uint16(graphicsBuf[2:])
-		currPoint.Color = graphicsBuf[4]
-
-		r.responseJson(currPoint)
+		r.responseBinary(pointFrameBuf)
 
 	}
 

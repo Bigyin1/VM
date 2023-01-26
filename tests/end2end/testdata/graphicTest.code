@@ -6,11 +6,10 @@ equ :conColor       10021
 
 main:
 
-mov r0, 512
 
 mov r1, 0
 mov r2, 0
-
+mov r0, 512
 
 line:
 
@@ -20,7 +19,7 @@ jmp(eq) :next
 
 st(db)  r1, [:conXCoord]
 st(db)  r2, [:conYCoord]
-st(b)   r0, [:conColor]
+st(hw)  r0, [:conColor]
 
 add r1, 1
 add r2, 1

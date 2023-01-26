@@ -42,26 +42,29 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 	respChan := make(chan []byte)
 	reqChan := make(chan []byte)
+	binaryRespChan := make(chan []byte)
 
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
 		time.Duration(600*time.Second))
 
 	client := &Client{
-		conn:   conn,
-		resp:   respChan,
-		req:    reqChan,
-		ctx:    ctx,
-		cancel: cancel,
+		conn:       conn,
+		textResp:   respChan,
+		binaryResp: binaryRespChan,
+		req:        reqChan,
+		ctx:        ctx,
+		cancel:     cancel,
 	}
 
 	runner := &Runner{
-		response:   respChan,
-		request:    reqChan,
-		vmExePath:  *vmPath,
-		asmExePath: *asmPath,
-		ctx:        ctx,
-		cancel:     cancel,
+		textResponse:   respChan,
+		binaryResponse: binaryRespChan,
+		request:        reqChan,
+		vmExePath:      *vmPath,
+		asmExePath:     *asmPath,
+		ctx:            ctx,
+		cancel:         cancel,
 	}
 
 	go client.readConn()

@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+const vmMajesticConsoleScreenFrameLen = 7
+
 func TestGraphic(t *testing.T) {
 
 	binFile := compileFile(t, "testdata/graphicTest.code")
@@ -28,9 +30,9 @@ func TestGraphic(t *testing.T) {
 	for i := 0; i < iters; i++ {
 		var x uint16
 		var y uint16
-		var color byte
+		var color uint32
 
-		graphicsBuf := make([]byte, 5)
+		graphicsBuf := make([]byte, vmMajesticConsoleScreenFrameLen)
 
 		n, err := vm.graphics.Read(graphicsBuf)
 		if err != nil {
@@ -45,9 +47,9 @@ func TestGraphic(t *testing.T) {
 
 		x = binary.LittleEndian.Uint16(graphicsBuf)
 		y = binary.LittleEndian.Uint16(graphicsBuf[2:])
-		color = graphicsBuf[4]
+		color = binary.LittleEndian.Uint32(append(graphicsBuf[4:], 0))
 
-		if x != uint16(i) || y != uint16(i) || color != byte(iters-i) {
+		if x != uint16(i) || y != uint16(i) || color != uint32(iters-i) {
 			vm.t.Errorf("got wrong data from graphics console: %d %d %d; wanted: %d %d %d\n",
 				x, y, color, i, i, iters-i)
 			return

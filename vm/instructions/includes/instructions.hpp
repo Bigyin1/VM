@@ -54,7 +54,7 @@ typedef struct Instruction
 
 } Instruction;
 
-typedef enum InstrEncDecErr
+typedef enum InstrCreationErr
 {
 
     INSTR_UNKNOWN,
@@ -62,9 +62,9 @@ typedef enum InstrEncDecErr
     INSTR_NOT_EXIST,
     INSTR_OK,
 
-} InstrEncDecErr;
+} InstrCreationErr;
 
-InstrEncDecErr NewInstruction(InstructionName name, Instruction *instr);
+InstrCreationErr NewInstruction(InstructionName name, Instruction *instr);
 
 const InstructionMeta *FindInsMetaByOpCode(InstrOpCode opCode);
 

@@ -25,7 +25,7 @@ static int execNextInstruction(CPU *cpu)
     if (reader == NULL)
     {
         fprintf(stderr, "vm: device %s unable to serve execute request at address: %zu\n",
-                dev->name, cpu->regIP - dev->lowAddr);
+                dev->name, cpu->regIP);
         return -1;
     }
 
@@ -33,7 +33,7 @@ static int execNextInstruction(CPU *cpu)
 
     Instruction instr = {0};
 
-    InstrEncDecErr err = Decode(&instr, reader);
+    InstrCreationErr err = Decode(&instr, reader);
     if (err == INSTR_NOT_EXIST)
     {
         fprintf(stderr, "vm: bad instruction; finished executing\n");

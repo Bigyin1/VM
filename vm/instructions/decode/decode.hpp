@@ -4,6 +4,6 @@
 
 #include "instructions.hpp"
 
-InstrEncDecErr Decode(Instruction *ins, FILE *r);
+InstrCreationErr Decode(Instruction *ins, FILE *r);
 
 #endif

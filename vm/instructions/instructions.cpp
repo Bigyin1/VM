@@ -62,7 +62,7 @@ static int findArgSetIdx(const InstructionMeta *im, ArgSet args)
     return -1;
 }
 
-InstrEncDecErr NewInstruction(InstructionName name, Instruction *instr)
+InstrCreationErr NewInstruction(InstructionName name, Instruction *instr)
 {
 
     const InstructionMeta *im = FindInsMetaByName(name);

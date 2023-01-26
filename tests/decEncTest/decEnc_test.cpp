@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "binformat.hpp"
-#include "assemble.hpp"
+#include "assemble/assemble.hpp"
 #include "instructions.hpp"
 #include "decode.hpp"
 
@@ -381,11 +381,13 @@ static FILE *getTextSectionData(char *buf, size_t sz)
     }
 
     SectionHeader *textSect = sectHdrs + 0;
+    size_t textOffset = textSect->offset;
+    size_t textSz = textSect->size;
 
     free(sectHdrs);
     fclose(f);
 
-    f = fmemopen(buf + textSect->offset, textSect->size, "r");
+    f = fmemopen(buf + textOffset, textSz, "r");
 
     return f;
 }
@@ -401,7 +403,7 @@ int main(int argc, char **argv)
     FILE *in = fopen(argv[1], "r");
     if (in == NULL)
     {
-        perror("decEncTest: ");
+        perror("decEncTest:");
         return 1;
     }
 
@@ -411,7 +413,7 @@ int main(int argc, char **argv)
     if (out == NULL)
         return 1;
 
-    if (assemble(in, out) < 0)
+    if (assemble(in, out) != ASM_OK)
         return 1;
 
     FILE *f = NULL;
@@ -422,7 +424,7 @@ int main(int argc, char **argv)
     }
 
     Instruction instr = {0};
-    InstrEncDecErr err = INSTR_OK;
+    InstrCreationErr err = INSTR_OK;
 
     size_t i = 0;
     while (!feof(f))

@@ -5,10 +5,16 @@
 #include <stddef.h>
 #include "cpu.hpp"
 
-int InitVM(CPU *cpu, FILE *prog);
+int InitVM(CPU *cpu, FILE *consIn, FILE *consOut);
+
+int LoadExeFile(CPU *cpu, FILE *in);
+
+void RunVM(CPU *cpu);
 
 void DestructVM(CPU *cpu);
 
-void RunVM(CPU *cpu);
+extern const size_t romDevIdx;
+extern const size_t ramDevIdx;
+extern const size_t consoleDevIdx;
 
 #endif

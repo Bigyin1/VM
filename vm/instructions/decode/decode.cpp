@@ -4,7 +4,7 @@
 
 static uint8_t regCodeMask = 0b00001111;
 
-static InstrEncDecErr decodeCommon(Argument *arg, FILE *r)
+static InstrCreationErr decodeCommon(Argument *arg, FILE *r)
 {
 
     switch (arg->Type)
@@ -50,7 +50,7 @@ static InstrEncDecErr decodeCommon(Argument *arg, FILE *r)
     return INSTR_OK;
 }
 
-static InstrEncDecErr decode_ld(Instruction *ins, FILE *r)
+static InstrCreationErr decode_ld(Instruction *ins, FILE *r)
 {
 
     // arg 1
@@ -66,7 +66,7 @@ static InstrEncDecErr decode_ld(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-static InstrEncDecErr decode_st(Instruction *ins, FILE *r)
+static InstrCreationErr decode_st(Instruction *ins, FILE *r)
 {
 
     // arg 1
@@ -81,7 +81,7 @@ static InstrEncDecErr decode_st(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-static InstrEncDecErr decode_mov(Instruction *ins, FILE *r)
+static InstrCreationErr decode_mov(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
@@ -106,7 +106,7 @@ static InstrEncDecErr decode_mov(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-static InstrEncDecErr decode_push(Instruction *ins, FILE *r)
+static InstrCreationErr decode_push(Instruction *ins, FILE *r)
 {
 
     if (ins->Arg1.Type == ArgImm)
@@ -133,7 +133,7 @@ static InstrEncDecErr decode_push(Instruction *ins, FILE *r)
     return INSTR_OK;
 }
 
-static InstrEncDecErr decode_pop(Instruction *ins, FILE *r)
+static InstrCreationErr decode_pop(Instruction *ins, FILE *r)
 {
 
     if (decodeCommon(&ins->Arg1, r) != INSTR_OK)
@@ -146,7 +146,7 @@ static InstrEncDecErr decode_pop(Instruction *ins, FILE *r)
     return INSTR_OK;
 }
 
-static InstrEncDecErr decodeARITHM(Instruction *ins, FILE *r)
+static InstrCreationErr decodeARITHM(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
@@ -170,7 +170,7 @@ static InstrEncDecErr decodeARITHM(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-static InstrEncDecErr decodeARITHMF(Instruction *ins, FILE *r)
+static InstrCreationErr decodeARITHMF(Instruction *ins, FILE *r)
 {
 
     uint8_t byte = 0;
@@ -193,55 +193,55 @@ static InstrEncDecErr decodeARITHMF(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-static InstrEncDecErr decode_add(Instruction *ins, FILE *r)
+static InstrCreationErr decode_add(Instruction *ins, FILE *r)
 {
 
     return decodeARITHM(ins, r);
 }
 
-static InstrEncDecErr decode_addf(Instruction *ins, FILE *r)
+static InstrCreationErr decode_addf(Instruction *ins, FILE *r)
 {
 
     return decodeARITHMF(ins, r);
 }
 
-static InstrEncDecErr decode_sub(Instruction *ins, FILE *r)
+static InstrCreationErr decode_sub(Instruction *ins, FILE *r)
 {
 
     return decodeARITHM(ins, r);
 }
 
-static InstrEncDecErr decode_subf(Instruction *ins, FILE *r)
+static InstrCreationErr decode_subf(Instruction *ins, FILE *r)
 {
 
     return decodeARITHMF(ins, r);
 }
 
-static InstrEncDecErr decode_mul(Instruction *ins, FILE *r)
+static InstrCreationErr decode_mul(Instruction *ins, FILE *r)
 {
 
     return decodeARITHM(ins, r);
 }
 
-static InstrEncDecErr decode_mulf(Instruction *ins, FILE *r)
+static InstrCreationErr decode_mulf(Instruction *ins, FILE *r)
 {
 
     return decodeARITHMF(ins, r);
 }
 
-static InstrEncDecErr decode_div(Instruction *ins, FILE *r)
+static InstrCreationErr decode_div(Instruction *ins, FILE *r)
 {
 
     return decodeARITHM(ins, r);
 }
 
-static InstrEncDecErr decode_divf(Instruction *ins, FILE *r)
+static InstrCreationErr decode_divf(Instruction *ins, FILE *r)
 {
 
     return decodeARITHMF(ins, r);
 }
 
-static InstrEncDecErr decode_jmp(Instruction *ins, FILE *r)
+static InstrCreationErr decode_jmp(Instruction *ins, FILE *r)
 {
     uint8_t byte = 0;
     if (fread(&byte, 1, 1, r) == 0)
@@ -254,7 +254,7 @@ static InstrEncDecErr decode_jmp(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg1, r);
 }
 
-static InstrEncDecErr decode_call(Instruction *ins, FILE *r)
+static InstrCreationErr decode_call(Instruction *ins, FILE *r)
 {
 
     ins->Arg1._immArgSz = DataWord;
@@ -262,28 +262,28 @@ static InstrEncDecErr decode_call(Instruction *ins, FILE *r)
     return decodeCommon(&ins->Arg1, r);
 }
 
-static InstrEncDecErr decode_cmp(Instruction *ins, FILE *r)
+static InstrCreationErr decode_cmp(Instruction *ins, FILE *r)
 {
 
     return decodeARITHM(ins, r);
 }
 
-static InstrEncDecErr decodeNoArgs(Instruction *, FILE *)
+static InstrCreationErr decodeNoArgs(Instruction *, FILE *)
 {
     return INSTR_OK;
 }
 
-static InstrEncDecErr decode_ret(Instruction *i, FILE *r)
+static InstrCreationErr decode_ret(Instruction *i, FILE *r)
 {
     return decodeNoArgs(i, r);
 }
 
-static InstrEncDecErr decode_halt(Instruction *i, FILE *r)
+static InstrCreationErr decode_halt(Instruction *i, FILE *r)
 {
     return decodeNoArgs(i, r);
 }
 
-typedef InstrEncDecErr (*DecFunc)(Instruction *, FILE *);
+typedef InstrCreationErr (*DecFunc)(Instruction *, FILE *);
 
 DecFunc getDecoder(InstrOpCode opCode)
 {
@@ -308,7 +308,7 @@ DecFunc getDecoder(InstrOpCode opCode)
 
 static const uint8_t opCodeMask = 0b00011111;
 
-static InstrEncDecErr newInstructionFromOpCode(Instruction *ins, InstrOpCode opCode, uint8_t argSetIdx)
+static InstrCreationErr newInstructionFromOpCode(Instruction *ins, InstrOpCode opCode, uint8_t argSetIdx)
 {
     assert(ins != NULL);
 
@@ -327,7 +327,7 @@ static InstrEncDecErr newInstructionFromOpCode(Instruction *ins, InstrOpCode opC
     return INSTR_OK;
 }
 
-InstrEncDecErr Decode(Instruction *ins, FILE *r)
+InstrCreationErr Decode(Instruction *ins, FILE *r)
 {
     assert(ins != NULL);
     assert(r != NULL);
@@ -340,7 +340,7 @@ InstrEncDecErr Decode(Instruction *ins, FILE *r)
     InstrOpCode opCode = (InstrOpCode)(byte & opCodeMask);
     uint8_t argSetIdx = (uint8_t)(byte >> 5);
 
-    InstrEncDecErr err = newInstructionFromOpCode(ins, opCode, argSetIdx);
+    InstrCreationErr err = newInstructionFromOpCode(ins, opCode, argSetIdx);
     if (err != INSTR_OK)
         return err;
 

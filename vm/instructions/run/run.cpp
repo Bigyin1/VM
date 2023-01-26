@@ -20,7 +20,7 @@ static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
     if (res < 0)
     {
         fprintf(stderr, "vm: device %s unable to serve write request at address: %zu\n",
-                dev->name, cpu->regIP - dev->lowAddr);
+                dev->name, addr);
         return -1;
     }
     return 0;
@@ -34,7 +34,7 @@ static int readFromAddr(CPU *cpu, size_t addr, uint64_t *val, DataSize sz)
     Device *dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
-        fprintf(stderr, "2 vm: unmapped address: %zu\n, cpu: %zu", addr, cpu->regIP);
+        fprintf(stderr, "vm: unmapped address: %zu\n", addr);
         return -1;
     }
 
@@ -42,7 +42,7 @@ static int readFromAddr(CPU *cpu, size_t addr, uint64_t *val, DataSize sz)
     if (res < 0)
     {
         fprintf(stderr, "vm: device %s unable to serve read request at address: %zu\n",
-                dev->name, cpu->regIP - dev->lowAddr);
+                dev->name, addr);
         return -1;
     }
 
@@ -56,7 +56,7 @@ static int run_ret(CPU *cpu, Instruction *ins)
 
     if (cpu->gpRegs[RSP] < 8)
     {
-        printf("vm: ret: stack pointer in invalid state\n");
+        fprintf(stderr, "vm: ret: stack pointer in invalid state\n");
         return -1;
     }
 
@@ -381,6 +381,7 @@ static int run_jmp(CPU *cpu, Instruction *ins)
 {
 
     JumpType jmpType = ins->JmpType;
+
     switch (jmpType)
     {
     case JumpUncond:

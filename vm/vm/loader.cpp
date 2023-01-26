@@ -1,6 +1,7 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include "vm.hpp"
 #include "binformat.hpp"
-#include "loader.hpp"
 
 static int loadSection(CPU *cpu, SectionHeader *sectHdr, FILE *in)
 {
@@ -11,21 +12,21 @@ static int loadSection(CPU *cpu, SectionHeader *sectHdr, FILE *in)
     Device *dev = FindDevice(cpu->devices, sectHdr->addr);
     if (dev == NULL)
     {
-        printf("vm: failed to load section on unmapped address: %zu\n", sectHdr->addr);
+        fprintf(stderr, "vm: failed to load section on unmapped address: %zu\n", sectHdr->addr);
         return -1;
     }
 
     if (dev->getWriter == NULL)
     {
-        printf("vm: device %s unable to be used as storage\n", dev->name);
+        fprintf(stderr, "vm: device %s unable to be used as storage\n", dev->name);
         return -1;
     }
 
     FILE *writer = dev->getWriter(dev->concreteDevice, sectHdr->addr - dev->lowAddr);
     if (writer == NULL)
     {
-        printf("vm: failed to load section: device %s unable to serve write request at address: %zu\n",
-               dev->name, sectHdr->addr - dev->lowAddr);
+        fprintf(stderr, "vm: failed to load section: device %s unable to serve write request at address: %zu\n",
+                dev->name, sectHdr->addr - dev->lowAddr);
         return -1;
     }
 
@@ -45,14 +46,14 @@ static int loadSection(CPU *cpu, SectionHeader *sectHdr, FILE *in)
     if (fread(buf, sectHdr->size, 1, in) != 1)
     {
         free(buf);
-        perror("asm: load section: ");
+        perror("asm: load section:");
         return -1;
     }
 
     if (fwrite(buf, sectHdr->size, 1, writer) != 1)
     {
         free(buf);
-        perror("asm: load section: ");
+        perror("asm: load section:");
         return -1;
     }
 
@@ -61,7 +62,7 @@ static int loadSection(CPU *cpu, SectionHeader *sectHdr, FILE *in)
     return 0;
 }
 
-int loadExeFile(CPU *cpu, FILE *in)
+int LoadExeFile(CPU *cpu, FILE *in)
 {
     BinformatHeader hdr = {0};
     if (getObjFileHeader(in, &hdr) < 0)
@@ -85,7 +86,7 @@ int loadExeFile(CPU *cpu, FILE *in)
     SectionHeader *sectHdrs = getSectionHeaders(in, hdr.sectionsCount);
     if (sectHdrs == NULL)
     {
-        perror("asm: load exe file: ");
+        perror("asm: load exe file:");
         return -1;
     }
 

@@ -163,7 +163,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
 static ParserErrCode createInstruction(Parser *parser, commandNode *node)
 {
 
-    InstrEncDecErr instrErr = NewInstruction(node->name, &node->instr);
+    InstrCreationErr instrErr = NewInstruction(node->name, &node->instr);
     if (instrErr == INSTR_UNKNOWN)
     {
 

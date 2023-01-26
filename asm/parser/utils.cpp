@@ -77,7 +77,7 @@ DataSize evalImmMinDataSz(uint64_t val, TokenType type)
             return DataHalfWord;
         return DataWord;
     }
-    int64_t sVal = val;
+    int64_t sVal = (int64_t)val;
 
     if (sVal <= INT8_MAX && sVal >= INT8_MIN)
         return DataByte;

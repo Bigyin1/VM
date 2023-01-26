@@ -69,11 +69,11 @@ int RAMWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz)
 
     RAM *ram = (RAM *)dev;
 
-    size_t toRead = DataSzToBytesSz(sz);
-    if (addr + toRead > ram->sz)
+    size_t toWrite = DataSzToBytesSz(sz);
+    if (addr + toWrite > ram->sz)
         return -1;
 
-    memcpy(ram->mem + addr, &data, toRead);
+    memcpy(ram->mem + addr, &data, toWrite);
 
     return 0;
 }

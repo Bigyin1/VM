@@ -1,4 +1,4 @@
-add_library(vm_lib vm.cpp loader.cpp init.cpp)
+add_library(vm_lib vm.cpp loader.cpp initVM.cpp)
 
 target_link_libraries(vm_lib
     PRIVATE binformat instr_run instr_decode project_options project_warnings

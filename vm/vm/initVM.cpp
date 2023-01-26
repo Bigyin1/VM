@@ -5,12 +5,11 @@
 #include "rom.hpp"
 #include "ram.hpp"
 #include "console.hpp"
-#include "loader.hpp"
 #include "vm.hpp"
 
-static size_t romDevIdx = 0;
-static size_t ramDevIdx = 1;
-static size_t consoleDevIdx = 2;
+const size_t romDevIdx = 0;
+const size_t ramDevIdx = 1;
+const size_t consoleDevIdx = 2;
 
 #define DEVICE(idx) cpu->devices[idx]
 
@@ -77,24 +76,22 @@ static int attachConsole(CPU *cpu, size_t addr, FILE *r, FILE *w)
     return 0;
 }
 
-int InitVM(CPU *cpu, FILE *prog)
+int InitVM(CPU *cpu, FILE *consIn, FILE *consOut)
 {
     assert(cpu != NULL);
 
-    if (attachROM(cpu, 0, 4096) < 0)
+    if (attachROM(cpu, 0, 4096) < 0) // TODO: add user's configuration for devices
         return -1;
 
     if (attachRAM(cpu, 4096, 4096) < 0)
         return -1;
 
-    if (attachConsole(cpu, 10000, stdin, stdout) < 0)
-        return -1;
+    if (consIn != NULL && consOut != NULL)
+        if (attachConsole(cpu, 10000, consIn, consOut) < 0)
+            return -1;
 
     cpu->regIP = DEVICE(romDevIdx).lowAddr;
     cpu->gpRegs[RSP] = DEVICE(ramDevIdx).lowAddr; // SP
-
-    if (loadExeFile(cpu, prog) < 0)
-        return -1;
 
     return 0;
 }

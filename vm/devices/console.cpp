@@ -27,6 +27,9 @@ int ConstructMajesticConsole(MajesticConsole *con, FILE *r, FILE *w)
 
 void DestructMajesticConsole(MajesticConsole *con)
 {
+    if (con == NULL)
+        return;
+
     fclose(con->r);
     fclose(con->w);
 
@@ -38,20 +41,18 @@ int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize)
 
     MajesticConsole *console = (MajesticConsole *)dev;
 
-    int n = 0;
-
     if (addr == doubleMemAddr)
     {
-        n = fscanf(console->r, "%lf", data);
-        fscanf(console->r, "%*c");
+        fscanf(console->r, "%lf", data);
+        fscanf(console->r, "%*c"); // read out newline
     }
     else if (addr == intMemAddr)
     {
-        n = fscanf(console->r, "%ld", data);
+        fscanf(console->r, "%ld", data);
         fscanf(console->r, "%*c");
     }
     else if (addr == charMemAddr)
-        n = fscanf(console->r, "%c", data);
+        fscanf(console->r, "%c", data);
     else
         return -1;
 
@@ -63,22 +64,21 @@ int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize)
 
     MajesticConsole *console = (MajesticConsole *)dev;
 
-    int n = 0;
     if (addr == doubleMemAddr)
     {
         double d = 0;
         memcpy(&d, &data, sizeof(double));
-        n = fprintf(console->w, "%lf", d);
+        fprintf(console->w, "%lf", d);
     }
     else if (addr == intMemAddr)
     {
         int64_t i = (int64_t)data;
-        n = fprintf(console->w, "%ld", i);
+        fprintf(console->w, "%ld", i);
     }
     else if (addr == charMemAddr)
     {
         char c = (char)data;
-        n = fprintf(console->w, "%c", c);
+        fprintf(console->w, "%c", c);
     }
     else if (addr == xCoordMemAddr || addr == yCoordMemAddr)
     {

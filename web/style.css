@@ -28,9 +28,14 @@
 
 
 .screen {
-
+    padding: 7px;
     grid-column: 1 / 1;
     grid-row: 1 / 1;
+}
+
+.screenCont {
+
+    padding: 7px;
 }
 
 

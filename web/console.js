@@ -109,7 +109,11 @@ export class Console {
         this.currentRow.scrollTop = this.currentRow.scrollHeight;
     }
 
-    putText(text) {
+    putText(text, isError) {
+        if (isError)
+            this.appendRow()
+
+
         for (const l of text) {
             if (l === '\n') {
                 this.appendRow()

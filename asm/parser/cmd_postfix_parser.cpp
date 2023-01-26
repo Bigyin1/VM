@@ -54,19 +54,8 @@ ParserErrCode parseInstrPostfix(Parser *parser, commandNode *node)
     if (eatToken(parser, ASM_T_ID) != PARSER_OK)
         return PARSER_BAD_COMMAND;
 
-    if (strcmp(node->name, "jmp") == 0)
-    {
-        if (parseJumpPostfix(node, postfix) == PARSER_OK)
-            return PARSER_OK;
-
-        ParserError *err = addNewParserError(parser, PARSER_BAD_CMD_POSTFIX);
-
-        err->token = postfix;
-        err->line = line;
-        err->column = column;
-
+    if (parseJumpPostfix(node, postfix) == PARSER_OK)
         return PARSER_OK;
-    }
 
     if (strcmp(postfix, "b") == 0)
     {

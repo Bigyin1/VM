@@ -6,11 +6,14 @@
 #include "console.hpp"
 #include "ram.hpp"
 #include "rom.hpp"
+#include "vm.hpp"
 
-extern const MajesticConsoleConfig consoleConfig;
+extern MajesticConsoleConfig consoleConfig;
 
-extern const ROMConfig romConfig;
+extern ROMConfig romConfig;
 
-extern const RAMConfig ramConfig;
+extern RAMConfig ramConfig;
+
+extern VMConfig vmConfig;
 
 #endif

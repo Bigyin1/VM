@@ -32,7 +32,7 @@ typedef struct MajesticConsoleConfig
     int consoleInFD;
     int consoleOutFD;
     int graphicsPixelOutFD;
-    int graphicsScreenOutFD; // unused
+    int graphicsScreenOutFD; // unused TODO
     int configuratonInFD;    // unused
     int userInfoOutFD;       // unused
 

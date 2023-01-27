@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "vmconfig/config.hpp"
 #include "vm.hpp"
 
 int main(int argc, char **argv)
@@ -16,21 +17,21 @@ int main(int argc, char **argv)
 
     CPU cpu = {0};
 
-    if (InitVM(&cpu) < 0)
+    if (InitVM(&cpu, &vmConfig) < 0)
     {
-        DestructVM(&cpu);
+        DestructVM(&cpu, &vmConfig);
         return EXIT_FAILURE;
     }
 
     if (LoadExeFile(&cpu, in) < 0)
     {
-        DestructVM(&cpu);
+        DestructVM(&cpu, &vmConfig);
         return EXIT_FAILURE;
     }
 
     RunVM(&cpu);
 
-    DestructVM(&cpu);
+    DestructVM(&cpu, &vmConfig);
 
     return EXIT_SUCCESS;
 }

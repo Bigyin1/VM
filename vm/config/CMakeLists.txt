@@ -3,10 +3,11 @@
 add_library(vm_config config.cpp)
 target_link_libraries(vm_config
     PRIVATE project_options project_warnings
-    PUBLIC devices)
+    PUBLIC vm_lib devices)
 
 target_include_directories(vm_config PUBLIC .)
 
+include(${CMAKE_SOURCE_DIR}/configs/VMConf.cmake)
 include(${CMAKE_SOURCE_DIR}/configs/MajesticConsoleConf.cmake)
 include(${CMAKE_SOURCE_DIR}/configs/RamConf.cmake)
 include(${CMAKE_SOURCE_DIR}/configs/RomConf.cmake)

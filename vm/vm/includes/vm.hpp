@@ -3,15 +3,24 @@
 #define VM_HPP
 
 #include <stddef.h>
+#include <stdbool.h>
 #include "cpu.hpp"
 
-int InitVM(CPU *cpu);
+typedef struct VMConfig
+{
+    bool attachConsole;
+    bool attachRAM;
+    bool attachROM;
+
+} VMConfig;
+
+int InitVM(CPU *cpu, const VMConfig *cfg);
 
 int LoadExeFile(CPU *cpu, FILE *in);
 
 void RunVM(CPU *cpu);
 
-void DestructVM(CPU *cpu);
+void DestructVM(CPU *cpu, const VMConfig *cfg);
 
 extern const size_t romDevIdx;
 extern const size_t ramDevIdx;

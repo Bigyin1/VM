@@ -41,17 +41,17 @@ static int attachConsole(CPU *cpu, const MajesticConsoleConfig *cfg)
     return 0;
 }
 
-int InitVM(CPU *cpu)
+int InitVM(CPU *cpu, const VMConfig *cfg)
 {
     assert(cpu != NULL);
 
-    if (attachROM(cpu, &romConfig) < 0)
+    if (cfg->attachROM && attachROM(cpu, &romConfig) < 0)
         return -1;
 
-    if (attachRAM(cpu, &ramConfig) < 0)
+    if (cfg->attachRAM && attachRAM(cpu, &ramConfig) < 0)
         return -1;
 
-    if (attachConsole(cpu, &consoleConfig) < 0)
+    if (cfg->attachConsole && attachConsole(cpu, &consoleConfig) < 0)
         return -1;
 
     cpu->gpRegs[RSP] = cpu->devices[ramDevIdx].lowAddr; // Default SP
@@ -59,11 +59,13 @@ int InitVM(CPU *cpu)
     return 0;
 }
 
-void DestructVM(CPU *cpu)
+void DestructVM(CPU *cpu, const VMConfig *cfg)
 {
     assert(cpu != NULL);
-
-    DestructRAM(&cpu->devices[ramDevIdx]);
-    DestructROM(&cpu->devices[romDevIdx]);
-    DestructMajesticConsole(&cpu->devices[consoleDevIdx]);
+    if (cfg->attachRAM)
+        DestructRAM(&cpu->devices[ramDevIdx]);
+    if (cfg->attachROM)
+        DestructROM(&cpu->devices[romDevIdx]);
+    if (cfg->attachConsole)
+        DestructMajesticConsole(&cpu->devices[consoleDevIdx]);
 }

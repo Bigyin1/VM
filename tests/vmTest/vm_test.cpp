@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "vmconfig/config.hpp"
 #include "instructions.hpp"
 #include "registers.hpp"
 #include "run.hpp"
@@ -13,14 +14,17 @@ typedef bool (*vmTest)(CPU *cpu);
 static bool vmTestWrapper(vmTest test)
 {
     CPU cpu = {0};
-    if (InitVM(&cpu, NULL, NULL) < 0)
+
+    vmConfig.attachConsole = false;
+
+    if (InitVM(&cpu, &vmConfig) < 0)
         return false;
 
     bool testStat = test(&cpu);
 
     testStat ? printf("SUCCESS\n") : printf("FAILED\n");
 
-    DestructVM(&cpu);
+    DestructVM(&cpu, &vmConfig);
 
     return testStat;
 }

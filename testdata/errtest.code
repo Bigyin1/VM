@@ -1,33 +1,33 @@
 
-#.data 4096 # load address
+.text 0
+equ :conXCoord      10017
+equ :conYCoord      10019
+equ :conColor       10021
+
+main:
 
 
-#hello:
-#db 'H', 'e', 'l', 'l', 'o',
-   # ' ', 'W' , 'o', 'r', 'l', 'd', 0
-    
+mov r1, 0
+mov r2, 0
+mov r0, 200
+mov r3, 0
 
-#array1:
-#ddb 12, 13
+line:
 
-#array2:
-#dhw 454545, 56566
-
-#dw :array1, :array2
+cmp r0, 0
+jmp(eq) :next
 
 
+st(db)  r1, [:conXCoord]
+st(db)  r2, [:conYCoord]
+st(hw)  r3, [:conColor]
 
-.text 
-ldd t2, [10000]
-st r2, ((10000)
+add r1, 1
+add r2, 1
 
+sub r0, 1
+jmp :line
 
-mov r1, 32 st(b) r1, [10016]
-
-mof r1, tt
-st r1, [10008]
-
-mov(b) r1, '\J'
-st(b) r1, [10016]
+next:
 
 halt

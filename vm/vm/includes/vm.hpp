@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include "cpu.hpp"
 
-int InitVM(CPU *cpu, FILE *consIn, FILE *consOut);
+int InitVM(CPU *cpu);
 
 int LoadExeFile(CPU *cpu, FILE *in);
 

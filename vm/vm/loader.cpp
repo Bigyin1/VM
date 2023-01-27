@@ -100,6 +100,8 @@ int LoadExeFile(CPU *cpu, FILE *in)
         }
     }
 
+    cpu->regIP = hdr.entrypoint;
+
     free(sectHdrs);
     return 0;
 }

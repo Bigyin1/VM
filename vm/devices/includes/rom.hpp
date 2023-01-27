@@ -5,21 +5,29 @@
 #include <cstddef>
 #include <stdint.h>
 #include <stdio.h>
+#include "device.hpp"
 #include "argument.hpp"
+
+typedef struct ROMConfig
+{
+    size_t address;
+    size_t size;
+
+} ROMConfig;
 
 typedef struct ROM
 {
+    const ROMConfig *config;
     char *mem;
-    size_t sz;
 
     FILE *reader;
     FILE *writer;
 
 } ROM;
 
-int ConstructROM(ROM *rom, size_t sz);
+int ConstructROM(Device *rom, const ROMConfig *config);
 
-void DestructROM(ROM *rom);
+void DestructROM(Device *rom);
 
 FILE *ROMGetReaderOnAddr(void *rom, size_t addr);
 

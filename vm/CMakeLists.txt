@@ -1,4 +1,5 @@
 
+add_subdirectory(config)
 add_subdirectory(devices)
 add_subdirectory(cpu)
 add_subdirectory(instructions)

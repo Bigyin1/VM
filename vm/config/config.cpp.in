@@ -1,0 +1,29 @@
+#include "vmconfig/config.hpp"
+
+const MajesticConsoleConfig consoleConfig = {
+
+    .address =              @ConsoleAddress@,
+    .consoleInFD =          @ConsoleInFD@,
+    .consoleOutFD =         @ConsoleOutFD@,
+    .graphicsPixelOutFD =   @graphicsPixelOutFD@,
+    .graphicsScreenOutFD =  @graphicsScreenOutFD@,
+    .configuratonInFD =     @consoleConfiguratonInFD@,
+    .userInfoOutFD =        @consoleUserInfoOutFD@,
+
+};
+
+
+const RAMConfig ramConfig = {
+
+    .address =  @RamAddress@,
+    .size =     @RamSize@,
+
+};
+
+
+const ROMConfig romConfig = {
+
+    .address =  @RomAddress@,
+    .size =     @RomSize@,
+
+};

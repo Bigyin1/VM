@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 
     CPU cpu = {0};
 
-    if (InitVM(&cpu, stdin, stdout) < 0)
+    if (InitVM(&cpu) < 0)
     {
         DestructVM(&cpu);
         return EXIT_FAILURE;

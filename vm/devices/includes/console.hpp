@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <stdint.h>
 #include <stdio.h>
+#include "device.hpp"
 #include "argument.hpp"
 
 #pragma pack(push, 1)
@@ -24,20 +25,35 @@ typedef struct MajesticConsoleMemMap
 
 const size_t MajesticConsoleMemSize = sizeof(MajesticConsoleMemMap);
 
+typedef struct MajesticConsoleConfig
+{
+    size_t address;
+
+    int consoleInFD;
+    int consoleOutFD;
+    int graphicsPixelOutFD;
+    int graphicsScreenOutFD; // unused
+    int configuratonInFD;    // unused
+    int userInfoOutFD;       // unused
+
+} MajesticConsoleConfig;
+
 typedef struct MajesticConsole
 {
     MajesticConsoleMemMap mem;
 
-    FILE *r;
-    FILE *w;
+    const MajesticConsoleConfig *config;
+
+    FILE *formattedIn;
+    FILE *formattedOut;
 
     int graphicsPipeFD;
 
 } MajesticConsole;
 
-int ConstructMajesticConsole(MajesticConsole *con, FILE *r, FILE *w);
+int ConstructMajesticConsole(Device *conDev, const MajesticConsoleConfig *config);
 
-void DestructMajesticConsole(MajesticConsole *con);
+void DestructMajesticConsole(Device *conDev);
 
 int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz);
 

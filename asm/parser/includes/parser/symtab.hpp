@@ -7,22 +7,22 @@
 
 typedef struct symbolData
 {
-    const char *label;
+    const char *name;
+    const char *sectionName;
     uint64_t val;
 
-    uint64_t *imports[16];
-    size_t importsSz;
-
-    bool present;
+    bool defined;
+    bool absolute;
 
 } symbolData;
 
 typedef struct symbolTable
 {
-    symbolData symbols[64];
+    symbolData symbols[72];
     size_t symbolsSz;
-} symbolTable;
 
-const symbolData *findSymbolByName(symbolTable *symTab, const char *name);
+    symbolData *symTab[72];
+    size_t symTabSz;
+} symbolTable;
 
 #endif

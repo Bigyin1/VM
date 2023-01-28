@@ -5,7 +5,7 @@
 #include "encode.hpp"
 #include "command_parser.hpp"
 #include "cmd_postfix_parser.hpp"
-#include "labels.hpp"
+#include "symbols.hpp"
 #include "utils.hpp"
 #include "directives.hpp"
 #include "errors.hpp"
@@ -18,7 +18,9 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
     if (currTokenType(parser) == ASM_T_LABEL)
     {
         char *labelVal = currTokenVal(parser);
-        addLabelImport(parser, labelVal, &arg->Imm);
+
+        addSymbolReference(parser, labelVal, node->offset + EvalInstrSymbolOffset(&node->instr));
+
         eatToken(parser, ASM_T_LABEL);
 
         if (currTokenType(parser) == ASM_T_SIGNED_INT ||
@@ -99,7 +101,9 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
     if (currTokenType(parser) == ASM_T_LABEL)
     {
         char *labelVal = currTokenVal(parser);
-        addLabelImport(parser, labelVal, &arg->Imm);
+
+        addSymbolReference(parser, labelVal, node->offset + EvalInstrSymbolOffset(&node->instr));
+
         arg->Type = ArgImm;
 
         arg->_immArgSz = DataWord; // address size
@@ -164,22 +168,13 @@ static ParserErrCode createInstruction(Parser *parser, commandNode *node)
 {
 
     InstrCreationErr instrErr = NewInstruction(node->name, &node->instr);
-    if (instrErr == INSTR_UNKNOWN)
-    {
-
-        ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_COMMAND);
-
-        err->token = node->name;
-        err->line = node->line;
-        return PARSER_OK;
-    }
     if (instrErr == INSTR_WRONG_OPERANDS)
     {
         ParserError *err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
 
         err->token = node->name;
         err->line = node->line;
-        return PARSER_OK;
+        return PARSER_BAD_COMMAND;
     }
 
     parser->currSection->currOffset += EvalInstrSize(&node->instr);
@@ -199,7 +194,7 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
     {
         node->label = name;
 
-        if (defineNewLabel(parser, node->label, parser->currSection->addr + node->offset) == PARSER_LABEL_REDEF)
+        if (defineNewSymbol(parser, node->label, node->offset) == PARSER_LABEL_REDEF)
         {
             ParserError *err = addNewParserError(parser, PARSER_LABEL_REDEF);
 
@@ -226,6 +221,15 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
         return err;
 
     node->Type = CMD_INSTR;
+    node->instr.im = FindInsMetaByName(node->name);
+    if (node->instr.im == NULL)
+    {
+        ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_COMMAND);
+
+        err->token = node->name;
+        err->line = node->line;
+        return PARSER_BAD_COMMAND;
+    }
 
     if (currTokenType(parser) == ASM_T_L_SIMP_PAREN)
     {

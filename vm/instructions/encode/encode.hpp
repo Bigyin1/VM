@@ -8,4 +8,6 @@ int Encode(Instruction *ins, FILE *w);
 
 size_t EvalInstrSize(Instruction *ins);
 
+size_t EvalInstrSymbolOffset(Instruction *ins);
+
 #endif

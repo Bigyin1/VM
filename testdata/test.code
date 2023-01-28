@@ -10,6 +10,9 @@ equ :consoleChar    10016
 .text 0
 main:
 
+
+call :someFunc
+
 call :printHelloFunc
 
 sub r0, :hello

@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include "parser/parser.hpp"
+#include "binformat.hpp"
 #include "errors.hpp"
 
 typedef struct AsmEncoder
@@ -11,7 +12,25 @@ typedef struct AsmEncoder
     Parser *parser;
     FILE *out;
 
-    size_t offset;
+    BinformatHeader header;
+
+    SectionHeader *usrSectHdrs;
+    size_t usrSectionCount;
+
+    SectionHeader *relocSectHdrs;
+    size_t relocSectionCount;
+
+    uint32_t relocSectsBodyEnd;
+
+    SectionHeader *symTabHdr;
+    SectionHeader *strTabHdr;
+
+    SymTabEntry *symTable;
+    uint32_t symTabSz;
+
+    char *strTab;
+    uint32_t strTabCurrOffset;
+    uint32_t strTabCapacity;
 
 } AsmEncoder;
 

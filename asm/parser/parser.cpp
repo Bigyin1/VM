@@ -4,7 +4,7 @@
 #include "parser/parser.hpp"
 #include "section_parser.hpp"
 #include "utils.hpp"
-#include "labels.hpp"
+#include "symbols.hpp"
 
 static ParserErrCode reallocSections(Parser *parser)
 {
@@ -63,7 +63,7 @@ ParserErrCode ParseTokens(Parser *parser)
             return err;
     }
 
-    return resolveImports(parser);
+    return PARSER_OK;
 }
 
 ParserErrCode ParserInit(Parser *p, Tokenizer *toks)

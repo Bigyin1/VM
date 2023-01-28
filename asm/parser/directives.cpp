@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "directives.hpp"
 #include "utils.hpp"
-#include "labels.hpp"
+#include "symbols.hpp"
 #include "errors.hpp"
 
 typedef struct dataDirective
@@ -95,7 +95,7 @@ static ParserErrCode parseDataDefDirectiveArgs(Parser *parser, commandNode *node
         if (currTokenType(parser) != ASM_T_LABEL)
             memcpy(node->data + dataIdx, &currTokenNumVal(parser), sz);
         else
-            addLabelImport(parser, currTokenVal(parser), (uint64_t *)(node->data + dataIdx));
+            addSymbolReference(parser, currTokenVal(parser), node->offset + dataIdx);
 
         dataIdx += sz;
 
@@ -149,7 +149,7 @@ ParserErrCode parseControlDirective(Parser *parser, commandNode *node)
             currTokenType(parser) == ASM_T_SIGNED_INT)
         {
 
-            if (defineNewLabel(parser, symb, currTokenNumVal(parser)) == PARSER_LABEL_REDEF)
+            if (defineNewAbsSymbol(parser, symb, currTokenNumVal(parser)) == PARSER_LABEL_REDEF)
             {
                 ParserError *err = addNewParserError(parser, PARSER_LABEL_REDEF);
 

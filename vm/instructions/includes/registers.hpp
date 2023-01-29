@@ -36,4 +36,6 @@ typedef struct RegMeta
 
 int FindRegByName(RegName name);
 
+const char *FindRegByCode(uint8_t regCode);
+
 #endif

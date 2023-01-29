@@ -22,6 +22,14 @@ typedef enum JumpType
 
 } JumpType;
 
+typedef enum SignExted
+{
+
+    SignExtended = 0,
+    NotSignExtended,
+
+} SignExted;
+
 typedef struct ArgSet
 {
     ArgType First;

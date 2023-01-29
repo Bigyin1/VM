@@ -35,5 +35,6 @@ typedef struct AsmEncoder
 } AsmEncoder;
 
 EncErrCode GenObjectFile(AsmEncoder *as);
+void AsmEncoderFree(AsmEncoder *as);
 
 #endif

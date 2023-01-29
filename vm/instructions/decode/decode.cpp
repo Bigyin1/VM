@@ -316,10 +316,9 @@ static InstrCreationErr newInstructionFromOpCode(Instruction *ins, InstrOpCode o
     if (ins->im == NULL)
         return INSTR_UNKNOWN;
 
+    ins->ArgSetIdx = argSetIdx;
     if (ins->ArgSetIdx != 0 && ins->im->ArgSets[argSetIdx].First == ArgNone)
         return INSTR_WRONG_OPERANDS;
-
-    ins->ArgSetIdx = argSetIdx;
 
     ins->Arg1.Type = ins->im->ArgSets[argSetIdx].First;
     ins->Arg2.Type = ins->im->ArgSets[argSetIdx].Second;

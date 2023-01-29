@@ -209,13 +209,13 @@ static void buildStrTabAndSymTabHdrs(AsmEncoder *as)
 
 static void writeStrTab(AsmEncoder *as)
 {
-
+    printf("writing strtab at offset: %d ; size: %ld\n", ftell(as->out), sizeof(char) * as->strTabCurrOffset);
     fwrite(as->strTab, sizeof(char), as->strTabCurrOffset, as->out);
 }
 
 static void writeSymTab(AsmEncoder *as)
 {
-
+    printf("writing symtab at offset: %d ; size: %ld\n", ftell(as->out), sizeof(SymTabEntry) * as->symTabSz);
     fwrite(as->symTable, sizeof(SymTabEntry), as->symTabSz, as->out);
 }
 
@@ -329,8 +329,8 @@ EncErrCode GenObjectFile(AsmEncoder *as)
 
     buildUserAndRelSectionHeaders(as);
     buildStrTabAndSymTabHdrs(as);
+    buildSymTab(as); // TODO need large refactoring
     buildStrTabAndSymTabHdrs(as);
-    buildSymTab(as);
 
     writeFileHeader(as);
     writeSectHdrs(as);
@@ -340,4 +340,15 @@ EncErrCode GenObjectFile(AsmEncoder *as)
     writeStrTab(as);
 
     return ENC_OK;
+}
+
+void AsmEncoderFree(AsmEncoder *as)
+{
+
+    free(as->strTab);
+    free(as->symTabHdr);
+    free(as->strTabHdr);
+    free(as->usrSectHdrs);
+    free(as->relocSectHdrs);
+    free(as->symTable);
 }

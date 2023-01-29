@@ -45,6 +45,30 @@
             ],
         },
         {
+            "name": "ReadObj Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            // Resolved by CMake Tools:
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [
+                "./testdata/out",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "osx": {
+                "console": "externalTerminal",
+                "MIMode": "lldb"
+            },
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "ASM Launch",
             "type": "cppdbg",
             "request": "launch",

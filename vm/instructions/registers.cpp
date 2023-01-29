@@ -75,3 +75,16 @@ int FindRegByName(RegName name)
 
     return -1;
 }
+
+const char *FindRegByCode(uint8_t regCode)
+{
+
+    for (size_t i = 0; i < sizeof(regs) / sizeof(RegMeta); i++)
+    {
+        if (regs[i].RegCode == regCode)
+            return regs[i].Name;
+    }
+
+    return NULL;
+    ;
+}

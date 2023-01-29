@@ -55,7 +55,7 @@ typedef struct SymTabEntry
 typedef struct RelEntry
 {
 
-    uint64_t offset;    // offset from relocation's section start
+    uint64_t offset;    // offset to apply relocation from relocation's section start
     uint32_t symbolIdx; // relevant symbol idx in symbol table
 
 } RelEntry;

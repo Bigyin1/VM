@@ -3,7 +3,8 @@
 hello:
 db 'H', 'e', 'l', 'l', 'o', ' ', 'W' , 'o', 'r', 'l', 'd', 0
 
-
+jumpTable:
+dw :func1, :func2, :func3
 equ :consoleChar    10016
 
 

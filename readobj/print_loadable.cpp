@@ -79,7 +79,7 @@ static void printBareData(ReadObj *r, SectionHeader *hdr, uint32_t offset)
 
     uint8_t currInRow = 0;
 
-    fprintf(r->out, "%u: ", offset);
+    fprintf(r->out, "%u:\t", offset);
     for (size_t i = 0; i < hdr->size; i++)
     {
         uint8_t b = 0;
@@ -89,6 +89,8 @@ static void printBareData(ReadObj *r, SectionHeader *hdr, uint32_t offset)
         if (currInRow == bytesInRow)
         {
             fprintf(r->out, "\n");
+            offset += bytesInRow;
+            fprintf(r->out, "%u:\t", offset);
             currInRow = 0;
         }
     }

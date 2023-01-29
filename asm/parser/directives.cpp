@@ -33,7 +33,7 @@ static const dataDirective dataDirectives[] = {
 
 };
 
-static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *node, size_t *sz)
+static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *node, size_t *count)
 {
 
     saveCurrToken(parser->toks);
@@ -45,7 +45,7 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *n
            currTokenType(parser) == ASM_T_SIGNED_INT ||
            currTokenType(parser) == ASM_T_LABEL)
     {
-        (*sz)++;
+        (*count)++;
 
         eatToken(parser, currTokenType(parser));
         eatBlanks(parser);
@@ -57,7 +57,7 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *n
         eatBlanks(parser);
     }
 
-    if (*sz == 0)
+    if (*count == 0)
     {
         ParserError *err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
 

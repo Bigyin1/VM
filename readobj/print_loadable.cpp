@@ -238,7 +238,7 @@ static int printLoadableSection(ReadObj *r, SectionHeader *hdr, uint16_t sectHdr
 {
     const char *sectName = getNameFromStrTable(r, hdr->nameIdx);
 
-    r->currRelSect = getSectionRelocations(r, hdr, &r->currRelSectSz);
+    getSectionRelocations(r, hdr);
 
     fprintf(r->out, "\nLoadable section \"%s\" at address: %lu: \n", sectName, hdr->addr);
 

@@ -24,7 +24,7 @@ static int printFileHeader(BinformatHeader *hdr, FILE *out)
     fprintf(out, "Binary header:\n");
     fprintf(out, "  Magic:\t%x\n", hdr->magic);
     fprintf(out, "  Version:\t%d\n", hdr->version);
-    fprintf(out, "  Entrypoint:\t%lld\n", hdr->entrypoint);
+    fprintf(out, "  Entrypoint:\t%lu\n", hdr->entrypoint);
 
     if (hdr->fileType == BIN_LINKABLE)
         fprintf(out, "  File type:\t%s\n", "Linkable");
@@ -75,7 +75,7 @@ static int printSectionHeader(ReadObj *r, SectionHeader *sectHdr, uint16_t idx)
         return -1;
     }
 
-    fprintf(r->out, "[%2d]\t%s\t\t\t%s\t\t%lld\t\t%d\n", idx, name,
+    fprintf(r->out, "[%2d]\t%s\t\t\t%s\t\t%lu\t\t%u\n", idx, name,
             sectType, sectHdr->addr, sectHdr->offset);
     return 0;
 }
@@ -85,7 +85,7 @@ static int printSectionHeaders(ReadObj *r)
 
     fprintf(r->out, "\n\n  File has %d sections:\n", r->fileHdr.sectionsCount);
 
-    fprintf(r->out, "[Num]\tName\t\t\tType\t\tAddress\t\tOffset\n");
+    fprintf(r->out, "[Idx]\tName\t\t\tType\t\tAddress\t\tOffset\n");
 
     for (uint16_t i = 0; i < r->fileHdr.sectionsCount; i++)
     {

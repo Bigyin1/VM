@@ -10,11 +10,22 @@ const char *getNameFromStrTable(ReadObj *r, uint32_t nameIdx)
     return r->strTable + nameIdx;
 }
 
-RelEntry *getSectionRelocations(ReadObj *r, SectionHeader *hdr, uint32_t *sz)
+void readRelSection(ReadObj *r, SectionHeader *hdr)
+{
+
+    fseek(r->in, hdr->offset, SEEK_SET);
+
+    r->currRelSectSz = hdr->size / sizeof(RelEntry);
+    r->currRelSect = (RelEntry *)calloc(r->currRelSectSz, sizeof(RelEntry));
+
+    fread(r->currRelSect, r->currRelSectSz, sizeof(RelEntry), r->in);
+}
+
+void getSectionRelocations(ReadObj *r, SectionHeader *hdr)
 {
 
     if (r->fileHdr.fileType == BIN_EXEC)
-        return NULL;
+        return;
 
     const char *sectName = getNameFromStrTable(r, hdr->nameIdx);
 
@@ -30,19 +41,16 @@ RelEntry *getSectionRelocations(ReadObj *r, SectionHeader *hdr, uint32_t *sz)
         if (strcmp(relSectName, sectName) != 0)
             continue;
 
-        *sz = r->sectHdrs[i].size / sizeof(RelEntry);
-        RelEntry *relSect = (RelEntry *)calloc(*sz, sizeof(RelEntry));
-
         long currOffset = ftell(r->in);
         fseek(r->in, r->sectHdrs[i].offset, SEEK_SET);
 
-        fread(relSect, *sz, sizeof(RelEntry), r->in);
+        readRelSection(r, &r->sectHdrs[i]);
 
         fseek(r->in, currOffset, SEEK_SET);
-        return relSect;
+        return;
     }
 
-    return NULL;
+    return;
 }
 
 void freeReadObj(ReadObj *r)

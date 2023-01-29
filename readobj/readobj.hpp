@@ -27,6 +27,10 @@ typedef struct ReadObj
 
 const char *getNameFromStrTable(ReadObj *r, uint32_t nameIdx);
 
-RelEntry *getSectionRelocations(ReadObj *r, SectionHeader *hdr, uint32_t *sz);
+void readRelSection(ReadObj *r, SectionHeader *hdr);
+
+void getSectionRelocations(ReadObj *r, SectionHeader *hdr);
+
+void freeReadObj(ReadObj *r);
 
 #endif

@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "readobj.hpp"
+#include "print_symtab.hpp"
+#include "print_relocs.hpp"
 #include "print_loadable.hpp"
 #include "print_headers.hpp"
 
@@ -25,6 +28,14 @@ int main(int argc, char **argv)
 
     if (printLoadableSections(&r) < 0)
         return EXIT_FAILURE;
+
+    if (printRelocSections(&r) < 0)
+        return EXIT_FAILURE;
+
+    if (printSymbolTable(&r) < 0)
+        return EXIT_FAILURE;
+
+    freeReadObj(&r);
 
     return EXIT_SUCCESS;
 }

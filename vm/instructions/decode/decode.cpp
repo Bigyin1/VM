@@ -60,7 +60,7 @@ static InstrCreationErr decode_ld(Instruction *ins, FILE *r)
 
     ins->Arg1.RegNum = byte & regCodeMask;
     ins->DataSz = (DataSize)((byte & 0b00110000) >> 4);
-    ins->SignExtend = (byte & 0b01000000) >> 6;
+    ins->SignExt = (SignExtend)((byte & 0b01000000) >> 6);
 
     // arg 2
     return decodeCommon(&ins->Arg2, r);
@@ -100,7 +100,7 @@ static InstrCreationErr decode_mov(Instruction *ins, FILE *r)
     // arg 1
     ins->Arg1.RegNum = byte & regCodeMask;
     ins->Arg2._immArgSz = (DataSize)((byte & 0b00110000) >> 4);
-    ins->SignExtend = (byte & 0b01000000) >> 6;
+    ins->SignExt = (SignExtend)((byte & 0b01000000) >> 6);
 
     // arg 2
     return decodeCommon(&ins->Arg2, r);
@@ -140,7 +140,7 @@ static InstrCreationErr decode_pop(Instruction *ins, FILE *r)
         return INSTR_NOT_EXIST;
 
     ins->DataSz = (DataSize)((ins->Arg1.RegNum & 0b00110000) >> 4);
-    ins->SignExtend = (ins->Arg1.RegNum & 0b01000000) >> 6;
+    ins->SignExt = (SignExtend)((ins->Arg1.RegNum & 0b01000000) >> 6);
     ins->Arg1.RegNum &= regCodeMask;
 
     return INSTR_OK;

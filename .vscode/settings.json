@@ -18,6 +18,13 @@
         "string": "cpp",
         "__config": "cpp",
         "random": "cpp",
+        "bit": "cpp",
+        "algorithm": "cpp",
+        "*.tcc": "cpp",
+        "typeinfo": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "*.inc": "cpp"
     },
     "liveServer.settings.port": 5501
 }

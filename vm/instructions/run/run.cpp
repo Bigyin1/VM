@@ -141,7 +141,7 @@ static int run_ld(CPU *cpu, Instruction *ins)
     if (readFromAddr(cpu, addr, &val, ins->DataSz) < 0)
         return -1;
 
-    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, ins->DataSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExt ? signExtendValue(val, ins->DataSz) : val;
 
     return 0;
 }
@@ -170,7 +170,7 @@ static int run_mov(CPU *cpu, Instruction *ins)
     else
         val = cpu->gpRegs[ins->Arg2.RegNum];
 
-    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, ins->Arg2._immArgSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExt ? signExtendValue(val, ins->Arg2._immArgSz) : val;
 
     return 0;
 }
@@ -210,7 +210,7 @@ static int run_pop(CPU *cpu, Instruction *ins)
     if (readFromAddr(cpu, addr, &val, ins->DataSz) < 0)
         return -1;
 
-    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExtend ? signExtendValue(val, ins->DataSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExt ? signExtendValue(val, ins->DataSz) : val;
 
     return 0;
 }

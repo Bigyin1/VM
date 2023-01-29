@@ -324,10 +324,10 @@ static bool instrEq(Instruction *ins1, Instruction *ins2)
                ins1->im->Name, ins1->JmpType, ins2->JmpType);
         return false;
     }
-    if (ins1->SignExtend != ins2->SignExtend)
+    if (ins1->SignExt != ins2->SignExt)
     {
         printf("failed: wrong sign extention for %s; wanted: %u, got: %u\n",
-               ins1->im->Name, ins1->SignExtend, ins2->SignExtend);
+               ins1->im->Name, ins1->SignExt, ins2->SignExt);
         return false;
     }
 

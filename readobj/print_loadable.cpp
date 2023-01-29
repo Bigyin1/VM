@@ -1,28 +1,58 @@
 #include <stdlib.h>
+#include <string.h>
 #include "print_loadable.hpp"
 #include "registers.hpp"
 #include "readobj.hpp"
 #include "decode.hpp"
 
-static const char *dataSzToPostfix(DataSize sz)
+static const char *dataJmpTypeToPostfix(InstructionName instr, JumpType jmpT)
 {
-    switch (sz)
-    {
-    case DataByte:
-        return "b";
 
-    case DataDByte:
-        return "db";
+    if (strcmp(instr, "jmp") != 0) /* TODO !!! check VM files argument.hpp and instructions.hpp;
+                                                                 Add validation for DataSize, JmpType and SignExtend fields */
+        return NULL;
 
-    case DataHalfWord:
-        return "hw";
+#define JMP_POSTFIX(pfix, jmpType) \
+    if (jmpT == jmpType)           \
+        return #pfix;
 
-    case DataWord:
-        return "w";
+#include "jmpTypePostfix.inc"
 
-    default:
-        break;
-    }
+#undef JMP_POSTFIX
+
+    return NULL;
+}
+
+static const char *dataSzAndSignToPostfix(InstructionName instr, DataSize sz, SignExtend sign)
+{
+
+    if (strcmp(instr, "st") != 0 && strcmp(instr, "ld") != 0 &&
+        strcmp(instr, "mov") != 0 &&
+        strcmp(instr, "pop") != 0 && strcmp(instr, "push") != 0) /* TODO !!! check VM files argument.hpp and instructions.hpp;
+                                                                 Add validation for DataSize and SignExtend fields */
+
+        return NULL;
+
+#define DATA_POSTFIX(pfix, dataSz, signExt) \
+    if (sz == dataSz && sign == signExt)    \
+        return #pfix;
+
+#include "cmdDataPostfixes.inc"
+
+#undef DATA_POSTFIX
+
+    return NULL;
+}
+
+static const char *getInstrPostfix(Instruction *instr)
+{
+
+    const char *pfix = dataJmpTypeToPostfix(instr->im->Name, instr->JmpType);
+
+    if (pfix == NULL)
+        pfix = dataSzAndSignToPostfix(instr->im->Name, instr->DataSz, instr->SignExt);
+
+    return pfix;
 }
 
 static int readSymbolTable(ReadObj *r)
@@ -166,7 +196,11 @@ static int disasmInstruction(ReadObj *r, uint16_t sectHdrIdx, Instruction *instr
     }
 
     InstructionName instrName = instr->im->Name;
+    const char *instrPostfix = getInstrPostfix(instr);
+
     fprintf(r->out, "%u:  %s", instrOffset, instrName);
+    if (instrPostfix != NULL)
+        fprintf(r->out, "(%s)", instrPostfix);
 
     if (instr->Arg1.Type == ArgNone)
     {
@@ -238,7 +272,7 @@ static int printLoadableSection(ReadObj *r, SectionHeader *hdr, uint16_t sectHdr
 
     if (offset != hdr->size)
     {
-        fprintf(stderr, "wrong section size: insteuction decoding overflows section \"%s\"\n",
+        fprintf(stderr, "wrong section size: instruction decoding overflows section \"%s\"\n",
                 sectName);
         free(r->currRelSect);
         return -1;

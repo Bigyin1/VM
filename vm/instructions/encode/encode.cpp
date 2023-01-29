@@ -55,7 +55,7 @@ static size_t encodeCommon(Argument *arg, FILE *w, DataSize argSz, bool evalSz, 
 static size_t encode_ld(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
 {
     size_t sz = 1;
-    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExtend << 6);
+    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExt << 6);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
     if (evalSymOffset)
@@ -88,7 +88,7 @@ static size_t encode_mov(Instruction *ins, FILE *w, bool evalSz, bool evalSymOff
 
     size_t sz = 1;
 
-    uint8_t byte = ins->Arg1.RegNum | (ins->Arg2._immArgSz << 4) | (ins->SignExtend << 6);
+    uint8_t byte = ins->Arg1.RegNum | (ins->Arg2._immArgSz << 4) | (ins->SignExt << 6);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
     if (evalSymOffset)
@@ -120,7 +120,7 @@ static size_t encode_push(Instruction *ins, FILE *w, bool evalSz, bool evalSymOf
 
 static size_t encode_pop(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
 {
-    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExtend << 6);
+    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExt << 6);
     return 1 + my_fwrite(&byte, 1, 1, w, evalSz);
 }
 

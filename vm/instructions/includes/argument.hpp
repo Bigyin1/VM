@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <stdint.h>
 
-typedef enum DataSize
+typedef enum DataSize // TODO: add default invalid value
 {
     DataWord = 0, // default value
     DataHalfWord,

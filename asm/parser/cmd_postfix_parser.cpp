@@ -5,41 +5,17 @@
 
 static ParserErrCode parseJumpPostfix(commandNode *node, const char *postfix)
 {
-    if (strcmp(postfix, "eq") == 0)
-    {
-        node->instr.JmpType = JumpEQ;
-        return PARSER_OK;
+
+#define JMP_POSTFIX(pfix, jmpType)     \
+    if (strcmp(#pfix, postfix) == 0)   \
+    {                                  \
+        node->instr.JmpType = jmpType; \
+        return PARSER_OK;              \
     }
 
-    if (strcmp(postfix, "neq") == 0)
-    {
-        node->instr.JmpType = JumpNEQ;
-        return PARSER_OK;
-    }
+#include "tmpl/jmpTypePostfix.inc"
 
-    if (strcmp(postfix, "g") == 0)
-    {
-        node->instr.JmpType = JumpG;
-        return PARSER_OK;
-    }
-
-    if (strcmp(postfix, "ge") == 0)
-    {
-        node->instr.JmpType = JumpGE;
-        return PARSER_OK;
-    }
-
-    if (strcmp(postfix, "l") == 0)
-    {
-        node->instr.JmpType = JumpL;
-        return PARSER_OK;
-    }
-
-    if (strcmp(postfix, "le") == 0)
-    {
-        node->instr.JmpType = JumpLE;
-        return PARSER_OK;
-    }
+#undef JMP_POSTFIX
 
     return PARSER_INSUFF_TOKEN;
 }
@@ -57,51 +33,17 @@ ParserErrCode parseInstrPostfix(Parser *parser, commandNode *node)
     if (parseJumpPostfix(node, postfix) == PARSER_OK)
         return PARSER_OK;
 
-    if (strcmp(postfix, "b") == 0)
-    {
-        node->instr.DataSz = DataByte;
-        return PARSER_OK;
+#define DATA_POSTFIX(pfix, dataSz, signExt) \
+    if (strcmp(#pfix, postfix) == 0)        \
+    {                                       \
+        node->instr.DataSz = dataSz;        \
+        node->instr.SignExt = signExt;      \
+        return PARSER_OK;                   \
     }
 
-    if (strcmp(postfix, "s") == 0)
-    {
-        node->instr.DataSz = DataWord;
-        node->instr.SignExtend = 1;
-        return PARSER_OK;
-    }
+#include "tmpl/cmdDataPostfixes.inc"
 
-    if (strcmp(postfix, "bs") == 0)
-    {
-        node->instr.DataSz = DataByte;
-        node->instr.SignExtend = 1;
-        return PARSER_OK;
-    }
-
-    if (strcmp(postfix, "db") == 0)
-    {
-        node->instr.DataSz = DataDByte;
-        return PARSER_OK;
-    }
-
-    if (strcmp(postfix, "dbs") == 0)
-    {
-        node->instr.DataSz = DataDByte;
-        node->instr.SignExtend = 1;
-        return PARSER_OK;
-    }
-
-    if (strcmp(postfix, "hw") == 0)
-    {
-        node->instr.DataSz = DataHalfWord;
-        return PARSER_OK;
-    }
-
-    if (strcmp(postfix, "hws") == 0)
-    {
-        node->instr.DataSz = DataHalfWord;
-        node->instr.SignExtend = 1;
-        return PARSER_OK;
-    }
+#undef DATA_POSTFIX
 
     ParserError *err = addNewParserError(parser, PARSER_BAD_CMD_POSTFIX);
 

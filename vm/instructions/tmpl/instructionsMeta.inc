@@ -6,12 +6,12 @@
 
 #endif
 
-INSTR(ret, 0,
+INSTR(ret, 1,
       {
           {.First = ArgNone COMMA .Second = ArgNone} COMMA
       })
 
-INSTR(ld, 1,
+INSTR(ld, 0,
       {
           {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
           {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA

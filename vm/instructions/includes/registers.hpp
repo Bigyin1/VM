@@ -22,6 +22,7 @@ typedef enum RegCodes
     R10,
     R11,
     R12,
+    R13,
     RSP,
     RBP
 

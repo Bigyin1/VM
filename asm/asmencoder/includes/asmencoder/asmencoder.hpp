@@ -29,7 +29,7 @@ typedef struct AsmEncoder
     uint32_t symTabSz;
 
     char *strTab;
-    uint32_t strTabCurrOffset;
+    uint32_t strTabSize;
     uint32_t strTabCapacity;
 
 } AsmEncoder;

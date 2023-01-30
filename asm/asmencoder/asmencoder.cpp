@@ -76,18 +76,18 @@ static void strTabAdd(AsmEncoder *as, const char *str, bool terminate)
     if (terminate)
         len++;
 
-    if (as->strTabCurrOffset + len > as->strTabCapacity)
+    if (as->strTabSize + len > as->strTabCapacity)
     {
         as->strTabCapacity *= 2;
         as->strTab = (char *)realloc(as->strTab, sizeof(char) * as->strTabCapacity); // TODO: errors
     }
 
     if (terminate)
-        strcpy(as->strTab + as->strTabCurrOffset, str);
+        strcpy(as->strTab + as->strTabSize, str);
     else
-        memcpy(as->strTab + as->strTabCurrOffset, str, len);
+        memcpy(as->strTab + as->strTabSize, str, len);
 
-    as->strTabCurrOffset += len;
+    as->strTabSize += len;
 }
 
 static void strTabAddCompositeSectName(AsmEncoder *as, const char *prefix, const char *name)
@@ -117,7 +117,7 @@ static void buildSymTab(AsmEncoder *as)
     {
         symbolData *currSymb = as->parser->symsTable.symTab[i];
 
-        symTab[i].nameIdx = as->strTabCurrOffset;
+        symTab[i].nameIdx = as->strTabSize;
         strTabAdd(as, currSymb->name, true);
 
         if (currSymb->defined)
@@ -156,11 +156,11 @@ static void buildUserAndRelSectionHeaders(AsmEncoder *as)
         currUsrSect->offset = userSectsBodyOffset;
         currUsrSect->size = (uint32_t)currUsrSectNode->currOffset;
         currUsrSect->type = SECT_LOAD;
-        currUsrSect->nameIdx = as->strTabCurrOffset;
+
+        currUsrSect->nameIdx = as->strTabSize;
+        strTabAdd(as, currUsrSectNode->name, true);
 
         userSectsBodyOffset += currUsrSect->size;
-
-        strTabAdd(as, currUsrSectNode->name, true);
 
         uint32_t sectRelocsCount = getRelocationsCountInSection(&as->parser->symsTable, currUsrSectNode->name);
 
@@ -174,11 +174,11 @@ static void buildUserAndRelSectionHeaders(AsmEncoder *as)
         currRelocSect->offset = relocSectsBodyOffset;
         currRelocSect->size = sectRelocsCount * sizeof(RelEntry);
         currRelocSect->type = SECT_REL;
-        currRelocSect->nameIdx = as->strTabCurrOffset;
+
+        currRelocSect->nameIdx = as->strTabSize;
+        strTabAddCompositeSectName(as, "rel.", currUsrSectNode->name);
 
         relocSectsBodyOffset += currRelocSect->size;
-
-        strTabAddCompositeSectName(as, "rel.", currUsrSectNode->name);
 
         relocSectIdx++;
     }
@@ -192,25 +192,25 @@ static void buildStrTabAndSymTabHdrs(AsmEncoder *as)
     as->symTabHdr = (SectionHeader *)calloc(1, sizeof(SectionHeader));
     as->strTabHdr = (SectionHeader *)calloc(1, sizeof(SectionHeader));
 
-    as->symTabHdr->nameIdx = as->strTabCurrOffset;
+    as->symTabHdr->nameIdx = as->strTabSize;
     strTabAdd(as, "symtab", true);
 
     as->symTabHdr->offset = as->relocSectsBodyEnd;
     as->symTabHdr->size = as->symTabSz * sizeof(SymTabEntry);
     as->symTabHdr->type = SECT_SYM_TAB;
 
-    as->strTabHdr->nameIdx = as->strTabCurrOffset;
+    as->strTabHdr->nameIdx = as->strTabSize;
     strTabAdd(as, "strtab", true);
 
     as->strTabHdr->offset = as->relocSectsBodyEnd + as->symTabHdr->size;
-    as->strTabHdr->size = as->strTabCurrOffset;
+    as->strTabHdr->size = as->strTabSize;
     as->strTabHdr->type = SECT_STR_TAB;
 }
 
 static void writeStrTab(AsmEncoder *as)
 {
-    printf("writing strtab at offset: %d ; size: %ld\n", ftell(as->out), sizeof(char) * as->strTabCurrOffset);
-    fwrite(as->strTab, sizeof(char), as->strTabCurrOffset, as->out);
+    printf("writing strtab at offset: %d ; size: %ld\n", ftell(as->out), sizeof(char) * as->strTabSize);
+    fwrite(as->strTab, sizeof(char), as->strTabSize, as->out);
 }
 
 static void writeSymTab(AsmEncoder *as)
@@ -328,7 +328,6 @@ EncErrCode GenObjectFile(AsmEncoder *as)
     as->strTabCapacity = 32;
 
     buildUserAndRelSectionHeaders(as);
-    buildStrTabAndSymTabHdrs(as);
     buildSymTab(as); // TODO need large refactoring
     buildStrTabAndSymTabHdrs(as);
 

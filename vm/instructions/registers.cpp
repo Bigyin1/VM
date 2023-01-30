@@ -56,6 +56,10 @@ const RegMeta regs[] = {
         .RegCode = R12,
     },
     {
+        .Name = "r13",
+        .RegCode = R13,
+    },
+    {
         .Name = "rbp",
         .RegCode = RBP,
     },

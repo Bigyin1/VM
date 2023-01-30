@@ -51,7 +51,35 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "./testdata/out",
+                "./testdata/exe",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "osx": {
+                "console": "externalTerminal",
+                "MIMode": "lldb"
+            },
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "LD Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            // Resolved by CMake Tools:
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [
+                "./testdata/out2",
+                "./testdata/out3",
+                "--text=0",
+                "--data=5096",
+                "./testdata/exe"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -75,8 +103,8 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "./testdata/test.code",
-                "./testdata/out"
+                "./testdata/test2.code",
+                "./testdata/out2"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

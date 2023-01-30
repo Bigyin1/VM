@@ -4,7 +4,7 @@
 
 const char *getNameFromStrTable(ReadObj *r, uint32_t nameIdx)
 {
-    if (nameIdx > -r->strTableSize)
+    if (nameIdx > r->strTableSize)
         return NULL;
 
     return r->strTable + nameIdx;
@@ -15,10 +15,10 @@ void readRelSection(ReadObj *r, SectionHeader *hdr)
 
     fseek(r->in, hdr->offset, SEEK_SET);
 
-    r->currRelSectSz = hdr->size / sizeof(RelEntry);
+    r->currRelSectSz = hdr->size / (uint32_t)sizeof(RelEntry);
     r->currRelSect = (RelEntry *)calloc(r->currRelSectSz, sizeof(RelEntry));
 
-    fread(r->currRelSect, r->currRelSectSz, sizeof(RelEntry), r->in);
+    fread(r->currRelSect, sizeof(RelEntry), r->currRelSectSz, r->in);
 }
 
 void getSectionRelocations(ReadObj *r, SectionHeader *hdr)

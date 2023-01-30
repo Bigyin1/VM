@@ -24,16 +24,28 @@ int main(int argc, char **argv)
     r.out = stdout;
 
     if (printHeaders(&r) < 0)
+    {
+        freeReadObj(&r);
         return EXIT_FAILURE;
+    }
 
     if (printLoadableSections(&r) < 0)
+    {
+        freeReadObj(&r);
         return EXIT_FAILURE;
+    }
 
     if (printRelocSections(&r) < 0)
+    {
+        freeReadObj(&r);
         return EXIT_FAILURE;
+    }
 
     if (printSymbolTable(&r) < 0)
+    {
+        freeReadObj(&r);
         return EXIT_FAILURE;
+    }
 
     freeReadObj(&r);
 

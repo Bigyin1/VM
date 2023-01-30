@@ -63,12 +63,10 @@ static int readSymbolTable(ReadObj *r)
     if (r->symTable == NULL)
         return -1;
 
-    long currOffset = ftell(r->in);
     fseek(r->in, r->sectHdrs[r->fileHdr.symbolTableIdx].offset, SEEK_SET);
 
-    fread(r->symTable, r->symTabSz, sizeof(SymTabEntry), r->in);
-
-    fseek(r->in, currOffset, SEEK_SET);
+    if (fread(r->symTable, sizeof(SymTabEntry), r->symTabSz, r->in) != r->symTabSz)
+        return -1;
 
     return 0;
 }
@@ -118,7 +116,35 @@ static uint32_t findSymbolNameForInstructionInLinkableFile(ReadObj *r,
     return 0;
 }
 
-static uint32_t findDefinedSymbolAtOffsetInLinkableFile(ReadObj *r, uint16_t hdrIdx, uint32_t offset, bool *ok)
+static uint32_t findSymbolNameForInstructionInExecFile(ReadObj *r, Instruction *instr, bool *ok)
+{
+    uint64_t val = 0;
+    if (instr->Arg1.Type == ArgImm || instr->Arg1.Type == ArgImmIndirect || instr->Arg1.Type == ArgImmOffsetIndirect)
+        val = instr->Arg1.Imm;
+    else if (instr->Arg2.Type == ArgImm || instr->Arg2.Type == ArgImmIndirect || instr->Arg2.Type == ArgImmOffsetIndirect)
+        val = instr->Arg2.Imm;
+    else
+    {
+        *ok = false;
+        return 0;
+    }
+
+    for (uint32_t i = 0; i < r->symTabSz; i++)
+    {
+        SymTabEntry *currSymb = &r->symTable[i];
+
+        if (currSymb->value == val)
+        {
+            *ok = true;
+            return currSymb->nameIdx;
+        }
+    }
+
+    *ok = false;
+    return 0;
+}
+
+static uint32_t findDefinedSymbolAtOffset(ReadObj *r, uint16_t hdrIdx, uint32_t offset, bool *ok)
 {
 
     for (uint32_t i = 0; i < r->symTabSz; i++)
@@ -128,7 +154,7 @@ static uint32_t findDefinedSymbolAtOffsetInLinkableFile(ReadObj *r, uint16_t hdr
         if (currSymb->sectHeaderIdx != hdrIdx)
             continue;
 
-        if (currSymb->value != offset)
+        if (currSymb->value - r->sectHdrs[hdrIdx].addr != offset)
             continue;
 
         *ok = true;
@@ -184,7 +210,7 @@ static int disasmInstruction(ReadObj *r, uint16_t sectHdrIdx, Instruction *instr
 {
 
     bool isLabel = false;
-    uint32_t labelNameIdx = findDefinedSymbolAtOffsetInLinkableFile(r, sectHdrIdx, instrOffset, &isLabel);
+    uint32_t labelNameIdx = findDefinedSymbolAtOffset(r, sectHdrIdx, instrOffset, &isLabel);
     if (isLabel)
     {
         const char *labelName = getNameFromStrTable(r, labelNameIdx);
@@ -213,7 +239,12 @@ static int disasmInstruction(ReadObj *r, uint16_t sectHdrIdx, Instruction *instr
     fprintf(r->out, " ");
 
     bool isSymbol = false;
-    uint32_t symbNameIdx = findSymbolNameForInstructionInLinkableFile(r, instrOffset, instrSz, &isSymbol);
+    uint32_t symbNameIdx = 0;
+
+    if (r->fileHdr.fileType == BIN_LINKABLE)
+        symbNameIdx = findSymbolNameForInstructionInLinkableFile(r, instrOffset, instrSz, &isSymbol);
+    else
+        symbNameIdx = findSymbolNameForInstructionInExecFile(r, instr, &isSymbol);
 
     if (!printRegisterArg(r, &instr->Arg1))
         if (printImmArg(r, &instr->Arg1, symbNameIdx, isSymbol) < 0)

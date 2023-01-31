@@ -1,6 +1,5 @@
 find_package(Doxygen
-    REQUIRED dot
-    OPTIONAL_COMPONENTS mscgen dia)
+    OPTIONAL_COMPONENTS dot mscgen dia)
 
 if(DOXYGEN_FOUND)
     set(DOXYGEN_OUTPUT_DIRECTORY doxygen)

@@ -9,7 +9,8 @@ const size_t MaxDevices = 5;
 
 typedef struct CPU
 {
-    size_t regIP;
+    uint64_t regIP;
+
     int8_t statusReg;
     uint64_t gpRegs[16];
 

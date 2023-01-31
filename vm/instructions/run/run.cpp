@@ -4,7 +4,7 @@
 #include "registers.hpp"
 #include "run.hpp"
 
-static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
+static int writeToAddr(CPU *cpu, uint64_t addr, uint64_t val, DataSize sz)
 {
 
     assert(cpu != NULL);
@@ -19,14 +19,14 @@ static int writeToAddr(CPU *cpu, size_t addr, uint64_t val, DataSize sz)
     int res = dev->writeTo(dev->concreteDevice, addr - dev->lowAddr, val, sz);
     if (res < 0)
     {
-        fprintf(stderr, "vm: device %s unable to serve write request at address: %zu\n",
-                dev->name, addr);
+        fprintf(stderr, "vm: device %s unable to serve write request at address: %zu; size: %zu\n",
+                dev->name, addr, DataSzToBytesSz(sz));
         return -1;
     }
     return 0;
 }
 
-static int readFromAddr(CPU *cpu, size_t addr, uint64_t *val, DataSize sz)
+static int readFromAddr(CPU *cpu, uint64_t addr, uint64_t *val, DataSize sz)
 {
 
     assert(cpu != NULL);
@@ -41,8 +41,8 @@ static int readFromAddr(CPU *cpu, size_t addr, uint64_t *val, DataSize sz)
     int res = dev->readFrom(dev->concreteDevice, addr - dev->lowAddr, val, sz);
     if (res < 0)
     {
-        fprintf(stderr, "vm: device %s unable to serve read request at address: %zu\n",
-                dev->name, addr);
+        fprintf(stderr, "vm: device %s unable to serve read request at address: %zu; size: %zu\n",
+                dev->name, addr, DataSzToBytesSz(sz));
         return -1;
     }
 
@@ -68,10 +68,10 @@ static int run_ret(CPU *cpu, Instruction *ins)
     return 0;
 }
 
-static size_t getEffectiveAddress(CPU *cpu, Argument *arg)
+static uint64_t getEffectiveAddress(CPU *cpu, Argument *arg)
 {
 
-    size_t addr = 0;
+    uint64_t addr = 0;
     switch (arg->Type)
     {
     case ArgRegisterIndirect:
@@ -134,7 +134,7 @@ static int run_ld(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    size_t addr = getEffectiveAddress(cpu, &ins->Arg2);
+    uint64_t addr = getEffectiveAddress(cpu, &ins->Arg2);
 
     uint64_t val = 0;
 
@@ -151,7 +151,7 @@ static int run_st(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    size_t addr = getEffectiveAddress(cpu, &ins->Arg2);
+    uint64_t addr = getEffectiveAddress(cpu, &ins->Arg2);
 
     if (writeToAddr(cpu, addr, cpu->gpRegs[ins->Arg1.RegNum], ins->DataSz) < 0)
         return -1;
@@ -180,7 +180,7 @@ static int run_push(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    size_t addr = cpu->gpRegs[RSP];
+    uint64_t addr = cpu->gpRegs[RSP];
 
     uint64_t val = 0;
     if (ins->Arg1.Type == ArgImm)
@@ -203,7 +203,7 @@ static int run_pop(CPU *cpu, Instruction *ins)
 
     cpu->gpRegs[RSP] -= DataSzToBytesSz(ins->DataSz);
 
-    size_t addr = cpu->gpRegs[RSP];
+    uint64_t addr = cpu->gpRegs[RSP];
 
     uint64_t val = 0;
 
@@ -413,7 +413,7 @@ static int run_jmp(CPU *cpu, Instruction *ins)
         break;
     }
 
-    size_t addr = 0;
+    uint64_t addr = 0;
     if (ins->Arg1.Type == ArgRegister)
         addr = cpu->gpRegs[ins->Arg1.RegNum];
     else
@@ -425,7 +425,7 @@ static int run_jmp(CPU *cpu, Instruction *ins)
 
 static int run_call(CPU *cpu, Instruction *ins)
 {
-    size_t addr = 0;
+    uint64_t addr = 0;
 
     if (ins->Arg1.Type == ArgImm)
         addr = ins->Arg1.Imm;

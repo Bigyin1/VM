@@ -105,8 +105,8 @@ func (r *Runner) termSubprocess(procChan <-chan struct{}) {
 	}
 
 	r.vmProc.Process.Signal(syscall.SIGTERM)
-	r.vmProc.Process.Release()
-	log.Printf("process %d terminated", r.vmProc.Process.Pid)
+	r.vmProc.Wait()
+	log.Printf("process %d terminated", r.vmProc.ProcessState.Pid())
 
 }
 
@@ -119,7 +119,7 @@ func (r *Runner) monitorVM() error {
 		procChan <- struct{}{}
 
 		log.Printf("process %d exited; status: %s",
-			r.vmProc.Process.Pid, r.vmProc.ProcessState.String())
+			r.vmProc.ProcessState.Pid(), r.vmProc.ProcessState.String())
 	}()
 
 	wg := &sync.WaitGroup{}
@@ -233,7 +233,7 @@ func (r *Runner) link(linkableFile *os.File) (*os.File, error) {
 
 	err = cmd.Run()
 	if err != nil {
-		log.Printf("error while assembling. exit code: %s\n", err.(*exec.ExitError).String())
+		log.Printf("error while linking. exit code: %s\n", err.(*exec.ExitError).String())
 
 		os.Remove(asmExeFile.Name())
 

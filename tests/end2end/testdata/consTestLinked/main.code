@@ -1,0 +1,12 @@
+.text
+
+main:
+
+
+call :RWconsInt
+
+call :RWconsDouble
+
+call :RWconsChar
+
+halt

@@ -465,6 +465,9 @@ static int relocateSectionData(ExecutableFile *exe, LinkableFile *l, RelSection 
 
 static int applyRelocsToInputFileSection(LD *ld, LinkableFile *l, SectionHeader *hdr, uint32_t fileIdx)
 {
+    if (hdr->size == 0)
+        return 0;
+
     char *sectData = (char *)calloc(hdr->size, sizeof(char));
     if (sectData == NULL)
     {

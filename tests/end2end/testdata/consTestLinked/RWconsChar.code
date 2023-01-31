@@ -1,0 +1,8 @@
+.text
+
+RWconsChar:
+
+ld(b) r0, [:consoleChar]
+st(b) r0, [:consoleChar]
+
+ret

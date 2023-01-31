@@ -1,0 +1,8 @@
+.text
+
+equ :consoleDouble  10000
+equ :consoleInt     10008
+equ :consoleChar    10016
+
+
+

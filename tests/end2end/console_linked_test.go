@@ -6,9 +6,21 @@ import (
 	"testing"
 )
 
-func TestConsole(t *testing.T) {
+func TestLinkedConsole(t *testing.T) {
 
-	binFile := compileAndLinkFiles(t, []string{"testdata/consTest.code"})
+	asmSrcs := []string{
+		"ConsAddrs.code",
+		"RWconsChar.code",
+		"RWconsDouble.code",
+		"main.code",
+		"RWconsInt.code",
+	}
+
+	for i := range asmSrcs {
+		asmSrcs[i] = "testdata/consTestLinked/" + asmSrcs[i]
+	}
+
+	binFile := compileAndLinkFiles(t, asmSrcs)
 	if t.Failed() {
 		return
 	}

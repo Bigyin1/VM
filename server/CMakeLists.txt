@@ -8,7 +8,9 @@ add_custom_command(TARGET server_get_exe_files POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     $<TARGET_FILE:my_vm> ${CMAKE_CURRENT_SOURCE_DIR}/progs
     COMMAND ${CMAKE_COMMAND} -E copy
-    $<TARGET_FILE:my_ld> ${CMAKE_CURRENT_SOURCE_DIR}/progs)
+    $<TARGET_FILE:my_ld> ${CMAKE_CURRENT_SOURCE_DIR}/progs
+    COMMAND ${CMAKE_COMMAND} -E copy
+    $<TARGET_FILE:readobj> ${CMAKE_CURRENT_SOURCE_DIR}/progs)
 
 add_test(NAME serverTest COMMAND
     go test -timeout 5s ${CMAKE_CURRENT_SOURCE_DIR}/.

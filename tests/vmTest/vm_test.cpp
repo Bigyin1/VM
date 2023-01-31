@@ -112,7 +112,7 @@ static bool testMOV_ImmSignExtend(CPU *cpu)
             .Imm = 477,
             ._immArgSz = DataDByte,
         },
-        .SignExtend = 1,
+        .SignExt = SignExtended,
     };
 
     if (Run(cpu, &instr) < 0)

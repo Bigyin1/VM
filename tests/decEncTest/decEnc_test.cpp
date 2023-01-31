@@ -21,7 +21,7 @@ Instruction testIns[] = {
         .Arg2 = {.Type = ArgImmIndirect, .Imm = 123},
         .ArgSetIdx = 2,
         .DataSz = DataHalfWord,
-        .SignExtend = 1,
+        .SignExt = SignExtended,
     },
 
     {
@@ -58,7 +58,7 @@ Instruction testIns[] = {
         .Arg1 = {.Type = ArgRegister, .RegNum = 0},
         .Arg2 = {.Type = ArgImm, .Imm = (uint64_t)-1, ._immArgSz = DataByte},
         .ArgSetIdx = 1,
-        .SignExtend = 1,
+        .SignExt = SignExtended,
     },
     {
         .im = &instructions[ins_mov],
@@ -143,7 +143,7 @@ Instruction testIns[] = {
 
     {
         .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 1, ._immArgSz = DataWord},
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
@@ -151,59 +151,59 @@ Instruction testIns[] = {
 
     {
         .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 11, ._immArgSz = DataWord},
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
         .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 21, ._immArgSz = DataWord},
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpEQ,
     },
     {
         .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 26, ._immArgSz = DataWord},
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
         .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 29, ._immArgSz = DataWord},
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
         .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 32, ._immArgSz = DataWord},
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
         .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 35, ._immArgSz = DataWord},
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
+        .Arg2 = {.Type = ArgNone},
+        .ArgSetIdx = 0,
+        .JmpType = JumpL,
+    },
+    {
+        .im = &instructions[ins_jmp],
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
         .JmpType = JumpUncond,
     },
     {
         .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 37, ._immArgSz = DataWord},
+        .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 0,
-        .JmpType = JumpUncond,
-    },
-    {
-        .im = &instructions[ins_jmp],
-        .Arg1 = {.Type = ArgImm, .Imm = 41, ._immArgSz = DataWord},
-        .Arg2 = {.Type = ArgNone},
-        .ArgSetIdx = 0,
-        .JmpType = JumpUncond,
+        .JmpType = JumpGE,
     },
 
 };
@@ -324,10 +324,10 @@ static bool instrEq(Instruction *ins1, Instruction *ins2)
                ins1->im->Name, ins1->JmpType, ins2->JmpType);
         return false;
     }
-    if (ins1->SignExtend != ins2->SignExtend)
+    if (ins1->SignExt != ins2->SignExt)
     {
         printf("failed: wrong sign extention for %s; wanted: %u, got: %u\n",
-               ins1->im->Name, ins1->SignExtend, ins2->SignExtend);
+               ins1->im->Name, ins1->SignExt, ins2->SignExt);
         return false;
     }
 
@@ -365,7 +365,7 @@ static FILE *getTextSectionData(char *buf, size_t sz)
         return NULL;
     }
 
-    if (hdr.sectionsCount != 2)
+    if (hdr.sectionsCount != 4)
     {
         printf("insufficient test code format\n");
         fclose(f);
@@ -394,11 +394,6 @@ static FILE *getTextSectionData(char *buf, size_t sz)
 
 int main(int argc, char **argv)
 {
-    if (argc != 2)
-    {
-        fprintf(stderr, "wrong count of arguments\n");
-        return 1;
-    }
 
     FILE *in = fopen(argv[1], "r");
     if (in == NULL)

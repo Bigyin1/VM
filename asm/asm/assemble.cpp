@@ -47,6 +47,7 @@ AsmErrCode assemble(FILE *in, FILE *out)
     fclose(out);
     tokenizerFree(&tokenizer);
     parserFree(&parser);
+    AsmEncoderFree(&as);
 
     if (err == ENC_USER_ERROR)
         return ASM_USER_ERROR;

@@ -96,12 +96,21 @@ func TestWebsocketServer(t *testing.T) {
 		return
 	}
 
+	resp, _ = readResponse(t, ws)
+	if t.Failed() {
+		return
+	}
+	if resp.MessageType != generalMessageType || resp.Message != linkedSuccessMessage {
+		t.Errorf("unexpected compile success message: %v", resp)
+		return
+	}
+
 	dataChan := make(chan []byte)
 
 	go readAllTextResponse(t, ws, dataChan)
 
 	dataSection := "Hello World\n"
-	if resp := getResponseWithTimeout(dataChan, 100*time.Millisecond); resp != dataSection {
+	if resp := getResponseWithTimeout(dataChan, 500*time.Millisecond); resp != dataSection {
 		t.Errorf("got unexpected data: %s, wanted: %s", resp, dataSection)
 		return
 	}
@@ -117,7 +126,7 @@ func TestWebsocketServer(t *testing.T) {
 		return
 	}
 
-	if resp := getResponseWithTimeout(dataChan, 100*time.Millisecond); resp != mesReq {
+	if resp := getResponseWithTimeout(dataChan, 500*time.Millisecond); resp != mesReq {
 		t.Errorf("got unexpected data: %s, wanted: %s", resp, dataSection)
 		return
 	}

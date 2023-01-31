@@ -22,6 +22,7 @@ typedef enum RegCodes
     R10,
     R11,
     R12,
+    R13,
     RSP,
     RBP
 
@@ -35,5 +36,7 @@ typedef struct RegMeta
 } RegMeta;
 
 int FindRegByName(RegName name);
+
+const char *FindRegByCode(uint8_t regCode);
 
 #endif

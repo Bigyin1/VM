@@ -1,5 +1,5 @@
 
-.text 0
+.text
 equ :conXCoord      10017
 equ :conYCoord      10019
 equ :conColor       10021

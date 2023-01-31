@@ -17,6 +17,7 @@ import (
 type Runner struct {
 	vmExePath  string
 	asmExePath string
+	ldExePath  string
 
 	textResponse   chan<- []byte
 	binaryResponse chan<- []byte
@@ -104,8 +105,8 @@ func (r *Runner) termSubprocess(procChan <-chan struct{}) {
 	}
 
 	r.vmProc.Process.Signal(syscall.SIGTERM)
-	r.vmProc.Process.Release()
-	log.Printf("process %d terminated", r.vmProc.Process.Pid)
+	r.vmProc.Wait()
+	log.Printf("process %d terminated", r.vmProc.ProcessState.Pid())
 
 }
 
@@ -118,7 +119,7 @@ func (r *Runner) monitorVM() error {
 		procChan <- struct{}{}
 
 		log.Printf("process %d exited; status: %s",
-			r.vmProc.Process.Pid, r.vmProc.ProcessState.String())
+			r.vmProc.ProcessState.Pid(), r.vmProc.ProcessState.String())
 	}()
 
 	wg := &sync.WaitGroup{}
@@ -140,6 +141,7 @@ func (r *Runner) monitorVM() error {
 }
 
 const compileSuccessMessage = "Compiled successfully\n"
+const linkedSuccessMessage = "Linked successfully\n"
 
 func (r *Runner) compile() (*os.File, error) {
 
@@ -161,16 +163,16 @@ func (r *Runner) compile() (*os.File, error) {
 		return nil, err
 	}
 
-	asmBinFile, err := ioutil.TempFile(".", "bin")
+	asmLinkableFile, err := ioutil.TempFile(".", "bin")
 	if err != nil {
 		log.Printf("failed to create temp file: %s\n", err)
 		return nil, err
 	}
 
 	asmTextFile.Close()
-	asmBinFile.Close()
+	asmLinkableFile.Close()
 
-	cmd := exec.Command(r.asmExePath, asmTextFile.Name(), asmBinFile.Name())
+	cmd := exec.Command(r.asmExePath, asmTextFile.Name(), asmLinkableFile.Name())
 
 	var outBuf bytes.Buffer
 	var errBuf bytes.Buffer
@@ -182,7 +184,7 @@ func (r *Runner) compile() (*os.File, error) {
 	if err != nil {
 		log.Printf("error while assembling. exit code: %s\n", err.(*exec.ExitError).String())
 
-		os.Remove(asmBinFile.Name())
+		os.Remove(asmLinkableFile.Name())
 
 		errMes := textResp{
 			MessageType: errorMessageType,
@@ -199,11 +201,65 @@ func (r *Runner) compile() (*os.File, error) {
 
 	err = r.responseJson(succMes)
 	if err != nil {
+
+		os.Remove(asmLinkableFile.Name())
 		fmt.Printf("writeJsonToConn: %v", err)
 		return nil, err
 	}
 
-	return asmBinFile, nil
+	return asmLinkableFile, nil
+}
+
+func (r *Runner) link(linkableFile *os.File) (*os.File, error) {
+
+	defer os.Remove(linkableFile.Name())
+
+	asmExeFile, err := ioutil.TempFile(".", "bin")
+	if err != nil {
+		log.Printf("failed to create temp file: %s\n", err)
+		return nil, err
+	}
+
+	asmExeFile.Close()
+
+	cmd := exec.Command(r.ldExePath,
+		"--text=0", "--data=6000", linkableFile.Name(), asmExeFile.Name())
+
+	var outBuf bytes.Buffer
+	var errBuf bytes.Buffer
+
+	cmd.Stdout = &outBuf
+	cmd.Stderr = &errBuf
+
+	err = cmd.Run()
+	if err != nil {
+		log.Printf("error while linking. exit code: %s\n", err.(*exec.ExitError).String())
+
+		os.Remove(asmExeFile.Name())
+
+		errMes := textResp{
+			MessageType: errorMessageType,
+			Message:     errBuf.String(),
+		}
+		r.responseJson(errMes)
+		return nil, err
+	}
+
+	succMes := textResp{
+		MessageType: generalMessageType,
+		Message:     linkedSuccessMessage,
+	}
+
+	err = r.responseJson(succMes)
+	if err != nil {
+		os.Remove(asmExeFile.Name())
+
+		fmt.Printf("responseJson: %v", err)
+		return nil, err
+	}
+
+	return asmExeFile, nil
+
 }
 
 func (r *Runner) Start() error {
@@ -213,14 +269,21 @@ func (r *Runner) Start() error {
 		close(r.binaryResponse)
 	}()
 
-	BinFile, err := r.compile()
+	LinkFile, err := r.compile()
 	if err != nil {
 		// write error to user
 		return err
 	}
-	defer os.Remove(BinFile.Name())
 
-	err = r.setupVM(BinFile.Name())
+	ExeFile, err := r.link(LinkFile)
+	if err != nil {
+		// write error to user
+		return err
+	}
+
+	defer os.Remove(ExeFile.Name())
+
+	err = r.setupVM(ExeFile.Name())
 	if err != nil {
 		return err
 	}

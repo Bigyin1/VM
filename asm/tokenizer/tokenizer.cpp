@@ -19,7 +19,7 @@ typedef struct token_meta_s
 const token_meta_s generalTokens[] = {
     {ASM_T_L_PAREN, "["},
     {ASM_T_R_PAREN, "]"},
-    {ASM_T_L_SIMP_PAREN, "("},
+    {ASM_T_L_SIMP_PAREN, "("}, // TODO: remove this and add single postfix token type instead.
     {ASM_T_R_SIMP_PAREN, ")"},
     {ASM_T_COMMENT, "#"},
     {ASM_T_COMMA, ","},

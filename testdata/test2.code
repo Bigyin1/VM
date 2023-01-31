@@ -1,0 +1,54 @@
+.data 5096
+
+hello:
+db 'H', 'e', 'l', 'l', 'o', ' ', 'W' , 'o', 'r', 'l', 'd', 0
+
+jumpTable:
+dw :printHelloFunc, :read, :anotherJumpTable
+equ :consoleChar    10016
+
+
+.text 0
+main:
+
+
+call :printHelloFunc
+
+sub r0, :hello
+mov r2, :hello
+
+read:
+cmp r0, 0
+jmp(eq) :next
+ld(b) r1, [:consoleChar]
+st(b) r1, [r2]
+sub r0, 1
+add r2, 1
+jmp :read
+
+next:
+
+call :printHelloFunc
+
+halt
+
+
+printHelloFunc:
+    mov r0, :hello
+
+    print:
+    ld(b) r1, [r0]
+
+    cmp r1, 0
+
+    jmp(eq) :end
+
+    st(b) r1, [:consoleChar]
+    add r0, 1
+    jmp :print
+
+    end:
+    ret
+
+
+

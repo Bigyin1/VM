@@ -12,31 +12,71 @@ import (
 )
 
 const asmExePath = "progs/my_asm"
+const ldExePath = "progs/my_ld"
 const vmExePath = "progs/my_vm"
 
-func compileFile(t *testing.T, exePath string) *os.File {
+func compileFile(t *testing.T, path string) string {
 
-	binFile, err := ioutil.TempFile(".", "bin")
+	linkableFile, err := ioutil.TempFile(".", "link")
 	if err != nil {
 		t.Errorf("failed to create temp file: %s\n", err)
-		return nil
+		return ""
 	}
+	linkableFile.Close()
 
 	var outBuf bytes.Buffer
 	var errBuf bytes.Buffer
 
-	cmd := exec.Command(asmExePath, exePath, binFile.Name())
+	cmd := exec.Command(asmExePath, path, linkableFile.Name())
 	cmd.Stdout = &outBuf
 	cmd.Stderr = &errBuf
 
 	err = cmd.Run()
 	if err != nil {
+		os.Remove(linkableFile.Name())
 		t.Errorf("%s\n", errBuf.String())
-		t.Errorf("asm error: %s\n", err.(*exec.ExitError).String())
-		return nil
+		return ""
 	}
 
-	return binFile
+	return linkableFile.Name()
+
+}
+
+func compileAndLinkFiles(t *testing.T, asmPaths []string) string {
+
+	linkedPaths := make([]string, 0)
+
+	for _, asmPath := range asmPaths {
+		linkedPath := compileFile(t, asmPath)
+		if t.Failed() {
+			return ""
+		}
+		defer os.Remove(linkedPath)
+		linkedPaths = append(linkedPaths, linkedPath)
+	}
+
+	var outBuf bytes.Buffer
+	var errBuf bytes.Buffer
+
+	exeFile, err := ioutil.TempFile(".", "exe")
+	if err != nil {
+		t.Errorf("failed to create temp file: %s\n", err)
+		return ""
+	}
+	exeFile.Close()
+
+	cmdArgs := append(linkedPaths, "--text=0", exeFile.Name())
+
+	cmd := exec.Command(ldExePath, cmdArgs...)
+	err = cmd.Run()
+	if err != nil {
+		os.Remove(exeFile.Name())
+		t.Errorf("%s\n", errBuf.String())
+		t.Errorf("%s\n", outBuf.String())
+		return ""
+	}
+
+	return exeFile.Name()
 
 }
 
@@ -51,15 +91,6 @@ type testVM struct {
 	vmConsoleReader io.ReadCloser
 
 	t *testing.T
-}
-
-func (vm *testVM) watchVM(t time.Duration) {
-
-	<-time.After(t)
-
-	vm.cmd.Process.Signal(syscall.SIGTERM)
-	vm.cmd.Process.Release()
-
 }
 
 func (vm *testVM) startVM(binFile string) {
@@ -87,13 +118,36 @@ func (vm *testVM) startVM(binFile string) {
 
 	err = cmd.Start()
 	if err != nil {
-		vm.t.Fatal(err)
+		vm.t.Error(err)
 		return
 	}
 
 	graphicsWriteTheir.Close()
 	vmConsoleReaderTheir.Close()
 	vmConsoleWriterTheir.Close()
+
+}
+
+func consoleCheck(vm *testVM, dataIn []byte, dataExp []byte) {
+
+	_, err := vm.vmConsoleWriter.Write(dataIn)
+	if err != nil {
+		vm.t.Errorf("pipe write error: %s", err)
+		return
+	}
+
+	buf := make([]byte, len(dataExp))
+	_, err = vm.vmConsoleReader.Read(buf)
+	if err != nil {
+		vm.t.Errorf("pipe read error: %s", err)
+		vm.t.Error(vm.errBuf.String())
+		return
+	}
+
+	if !bytes.Equal(buf, dataExp) {
+		vm.t.Errorf("got: %s wanted: %s", string(buf), string(dataExp))
+		return
+	}
 
 }
 
@@ -104,4 +158,13 @@ func (vm *testVM) waitVM() {
 		vm.t.Errorf("%s\n", vm.errBuf.String())
 		vm.t.Errorf("vm failed: %s", vm.cmd.ProcessState.String())
 	}
+}
+
+func (vm *testVM) watchVM(t time.Duration) {
+
+	<-time.After(t)
+
+	vm.cmd.Process.Signal(syscall.SIGTERM)
+	vm.cmd.Process.Release()
+
 }

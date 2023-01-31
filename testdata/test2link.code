@@ -1,0 +1,12 @@
+.data 5096
+
+db 0xFF
+anotherJumpTablee:
+dw :printHelloFunc, :read
+
+
+.text 0
+
+call :printHelloFunc
+call :anotherJumpTablee
+ret

@@ -4,7 +4,7 @@
 #include "parser/parser.hpp"
 #include "section_parser.hpp"
 #include "utils.hpp"
-#include "labels.hpp"
+#include "symbols.hpp"
 
 static ParserErrCode reallocSections(Parser *parser)
 {
@@ -53,17 +53,12 @@ ParserErrCode ParseTokens(Parser *parser)
 
         eatSP(parser);
 
-        uint64_t sectAddr = currTokenNumVal(parser);
-        eatToken(parser, ASM_T_UNSIGNED_INT);
-
-        parser->currSection->addr = sectAddr;
-
         err = parseSectionNode(parser, parser->currSection);
         if (err != PARSER_OK)
             return err;
     }
 
-    return resolveImports(parser);
+    return PARSER_OK;
 }
 
 ParserErrCode ParserInit(Parser *p, Tokenizer *toks)

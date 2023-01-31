@@ -67,7 +67,7 @@ int LoadExeFile(CPU *cpu, FILE *in)
     BinformatHeader hdr = {0};
     if (getObjFileHeader(in, &hdr) < 0)
     {
-        perror("asm: load exe file: ");
+        perror("vm: load exe file:");
         return -1;
     }
 
@@ -80,6 +80,12 @@ int LoadExeFile(CPU *cpu, FILE *in)
     if (hdr.version != formatVersion)
     {
         fprintf(stderr, "invalid version\n");
+        return -1;
+    }
+
+    if (hdr.fileType != BIN_EXEC)
+    {
+        fprintf(stderr, "executable file expected\n");
         return -1;
     }
 

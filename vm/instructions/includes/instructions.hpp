@@ -9,7 +9,7 @@
 #include "argument.hpp"
 #include "opcodes.hpp"
 
-typedef enum JumpType
+typedef enum JumpType // TODO: add default invalid value
 {
 
     JumpUncond = 0, // default value
@@ -21,6 +21,14 @@ typedef enum JumpType
     JumpLE,         // <=
 
 } JumpType;
+
+typedef enum SignExtend // TODO: add default invalid value
+{
+
+    NotSignExtended = 0, // default value
+    SignExtended,
+
+} SignExtend;
 
 typedef struct ArgSet
 {
@@ -48,7 +56,7 @@ typedef struct Instruction
     uint8_t ArgSetIdx;
 
     DataSize DataSz;
-    uint8_t SignExtend;
+    SignExtend SignExt;
 
     JumpType JmpType;
 

@@ -65,15 +65,9 @@ static int findArgSetIdx(const InstructionMeta *im, ArgSet args)
 InstrCreationErr NewInstruction(InstructionName name, Instruction *instr)
 {
 
-    const InstructionMeta *im = FindInsMetaByName(name);
-    if (im == NULL)
-        return INSTR_UNKNOWN;
-
-    instr->im = im;
-
     ArgSet argSet = {.First = instr->Arg1.Type, .Second = instr->Arg2.Type};
 
-    int argSetIdx = findArgSetIdx(im, argSet);
+    int argSetIdx = findArgSetIdx(instr->im, argSet);
     if (argSetIdx < 0)
         return INSTR_WRONG_OPERANDS;
 

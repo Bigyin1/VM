@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include "binformat.hpp"
 
+const uint32_t magicHeader = 0xFAAFAAAF;
+const uint16_t formatVersion = 1;
+
+const uint16_t SHN_UNDEF = 0xFFFF;
+const uint16_t SHN_ABS = 0xFFFE;
+
 int getObjFileHeader(FILE *in, BinformatHeader *h)
 {
 

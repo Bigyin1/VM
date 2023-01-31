@@ -11,15 +11,15 @@ const vmMajesticConsoleScreenFrameLen = 7
 
 func TestGraphic(t *testing.T) {
 
-	binFile := compileFile(t, "testdata/graphicTest.code")
+	binFile := compileAndLinkFiles(t, []string{"testdata/graphicTest.code"})
 	if t.Failed() {
 		return
 	}
-	defer os.Remove(binFile.Name())
+	defer os.Remove(binFile)
 
 	vm := testVM{t: t}
 
-	vm.startVM(binFile.Name())
+	vm.startVM(binFile)
 	if t.Failed() {
 		return
 	}

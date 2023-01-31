@@ -1,4 +1,4 @@
-.text 0
+.text
 
 equ :consoleDouble  10000
 equ :consoleInt     10008

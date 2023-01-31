@@ -56,6 +56,10 @@ const RegMeta regs[] = {
         .RegCode = R12,
     },
     {
+        .Name = "r13",
+        .RegCode = R13,
+    },
+    {
         .Name = "rbp",
         .RegCode = RBP,
     },
@@ -74,4 +78,17 @@ int FindRegByName(RegName name)
     }
 
     return -1;
+}
+
+const char *FindRegByCode(uint8_t regCode)
+{
+
+    for (size_t i = 0; i < sizeof(regs) / sizeof(RegMeta); i++)
+    {
+        if (regs[i].RegCode == regCode)
+            return regs[i].Name;
+    }
+
+    return NULL;
+    ;
 }

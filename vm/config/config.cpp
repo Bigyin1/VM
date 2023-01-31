@@ -1,6 +1,6 @@
 #include "vmconfig/config.hpp"
 
-const MajesticConsoleConfig consoleConfig = {
+MajesticConsoleConfig consoleConfig = {
 
     .address =              10000,
     .consoleInFD =          0,
@@ -13,7 +13,7 @@ const MajesticConsoleConfig consoleConfig = {
 };
 
 
-const RAMConfig ramConfig = {
+RAMConfig ramConfig = {
 
     .address =  4096,
     .size =     4096,
@@ -21,9 +21,17 @@ const RAMConfig ramConfig = {
 };
 
 
-const ROMConfig romConfig = {
+ROMConfig romConfig = {
 
     .address =  0,
     .size =     4096,
+
+};
+
+VMConfig vmConfig = {
+
+    .attachConsole =    true,
+    .attachRAM =        true,
+    .attachROM =        true,
 
 };

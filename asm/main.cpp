@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 
     if (argc != 3)
     {
-        printf("Wrong args count\n");
+        fprintf(stderr, "Wrong args count\n");
         return EXIT_FAILURE;
     }
 

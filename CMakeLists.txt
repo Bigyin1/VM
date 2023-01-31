@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 project(VM VERSION 0.1 LANGUAGES CXX)
 
 include(cmake/CompileOptions.cmake)
+include(cmake/Doxygen.cmake)
 
 enable_testing()
 

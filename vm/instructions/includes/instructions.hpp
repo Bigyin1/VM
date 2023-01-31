@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <stdint.h>
 
-#include <stdio.h>
 #include "argument.hpp"
 #include "opcodes.hpp"
 

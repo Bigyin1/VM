@@ -1,4 +1,4 @@
-.data 5096
+.data
 
 hello:
 db 'H', 'e', 'l', 'l', 'o', ' ', 'W' , 'o', 'r', 'l', 'd', '\J', 0
@@ -7,7 +7,7 @@ db 'H', 'e', 'l', 'l', 'o', ' ', 'W' , 'o', 'r', 'l', 'd', '\J', 0
 equ :consoleChar    10016
 
 
-.text 0
+.text
 main:
 
 call :printHelloFunc

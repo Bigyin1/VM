@@ -32,6 +32,7 @@ var upgrader = websocket.Upgrader{
 var addr = flag.String("addr", ":8080", "http service address")
 var asmPath = flag.String("asm", "./progs/my_asm", "assermbler path")
 var vmPath = flag.String("vm", "./progs/my_vm", "vm path")
+var ldPath = flag.String("ld", "./progs/my_ld", "ld path")
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
 
@@ -63,6 +64,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		request:        reqChan,
 		vmExePath:      *vmPath,
 		asmExePath:     *asmPath,
+		ldExePath:      *ldPath,
 		ctx:            ctx,
 		cancel:         cancel,
 	}

@@ -11,7 +11,7 @@ const vmMajesticConsoleScreenFrameLen = 7
 
 func TestGraphic(t *testing.T) {
 
-	binFile := compileFile(t, "testdata/graphicTest.code")
+	binFile := compileAndLinkFile(t, "testdata/graphicTest.code")
 	if t.Failed() {
 		return
 	}

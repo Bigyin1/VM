@@ -10,7 +10,9 @@ add_custom_command(TARGET end2end_get_exe_files POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     $<TARGET_FILE:my_asm> ${CMAKE_CURRENT_SOURCE_DIR}/progs
     COMMAND ${CMAKE_COMMAND} -E copy
-    $<TARGET_FILE:${vm_name}> ${CMAKE_CURRENT_SOURCE_DIR}/progs)
+    $<TARGET_FILE:${vm_name}> ${CMAKE_CURRENT_SOURCE_DIR}/progs
+    COMMAND ${CMAKE_COMMAND} -E copy
+    $<TARGET_FILE:my_ld> ${CMAKE_CURRENT_SOURCE_DIR}/progs)
 
 add_test(NAME consoleTest COMMAND
     go test -timeout 5s

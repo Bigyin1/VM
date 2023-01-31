@@ -1,5 +1,5 @@
 
-.text 0
+.text
 main:
 ret
 
@@ -53,8 +53,8 @@ jmp(eq) :ins_4
 jmp :ins_5
 jmp :ins_6
 jmp :ins_7
-jmp :ins_8
+jmp(l) :ins_8
 jmp :ins_9
-jmp :ins_10
+jmp(ge) :ins_10
 
 

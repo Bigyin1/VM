@@ -73,27 +73,30 @@ static int buildOutputSect(LD *ld, outputSect *outSect, outSectionInfo *newSectI
     return 0;
 }
 
-static outputSect *BuildOutputSections(LD *ld)
+static int BuildOutputSections(LD *ld, outputSect **sects)
 {
 
-    outputSect *outSects = (outputSect *)calloc(ld->args->outSectsCount, sizeof(outputSect));
-    if (outSects == NULL)
-        return NULL;
+    *sects = (outputSect *)calloc(ld->args->outSectsCount, sizeof(outputSect));
+    if (*sects == NULL)
+        return -1;
+
+    outputSect *outSects = *sects;
 
     for (uint16_t i = 0; i < ld->args->outSectsCount; i++)
     {
         if (buildOutputSect(ld, &outSects[i], &ld->args->outSectInfo[i], i) < 0)
-            return NULL;
+            return -1;
 
         if (outSects[i].sectsCount == 0)
         {
-            fprintf(stderr, "error: section %s does not exist in provided files\n",
+            fprintf(stderr, "ld: error: section %s does not exist in provided files\n",
                     ld->args->outSectInfo[i].name); // TODO: maybe change this to warning
-            return NULL;
+
+            return -1;
         }
     }
 
-    return outSects;
+    return 0;
 }
 
 static void setOutputSectionSizes(LD *ld, outputSect *outSect)
@@ -233,7 +236,7 @@ static uint16_t getOutputSectHeaderIdxBySectName(outputSect *outSects, uint16_t 
     return 0;
 }
 
-static int getSymbolsFromFile(LD *ld, uint16_t linkFileIdx, outputSect *outSects)
+static int getSymbolsFromInputFile(LD *ld, uint16_t linkFileIdx, outputSect *outSects)
 {
 
     LinkableFile *f = &ld->files[linkFileIdx];
@@ -255,6 +258,7 @@ static int getSymbolsFromFile(LD *ld, uint16_t linkFileIdx, outputSect *outSects
             SectionHeader *symbSectHdr = &f->sectHdrs[f->symTable[i].sectHeaderIdx];
 
             outSectName = getNameFromStrTableByIdx(f, symbSectHdr->nameIdx);
+
             outSectIdx = getOutputSectHeaderIdxBySectName(outSects,
                                                           ld->args->outSectsCount,
                                                           outSectName);
@@ -276,7 +280,7 @@ static int BuildExecFileSymbolTable(LD *ld, outputSect *outSects)
         return -1;
 
     for (uint16_t i = 0; i < ld->args->filesCount; i++)
-        if (getSymbolsFromFile(ld, i, outSects) < 0)
+        if (getSymbolsFromInputFile(ld, i, outSects) < 0)
             return -1;
 
     return 0;
@@ -459,7 +463,7 @@ static int relocateSectionData(ExecutableFile *exe, LinkableFile *l, RelSection 
     return 0;
 }
 
-static int applyRelocsToOldSection(LD *ld, LinkableFile *l, SectionHeader *hdr, uint32_t fileIdx)
+static int applyRelocsToInputFileSection(LD *ld, LinkableFile *l, SectionHeader *hdr, uint32_t fileIdx)
 {
     char *sectData = (char *)calloc(hdr->size, sizeof(char));
     if (sectData == NULL)
@@ -509,7 +513,7 @@ static int applyRelocsToOutputSection(LD *ld, outputSect *outSect)
         if (currFileSectHdr == NULL)
             continue;
 
-        if (applyRelocsToOldSection(ld, currFile, currFileSectHdr, i) < 0)
+        if (applyRelocsToInputFileSection(ld, currFile, currFileSectHdr, i) < 0)
             return -1;
     }
 
@@ -547,6 +551,9 @@ static int WriteSymTabAndStrTab(ExecutableFile *exe, FILE *out)
 
 static void FreeOutputSects(outputSect *outSects, uint32_t sz)
 {
+    if (outSects == NULL)
+        return;
+
     for (size_t i = 0; i < sz; i++)
     {
         free(outSects[i].sectsHdrs);
@@ -559,8 +566,9 @@ int LinkFiles(LD *ld)
 {
     BuildOutputExeFileHeader(ld);
 
-    outputSect *outSects = BuildOutputSections(ld);
-    if (outSects == NULL)
+    outputSect *outSects = NULL;
+
+    if (BuildOutputSections(ld, &outSects) < 0)
     {
         FreeOutputSects(outSects, ld->args->outSectsCount);
         return -1;

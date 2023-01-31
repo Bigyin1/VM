@@ -12,31 +12,50 @@ import (
 )
 
 const asmExePath = "progs/my_asm"
+const ldExePath = "progs/my_ld"
 const vmExePath = "progs/my_vm"
 
-func compileFile(t *testing.T, exePath string) *os.File {
+func compileAndLinkFile(t *testing.T, exePath string) *os.File {
 
-	binFile, err := ioutil.TempFile(".", "bin")
+	linkableFile, err := ioutil.TempFile(".", "bin")
 	if err != nil {
 		t.Errorf("failed to create temp file: %s\n", err)
 		return nil
 	}
+	defer os.Remove(linkableFile.Name())
 
 	var outBuf bytes.Buffer
 	var errBuf bytes.Buffer
 
-	cmd := exec.Command(asmExePath, exePath, binFile.Name())
+	cmd := exec.Command(asmExePath, exePath, linkableFile.Name())
 	cmd.Stdout = &outBuf
 	cmd.Stderr = &errBuf
 
 	err = cmd.Run()
 	if err != nil {
 		t.Errorf("%s\n", errBuf.String())
-		t.Errorf("asm error: %s\n", err.(*exec.ExitError).String())
 		return nil
 	}
 
-	return binFile
+	exeFile, err := ioutil.TempFile(".", "bin")
+	if err != nil {
+		t.Errorf("failed to create temp file: %s\n", err)
+		return nil
+	}
+
+	outBuf.Reset()
+	errBuf.Reset()
+
+	cmd = exec.Command(ldExePath, "--text=0", linkableFile.Name(), exeFile.Name())
+	err = cmd.Run()
+	if err != nil {
+		os.Remove(exeFile.Name())
+		t.Errorf("%s\n", errBuf.String())
+		t.Errorf("%s\n", outBuf.String())
+		return nil
+	}
+
+	return exeFile
 
 }
 
@@ -87,7 +106,7 @@ func (vm *testVM) startVM(binFile string) {
 
 	err = cmd.Start()
 	if err != nil {
-		vm.t.Fatal(err)
+		vm.t.Error(err)
 		return
 	}
 

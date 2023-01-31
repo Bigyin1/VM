@@ -53,11 +53,6 @@ ParserErrCode ParseTokens(Parser *parser)
 
         eatSP(parser);
 
-        uint64_t sectAddr = currTokenNumVal(parser);
-        eatToken(parser, ASM_T_UNSIGNED_INT);
-
-        parser->currSection->addr = sectAddr;
-
         err = parseSectionNode(parser, parser->currSection);
         if (err != PARSER_OK)
             return err;

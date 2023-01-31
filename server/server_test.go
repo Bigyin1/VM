@@ -96,6 +96,15 @@ func TestWebsocketServer(t *testing.T) {
 		return
 	}
 
+	resp, _ = readResponse(t, ws)
+	if t.Failed() {
+		return
+	}
+	if resp.MessageType != generalMessageType || resp.Message != linkedSuccessMessage {
+		t.Errorf("unexpected compile success message: %v", resp)
+		return
+	}
+
 	dataChan := make(chan []byte)
 
 	go readAllTextResponse(t, ws, dataChan)

@@ -31,7 +31,7 @@ func consoleCheck(vm *testVM, dataIn []byte, dataExp []byte) {
 
 func TestConsole(t *testing.T) {
 
-	binFile := compileFile(t, "testdata/consTest.code")
+	binFile := compileAndLinkFile(t, "testdata/consTest.code")
 	if t.Failed() {
 		return
 	}

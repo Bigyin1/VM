@@ -3,22 +3,31 @@
 
 export class Console {
 
-    constructor(sendTextCallback) {
-        this.prompt = "$> ";
-        this.root = document.getElementsByClassName("console")[0]
-
+    constructor(root, prompt, sendTextCallback, greetMess) {
+        this.prompt = prompt;
+        this.root = root
         this.sendText = sendTextCallback
+        this.greetMess = greetMess
+
+        this.readonly = false
+        if (this.sendText == null)
+            this.readonly = true
 
 
-        let greet = document.createElement("div")
-        greet.innerHTML = "Welcome to VM"
-        this.root.appendChild(greet)
+        this.greet()
 
         this.writePos = 0
         this.currentRow = null
 
         this.appendRow()
 
+    }
+
+
+    greet() {
+        let greet = document.createElement("div")
+        greet.innerHTML = this.greetMess
+        this.root.appendChild(greet)
     }
 
     appendRow() {
@@ -50,6 +59,7 @@ export class Console {
         this.currentRow.setAttribute("class", "rowInput")
         this.currentRow.addEventListener("keydown", this.onKeyDown.bind(this))
         this.currentRow.onpaste = (e) => { return false }
+
         this.currentRow.onclick = (e) => {
             e.preventDefault()
             this.setRowCaretToEnd()
@@ -57,11 +67,19 @@ export class Console {
 
         row.appendChild(this.currentRow)
 
-        this.currentRow.focus()
+        if (!this.readonly) {
+            this.currentRow.focus()
+        }
         this.currentRow.scrollIntoView()
     }
 
     onKeyDown(event) {
+
+        if (this.readonly) {
+            event.preventDefault()
+            return
+        }
+
         let key = event.key
         if (key === "Enter") {
             event.preventDefault();
@@ -89,8 +107,10 @@ export class Console {
         if (event.key.length != 1)
             return
 
+
         this.sendText(event.key) // send immidiately
         this.writePos += 1
+
     }
 
 
@@ -103,15 +123,18 @@ export class Console {
         sel.removeAllRanges();
         sel.addRange(range);
 
-        this.currentRow.focus();
+        if (!this.readonly) {
+            this.currentRow.focus();
+        }
         range.detach();
 
         this.currentRow.scrollTop = this.currentRow.scrollHeight;
     }
 
     putText(text, isError) {
-        if (isError)
+        if (isError) {
             this.appendRow()
+        }
 
 
         for (const l of text) {
@@ -119,12 +142,28 @@ export class Console {
                 this.appendRow()
                 continue
             }
+            if (l === '\t') {
+
+                this.currentRow.innerHTML += "<pre>&emsp;</pre>"
+                continue
+
+            }
             this.currentRow.textContent += l
             this.writePos += 1
 
             this.setRowCaretToEnd()
 
         }
+    }
+
+    clear() {
+        this.root.innerHTML = ""
+        this.greet()
+
+        this.writePos = 0
+        this.currentRow = null
+
+        this.appendRow()
     }
 
 

@@ -51,5 +51,5 @@ ParserErrCode parseInstrPostfix(Parser *parser, commandNode *node)
     err->line = line;
     err->column = column;
 
-    return PARSER_OK;
+    return PARSER_BAD_CMD_POSTFIX;
 }

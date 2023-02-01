@@ -72,6 +72,8 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
             err->token = regVal;
             err->line = line;
             err->column = column;
+
+            return PARSER_BAD_COMMAND;
         }
         arg->RegNum = (uint8_t)regNum;
 
@@ -237,7 +239,7 @@ ParserErrCode parseCommandNode(Parser *parser, commandNode *node)
 
         err = parseInstrPostfix(parser, node);
         if (err != PARSER_OK)
-            return err;
+            return PARSER_BAD_COMMAND;
 
         if (eatToken(parser, ASM_T_R_SIMP_PAREN) != PARSER_OK)
             return PARSER_BAD_COMMAND;

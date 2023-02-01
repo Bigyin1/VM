@@ -377,7 +377,7 @@ static int getEntrypoint(ExecutableFile *exe)
         }
     }
 
-    fprintf(stderr, "failed to find enrypoint \"main\\n");
+    fprintf(stderr, "failed to find entrypoint \"main\"\n");
 
     return -1;
 }

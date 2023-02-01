@@ -2,6 +2,7 @@ package main
 
 const errorMessageType = "error"
 const generalMessageType = "general"
+const codeDumpMessageType = "codedump"
 const consOutMessageType = "console"
 
 type textResp struct {

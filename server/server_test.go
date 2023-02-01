@@ -35,7 +35,7 @@ func readResponse(t *testing.T, ws *websocket.Conn) (resp textResp, err error) {
 	return
 }
 
-func readAllTextResponse(t *testing.T, ws *websocket.Conn, dataChan chan<- []byte) {
+func readAllConsoleResponse(t *testing.T, ws *websocket.Conn, dataChan chan<- []byte) {
 
 	defer close(dataChan)
 	for {
@@ -44,7 +44,9 @@ func readAllTextResponse(t *testing.T, ws *websocket.Conn, dataChan chan<- []byt
 		if err != nil {
 			return
 		}
-		dataChan <- []byte(resp.Message)
+		if resp.MessageType == consOutMessageType {
+			dataChan <- []byte(resp.Message)
+		}
 	}
 }
 
@@ -53,17 +55,14 @@ func getResponseWithTimeout(dataChan <-chan []byte, d time.Duration) string {
 	buf := bytes.Buffer{}
 	timer := time.NewTimer(d)
 
-L:
 	for {
 		select {
 		case <-timer.C:
-			break L
+			return buf.String()
 		case data := <-dataChan:
 			buf.Write(data)
 		}
 	}
-
-	return buf.String()
 }
 
 func TestWebsocketServer(t *testing.T) {
@@ -91,7 +90,7 @@ func TestWebsocketServer(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	if resp.MessageType != generalMessageType || resp.Message != compileSuccessMessage {
+	if resp.MessageType != generalMessageType {
 		t.Errorf("unexpected compile success message: %v", resp)
 		return
 	}
@@ -100,14 +99,23 @@ func TestWebsocketServer(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	if resp.MessageType != generalMessageType || resp.Message != linkedSuccessMessage {
-		t.Errorf("unexpected compile success message: %v", resp)
+	if resp.MessageType != generalMessageType {
+		t.Errorf("unexpected linked success message: %v", resp)
+		return
+	}
+
+	resp, _ = readResponse(t, ws)
+	if t.Failed() {
+		return
+	}
+	if resp.MessageType != codeDumpMessageType {
+		t.Errorf("unexpected readobj dump message: %v", resp)
 		return
 	}
 
 	dataChan := make(chan []byte)
 
-	go readAllTextResponse(t, ws, dataChan)
+	go readAllConsoleResponse(t, ws, dataChan)
 
 	dataSection := "Hello World\n"
 	if resp := getResponseWithTimeout(dataChan, 500*time.Millisecond); resp != dataSection {

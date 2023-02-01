@@ -7,13 +7,23 @@ class VMClient {
 
     constructor(addr) {
         this.addr = addr
-        this.console = new Console(this.sendConsoleText.bind(this))
+
+        this.console = new Console(document.getElementsByClassName("console")[0],
+            "$> ", this.sendConsoleText.bind(this), "Welcome to VM")
+
+        this.infoConsole = new Console(document.getElementsByClassName("infoConsole")[0],
+            "  ", null, "Log")
+
         this.codeInput = new CodeInput()
+
         this.screen = new Screen(this.codeInput.root.offsetWidth, this.codeInput.root.offsetHeight)
+
 
         this.socket = null
 
         this.codeInput.button.addEventListener("click", (event) => {
+
+            this.infoConsole.clear()
 
             if (this.socket != null) {
                 this.socket.close(1000, "incoming new code")
@@ -50,6 +60,10 @@ class VMClient {
 
         })
 
+        document.getElementsByClassName("clearButton")[0].addEventListener("click", (e) => {
+            this.console.clear()
+        })
+
     }
 
     processJSONMessage(message) {
@@ -59,12 +73,19 @@ class VMClient {
         }
 
         if (message.type === "general") {
-            this.console.putText(message.message, false)
+            this.infoConsole.putText(message.message, false)
+            return
+        }
+
+        if (message.type === "codedump") {
+            this.infoConsole.putText("\n----------------\n", false)
+            this.infoConsole.putText(message.message, false)
+            this.infoConsole.putText("\n----------------\n", false)
             return
         }
 
         if (message.type === "error") {
-            this.console.putText(message.message, true)
+            this.infoConsole.putText(message.message, true)
             return
         }
 
@@ -78,7 +99,6 @@ class VMClient {
         let g = arr[5]
         let b = arr[6]
 
-        //console.log(x, y, r, g, b)
         this.screen.drawPixel(x, y, r, g, b)
     }
 

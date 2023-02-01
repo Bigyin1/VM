@@ -11,13 +11,13 @@ import (
 	"os"
 	"os/exec"
 	"sync"
-	"syscall"
 )
 
 type Runner struct {
-	vmExePath  string
-	asmExePath string
-	ldExePath  string
+	vmExePath      string
+	asmExePath     string
+	ldExePath      string
+	readobjExePath string
 
 	textResponse   chan<- []byte
 	binaryResponse chan<- []byte
@@ -72,7 +72,7 @@ func (r *Runner) setupVM(exeFile string) error {
 		return err
 	}
 
-	r.vmProc = exec.Command(r.vmExePath, exeFile)
+	r.vmProc = exec.CommandContext(r.ctx, r.vmExePath, exeFile)
 
 	r.vmProc.Stdin = vmConsoleReaderTheir
 	r.vmProc.Stdout = vmConsoleWriterTheir
@@ -94,32 +94,13 @@ func (r *Runner) setupVM(exeFile string) error {
 	return nil
 }
 
-func (r *Runner) termSubprocess(procChan <-chan struct{}) {
-
-	<-r.ctx.Done()
-
-	select {
-	case <-procChan:
-		return
-	default:
-	}
-
-	r.vmProc.Process.Signal(syscall.SIGTERM)
-	r.vmProc.Wait()
-	log.Printf("process %d terminated", r.vmProc.ProcessState.Pid())
-
-}
-
 func (r *Runner) monitorVM() error {
 
-	procChan := make(chan struct{}, 1)
 	go func() {
 		r.vmProc.Wait()
 
-		procChan <- struct{}{}
-
 		log.Printf("process %d exited; status: %s",
-			r.vmProc.ProcessState.Pid(), r.vmProc.ProcessState.String())
+			r.vmProc.Process.Pid, r.vmProc.ProcessState.String())
 	}()
 
 	wg := &sync.WaitGroup{}
@@ -129,8 +110,6 @@ func (r *Runner) monitorVM() error {
 	go r.monitorConsoleOut(wg)
 	go r.monitorGraphicsOut(wg)
 	go r.monitorErrorsOut(wg)
-
-	go r.termSubprocess(procChan)
 
 	wg.Wait()
 
@@ -172,7 +151,8 @@ func (r *Runner) compile() (*os.File, error) {
 	asmTextFile.Close()
 	asmLinkableFile.Close()
 
-	cmd := exec.Command(r.asmExePath, asmTextFile.Name(), asmLinkableFile.Name())
+	cmd := exec.CommandContext(r.ctx, r.asmExePath,
+		asmTextFile.Name(), asmLinkableFile.Name())
 
 	var outBuf bytes.Buffer
 	var errBuf bytes.Buffer
@@ -222,8 +202,8 @@ func (r *Runner) link(linkableFile *os.File) (*os.File, error) {
 
 	asmExeFile.Close()
 
-	cmd := exec.Command(r.ldExePath,
-		"--text=0", "--data=6000", linkableFile.Name(), asmExeFile.Name())
+	cmd := exec.CommandContext(r.ctx, r.ldExePath,
+		"--text=0", "--data=5000", linkableFile.Name(), asmExeFile.Name())
 
 	var outBuf bytes.Buffer
 	var errBuf bytes.Buffer
@@ -262,6 +242,42 @@ func (r *Runner) link(linkableFile *os.File) (*os.File, error) {
 
 }
 
+func (r *Runner) readobjDump(exeFile string) error {
+
+	cmd := exec.CommandContext(r.ctx, r.readobjExePath, exeFile)
+
+	var outBuf bytes.Buffer
+	var errBuf bytes.Buffer
+
+	cmd.Stdout = &outBuf
+	cmd.Stderr = &errBuf
+
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("readobj failed: exit code: %s\n", err.(*exec.ExitError).String())
+
+		errMes := textResp{
+			MessageType: errorMessageType,
+			Message:     errBuf.String(),
+		}
+		r.responseJson(errMes)
+		return err
+	}
+
+	succMes := textResp{
+		MessageType: codeDumpMessageType,
+		Message:     outBuf.String(),
+	}
+
+	err = r.responseJson(succMes)
+	if err != nil {
+		fmt.Printf("responseJson: %v", err)
+		return err
+	}
+
+	return nil
+}
+
 func (r *Runner) Start() error {
 
 	defer func() {
@@ -271,17 +287,20 @@ func (r *Runner) Start() error {
 
 	LinkFile, err := r.compile()
 	if err != nil {
-		// write error to user
+		// log error
 		return err
 	}
 
 	ExeFile, err := r.link(LinkFile)
 	if err != nil {
-		// write error to user
+		// log error
 		return err
 	}
-
 	defer os.Remove(ExeFile.Name())
+
+	if err = r.readobjDump(ExeFile.Name()); err != nil {
+		return err
+	}
 
 	err = r.setupVM(ExeFile.Name())
 	if err != nil {

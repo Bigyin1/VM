@@ -42,7 +42,7 @@ ParserErrCode ParseTokens(Parser *parser)
 
         const char *sectName = currTokenVal(parser);
 
-        eatToken(parser, ASM_T_SECTION_NAME);
+        eatToken(parser, ASM_T_SECTION_NAME); // TODO: check for duplicating sections
 
         ParserErrCode err = reallocSections(parser);
         if (err != PARSER_OK)

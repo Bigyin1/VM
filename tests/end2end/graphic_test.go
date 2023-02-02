@@ -24,8 +24,6 @@ func TestGraphic(t *testing.T) {
 		return
 	}
 
-	defer vm.graphics.Close()
-
 	iters := 512
 	for i := 0; i < iters; i++ {
 		var x uint16

@@ -134,6 +134,24 @@ Instruction testIns[] = {
         .ArgSetIdx = 1,
     },
     {
+        .im = &instructions[ins_mul],
+        .Arg1 = {.Type = ArgRegister, .RegNum = 2},
+        .Arg2 = {.Type = ArgRegisterOffsetIndirect, .RegNum = 1, .ImmDisp16 = 10},
+        .ArgSetIdx = 3,
+    },
+    {
+        .im = &instructions[ins_subf],
+        .Arg1 = {.Type = ArgRegister, .RegNum = 14},
+        .Arg2 = {.Type = ArgRegisterIndirect, .RegNum = 5},
+        .ArgSetIdx = 2,
+    },
+    {
+        .im = &instructions[ins_cmp],
+        .Arg1 = {.Type = ArgRegister, .RegNum = 6},
+        .Arg2 = {.Type = ArgRegisterOffsetIndirect, .RegNum = 2, .ImmDisp16 = -4},
+        .ArgSetIdx = 3,
+    },
+    {
         .im = &instructions[ins_jmp],
         .Arg1 = {.Type = ArgImm, .Imm = 0, ._immArgSz = DataWord},
         .Arg2 = {.Type = ArgNone},
@@ -398,7 +416,7 @@ int main(int argc, char **argv)
     FILE *in = fopen(argv[1], "r");
     if (in == NULL)
     {
-        perror("decEncTest:");
+        perror("decEncTest");
         return 1;
     }
 

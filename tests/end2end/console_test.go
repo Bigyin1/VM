@@ -26,13 +26,11 @@ func TestConsole(t *testing.T) {
 		return
 	}
 
-	defer vm.graphics.Close()
+	consoleEchoCheck(&vm, []byte(dataInt), []byte(strings.TrimSuffix(dataInt, "\n")))
 
-	consoleCheck(&vm, []byte(dataInt), []byte(strings.TrimSuffix(dataInt, "\n")))
+	consoleEchoCheck(&vm, []byte(dataDouble), []byte(strings.TrimSuffix(dataDouble, "\n")))
 
-	consoleCheck(&vm, []byte(dataDouble), []byte(strings.TrimSuffix(dataDouble, "\n")))
-
-	consoleCheck(&vm, []byte(dataChar), []byte(dataChar))
+	consoleEchoCheck(&vm, []byte(dataChar), []byte(dataChar))
 
 	vm.waitVM()
 

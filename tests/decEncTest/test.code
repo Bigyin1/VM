@@ -45,6 +45,10 @@ mul r0,  3
 mulf r1, 1234.0
 divf r0, 2.00
 
+mul r2, [r1+10]
+subf rbp, [r5]
+cmp r6, [r2-4]
+
 
 jmp(neq) :main
 jmp :ins_2

@@ -126,40 +126,28 @@ static size_t encode_pop(Instruction *ins, FILE *w, bool evalSz, bool evalSymOff
 
 static size_t encodeARITHM(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
 {
-
-    if (ins->Arg2.Type == ArgRegister)
-    {
-        uint8_t byte = ins->Arg1.RegNum | (ins->Arg2.RegNum << 4);
-        return 1 + my_fwrite(&byte, 1, 1, w, evalSz);
-    }
-
     size_t sz = 1;
-    uint8_t byte = ins->Arg1.RegNum | (ins->Arg2._immArgSz << 4);
+
+    uint8_t byte = 0;
+    if (ins->Arg2.Type != ArgImm)
+        byte = ins->Arg1.RegNum | (ins->Arg2.RegNum << 4);
+    else
+        byte = ins->Arg1.RegNum | (ins->Arg2._immArgSz << 4);
+
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
+    if (ins->Arg2.Type == ArgRegister || ins->Arg2.Type == ArgRegisterIndirect)
+        return sz;
+
+    if (ins->Arg2.Type == ArgRegisterOffsetIndirect)
+    {
+        sz += my_fwrite(&ins->Arg2.ImmDisp16, sizeof(ins->Arg2.ImmDisp16), 1, w, evalSz);
+        return sz;
+    }
 
     if (evalSymOffset)
         return sz;
 
     return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz, evalSymOffset);
-}
-
-static size_t encodeARITHMF(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
-{
-
-    if (ins->Arg2.Type == ArgRegister)
-    {
-        uint8_t byte = ins->Arg1.RegNum | (ins->Arg2.RegNum << 4);
-        return 1 + my_fwrite(&byte, 1, 1, w, evalSz);
-    }
-
-    size_t sz = 1;
-    uint8_t byte = ins->Arg1.RegNum;
-    sz += my_fwrite(&byte, 1, 1, w, evalSz);
-
-    if (evalSymOffset)
-        return sz;
-
-    return sz + my_fwrite(&ins->Arg2.Imm, sizeof(double), 1, w, evalSz);
 }
 
 static size_t encode_add(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
@@ -169,7 +157,7 @@ static size_t encode_add(Instruction *ins, FILE *w, bool evalSz, bool evalSymOff
 
 static size_t encode_addf(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
 {
-    return encodeARITHMF(ins, w, evalSz, evalSymOffset);
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
 static size_t encode_sub(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
@@ -179,7 +167,7 @@ static size_t encode_sub(Instruction *ins, FILE *w, bool evalSz, bool evalSymOff
 
 static size_t encode_subf(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
 {
-    return encodeARITHMF(ins, w, evalSz, evalSymOffset);
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
 static size_t encode_mul(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
@@ -189,7 +177,7 @@ static size_t encode_mul(Instruction *ins, FILE *w, bool evalSz, bool evalSymOff
 
 static size_t encode_mulf(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
 {
-    return encodeARITHMF(ins, w, evalSz, evalSymOffset);
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
 static size_t encode_div(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
@@ -199,7 +187,22 @@ static size_t encode_div(Instruction *ins, FILE *w, bool evalSz, bool evalSymOff
 
 static size_t encode_divf(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
 {
-    return encodeARITHMF(ins, w, evalSz, evalSymOffset);
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
+}
+
+static size_t encode_sqrt(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
+{
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
+}
+
+static size_t encode_cmp(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
+{
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
+}
+
+static size_t encode_cmpf(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
+{
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
 static size_t encode_jmp(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
@@ -224,11 +227,6 @@ static size_t encode_call(Instruction *ins, FILE *w, bool evalSz, bool evalSymOf
         return sz;
 
     return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz, evalSymOffset);
-}
-
-static size_t encode_cmp(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)
-{
-    return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
 static size_t encode_halt(Instruction *ins, FILE *w, bool evalSz, bool evalSymOffset)

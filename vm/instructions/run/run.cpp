@@ -1,5 +1,7 @@
 #include <assert.h>
 #include <string.h>
+#include <float.h>
+#include <math.h>
 #include "instructions.hpp"
 #include "registers.hpp"
 #include "run.hpp"
@@ -215,21 +217,73 @@ static int run_pop(CPU *cpu, Instruction *ins)
     return 0;
 }
 
+static int runArithm(CPU *cpu, Instruction *ins, void (*op)(CPU *cpu, Instruction *, uint64_t, uint64_t))
+{
+
+    uint64_t val = 0;
+    if (ins->Arg2.Type == ArgImm)
+        val = ins->Arg2.Imm;
+    else if (ins->Arg2.Type == ArgRegister)
+        val = cpu->gpRegs[ins->Arg2.RegNum];
+    else
+    {
+        uint64_t addr = getEffectiveAddress(cpu, &ins->Arg2);
+
+        if (readFromAddr(cpu, addr, &val, ins->DataSz) < 0)
+            return -1;
+    }
+
+    op(cpu, ins, cpu->gpRegs[ins->Arg1.RegNum], val);
+
+    return 0;
+}
+
+static int runArithmf(CPU *cpu, Instruction *ins, void (*op)(CPU *cpu, Instruction *, double, double))
+{
+
+    double op1 = 0;
+    memcpy(&op1, &cpu->gpRegs[ins->Arg1.RegNum], sizeof(double));
+
+    double op2 = 0;
+    if (ins->Arg2.Type == ArgImm)
+        memcpy(&op2, &ins->Arg2.Imm, sizeof(double));
+    else if (ins->Arg2.Type == ArgRegister)
+        memcpy(&op2, &cpu->gpRegs[ins->Arg2.RegNum], sizeof(double));
+    else
+    {
+        uint64_t addr = getEffectiveAddress(cpu, &ins->Arg2);
+
+        uint64_t val = 0;
+        if (readFromAddr(cpu, addr, &val, ins->DataSz) < 0)
+            return -1;
+
+        memcpy(&op2, &val, sizeof(double));
+    }
+
+    op(cpu, ins, op1, op2);
+
+    return 0;
+}
+
+static void opAdd(CPU *cpu, Instruction *ins, uint64_t a1, uint64_t a2)
+{
+    cpu->gpRegs[ins->Arg1.RegNum] = a1 + a2;
+}
+
 static int run_add(CPU *cpu, Instruction *ins)
 {
 
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    uint64_t val = 0;
-    if (ins->Arg2.Type == ArgImm)
-        val = ins->Arg2.Imm;
-    else
-        val = cpu->gpRegs[ins->Arg2.RegNum];
+    return runArithm(cpu, ins, opAdd);
+}
 
-    cpu->gpRegs[ins->Arg1.RegNum] += val;
+static void opAddf(CPU *cpu, Instruction *ins, double op1, double op2)
+{
+    double res = op1 + op2;
 
-    return 0;
+    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &res, sizeof(double));
 }
 
 static int run_addf(CPU *cpu, Instruction *ins)
@@ -238,20 +292,12 @@ static int run_addf(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    double val1 = 0;
-    memcpy(&val1, &cpu->gpRegs[ins->Arg1.RegNum], sizeof(double));
+    return runArithmf(cpu, ins, opAddf);
+}
 
-    double val2 = 0;
-    if (ins->Arg2.Type == ArgImm)
-        memcpy(&val2, &ins->Arg2.Imm, sizeof(double));
-    else
-        memcpy(&val2, &cpu->gpRegs[ins->Arg2.RegNum], sizeof(double));
-
-    val1 += val2;
-
-    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &val1, sizeof(double));
-
-    return 0;
+static void opSub(CPU *cpu, Instruction *ins, uint64_t a1, uint64_t a2)
+{
+    cpu->gpRegs[ins->Arg1.RegNum] = a1 - a2;
 }
 
 static int run_sub(CPU *cpu, Instruction *ins)
@@ -260,21 +306,14 @@ static int run_sub(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    uint64_t val = 0;
-    if (ins->Arg2.Type == ArgImm)
-        val = ins->Arg2.Imm;
-    else
-        val = cpu->gpRegs[ins->Arg2.RegNum];
+    return runArithm(cpu, ins, opSub);
+}
 
-    cpu->gpRegs[ins->Arg1.RegNum] -= val;
+static void opSubf(CPU *cpu, Instruction *ins, double op1, double op2)
+{
+    double res = op1 - op2;
 
-    cpu->statusReg = 0;
-    if ((int64_t)cpu->gpRegs[ins->Arg1.RegNum] > 0)
-        cpu->statusReg = 1;
-    else if ((int64_t)cpu->gpRegs[ins->Arg1.RegNum] < 0)
-        cpu->statusReg = -1;
-
-    return 0;
+    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &res, sizeof(double));
 }
 
 static int run_subf(CPU *cpu, Instruction *ins)
@@ -283,20 +322,12 @@ static int run_subf(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    double val1 = 0;
-    memcpy(&val1, &cpu->gpRegs[ins->Arg1.RegNum], sizeof(double));
+    return runArithmf(cpu, ins, opSubf);
+}
 
-    double val2 = 0;
-    if (ins->Arg2.Type == ArgImm)
-        memcpy(&val2, &ins->Arg2.Imm, sizeof(double));
-    else
-        memcpy(&val2, &cpu->gpRegs[ins->Arg2.RegNum], sizeof(double));
-
-    val1 -= val2;
-
-    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &val1, sizeof(double));
-
-    return 0;
+static void opMul(CPU *cpu, Instruction *ins, uint64_t a1, uint64_t a2)
+{
+    cpu->gpRegs[ins->Arg1.RegNum] = a1 * a2;
 }
 
 static int run_mul(CPU *cpu, Instruction *ins)
@@ -305,15 +336,14 @@ static int run_mul(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    uint64_t val = 0;
-    if (ins->Arg2.Type == ArgImm)
-        val = ins->Arg2.Imm;
-    else
-        val = cpu->gpRegs[ins->Arg2.RegNum];
+    return runArithm(cpu, ins, opMul);
+}
 
-    cpu->gpRegs[ins->Arg1.RegNum] *= val;
+static void opMulf(CPU *cpu, Instruction *ins, double op1, double op2)
+{
+    double res = op1 * op2;
 
-    return 0;
+    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &res, sizeof(double));
 }
 
 static int run_mulf(CPU *cpu, Instruction *ins)
@@ -322,20 +352,12 @@ static int run_mulf(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    double val1 = 0;
-    memcpy(&val1, &cpu->gpRegs[ins->Arg1.RegNum], sizeof(double));
+    return runArithmf(cpu, ins, opMulf);
+}
 
-    double val2 = 0;
-    if (ins->Arg2.Type == ArgImm)
-        memcpy(&val2, &ins->Arg2.Imm, sizeof(double));
-    else
-        memcpy(&val2, &cpu->gpRegs[ins->Arg2.RegNum], sizeof(double));
-
-    val1 *= val2;
-
-    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &val1, sizeof(double));
-
-    return 0;
+static void opDiv(CPU *cpu, Instruction *ins, uint64_t a1, uint64_t a2)
+{
+    cpu->gpRegs[ins->Arg1.RegNum] = a1 / a2;
 }
 
 static int run_div(CPU *cpu, Instruction *ins)
@@ -344,15 +366,14 @@ static int run_div(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    uint64_t val = 0;
-    if (ins->Arg2.Type == ArgImm)
-        val = ins->Arg2.Imm;
-    else
-        val = cpu->gpRegs[ins->Arg2.RegNum];
+    return runArithm(cpu, ins, opDiv);
+}
 
-    cpu->gpRegs[ins->Arg1.RegNum] /= val;
+static void opDivf(CPU *cpu, Instruction *ins, double op1, double op2)
+{
+    double res = op1 / op2;
 
-    return 0;
+    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &res, sizeof(double));
 }
 
 static int run_divf(CPU *cpu, Instruction *ins)
@@ -361,20 +382,68 @@ static int run_divf(CPU *cpu, Instruction *ins)
     assert(cpu != NULL);
     assert(ins != NULL);
 
-    double val1 = 0;
-    memcpy(&val1, &cpu->gpRegs[ins->Arg1.RegNum], sizeof(double));
+    return runArithmf(cpu, ins, opDivf);
+}
 
-    double val2 = 0;
-    if (ins->Arg2.Type == ArgImm)
-        memcpy(&val2, &ins->Arg2.Imm, sizeof(double));
-    else
-        memcpy(&val2, &cpu->gpRegs[ins->Arg2.RegNum], sizeof(double));
+static void opSqrt(CPU *cpu, Instruction *ins, double op1, double op2)
+{
+    double res = sqrt(op2);
 
-    val1 /= val2;
+    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &res, sizeof(double));
+}
 
-    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &val1, sizeof(double));
+static int run_sqrt(CPU *cpu, Instruction *ins)
+{
 
-    return 0;
+    assert(cpu != NULL);
+    assert(ins != NULL);
+
+    return runArithmf(cpu, ins, opSqrt);
+}
+
+static void opCmp(CPU *cpu, Instruction *ins, uint64_t op1, uint64_t op2)
+{
+    int64_t res = (int64_t)(op1 - op2);
+
+    cpu->statusReg = 0;
+    if (res > 0)
+        cpu->statusReg = 1;
+    else if (res < 0)
+        cpu->statusReg = -1;
+}
+
+static int run_cmp(CPU *cpu, Instruction *ins)
+{
+    return runArithm(cpu, ins, opCmp);
+}
+
+static void opCmpf(CPU *cpu, Instruction *, double op1, double op2)
+{
+
+    cpu->statusReg = 0;
+
+    double diff = op1 - op2;
+
+    const double eps = 1.0e-8;
+    if (fabs(diff) <= eps)
+    {
+        cpu->statusReg = 0;
+        return;
+    }
+
+    if (diff > 0)
+        cpu->statusReg = 1;
+    else if (diff < 0)
+        cpu->statusReg = -1;
+}
+
+static int run_cmpf(CPU *cpu, Instruction *ins)
+{
+
+    assert(cpu != NULL);
+    assert(ins != NULL);
+
+    return runArithmf(cpu, ins, opCmpf);
 }
 
 static int run_jmp(CPU *cpu, Instruction *ins)
@@ -408,7 +477,7 @@ static int run_jmp(CPU *cpu, Instruction *ins)
             return 0;
         break;
     case JumpNEQ:
-        if (cpu->statusReg != 0)
+        if (cpu->statusReg == 0)
             return 0;
         break;
     }
@@ -438,26 +507,6 @@ static int run_call(CPU *cpu, Instruction *ins)
     cpu->gpRegs[RSP] += 8;
 
     cpu->regIP = addr;
-
-    return 0;
-}
-
-static int run_cmp(CPU *cpu, Instruction *ins)
-{
-
-    uint64_t val = 0;
-    if (ins->Arg2.Type == ArgImm)
-        val = ins->Arg2.Imm;
-    else
-        val = cpu->gpRegs[ins->Arg2.RegNum];
-
-    int64_t res = cpu->gpRegs[ins->Arg1.RegNum] - val;
-
-    cpu->statusReg = 0;
-    if (res > 0)
-        cpu->statusReg = 1;
-    else if (res < 0)
-        cpu->statusReg = -1;
 
     return 0;
 }

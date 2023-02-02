@@ -66,7 +66,8 @@ const RegMeta regs[] = {
     {
         .Name = "rsp",
         .RegCode = RSP,
-    }};
+    },
+};
 
 int FindRegByName(RegName name)
 {

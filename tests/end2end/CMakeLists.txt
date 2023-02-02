@@ -20,6 +20,12 @@ add_test(NAME consoleLinkedTest COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.go
 )
 
+add_test(NAME quadEqTest COMMAND
+    go test -timeout 5s
+    ${CMAKE_CURRENT_SOURCE_DIR}/quadEq_test.go
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils.go
+)
+
 add_custom_target(end2end_get_exe_files COMMAND)
 
 add_custom_command(TARGET end2end_get_exe_files POST_BUILD

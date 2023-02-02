@@ -128,7 +128,7 @@ func (vm *testVM) startVM(binFile string) {
 
 }
 
-func consoleCheck(vm *testVM, dataIn []byte, dataExp []byte) {
+func consoleEchoCheck(vm *testVM, dataIn []byte, dataExp []byte) {
 
 	_, err := vm.vmConsoleWriter.Write(dataIn)
 	if err != nil {
@@ -158,6 +158,10 @@ func (vm *testVM) waitVM() {
 		vm.t.Errorf("%s\n", vm.errBuf.String())
 		vm.t.Errorf("vm failed: %s", vm.cmd.ProcessState.String())
 	}
+
+	vm.vmConsoleReader.Close()
+	vm.vmConsoleWriter.Close()
+	vm.graphics.Close()
 }
 
 func (vm *testVM) watchVM(t time.Duration) {

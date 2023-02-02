@@ -51,48 +51,64 @@ INSTR(add, 6,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
 INSTR(addf, 7,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
 INSTR(sub, 8,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
 INSTR(subf, 9,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
 INSTR(mul, 10,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
 INSTR(mulf, 11,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
 INSTR(div, 12,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
 INSTR(divf, 13,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
 INSTR(jmp, 14,
@@ -111,9 +127,27 @@ INSTR(cmp, 16,
       {
           {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
           {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
 
-INSTR(halt, 17,
+INSTR(cmpf, 17,
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
+      })
+
+INSTR(halt, 18,
       {
           {.First = ArgNone COMMA .Second = ArgNone} COMMA
+      })
+
+INSTR(sqrt, 19,
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })

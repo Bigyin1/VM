@@ -184,6 +184,8 @@ static void EvalExecFileSymbolTableSize(LD *ld)
 
     for (uint16_t i = 0; i < ld->args->filesCount; i++)
         evalAbsSymbCountInFile(ld, &ld->files[i]);
+
+    ld->execFile.symTabSz += ld->args->outSectsCount;
 }
 
 static int checkDuplicatesForNewSymbol(ExecutableFile *ex, uint32_t currIdx, const char *symbName)
@@ -273,6 +275,27 @@ static int getSymbolsFromInputFile(LD *ld, uint16_t linkFileIdx, outputSect *out
     return 0;
 }
 
+static void addSectionNamesAsSymbols(LD *ld, outputSect *outSects)
+{
+
+    for (uint16_t i = 0; i < ld->args->outSectsCount; i++)
+    {
+        SymTabEntry *currOutExeSymbol = &ld->execFile.symTable[ld->execFile.symTabCurrIdx];
+
+        uint16_t outSectIdx = getOutputSectHeaderIdxBySectName(outSects,
+                                                               ld->args->outSectsCount,
+                                                               outSects[i].sectName);
+        outSects[i].nameIdx = ld->execFile.strTableSz;
+        execFileStringTableAdd(&ld->execFile, outSects[i].sectName);
+
+        currOutExeSymbol->nameIdx = outSects[i].nameIdx;
+        currOutExeSymbol->sectHeaderIdx = outSectIdx;
+        currOutExeSymbol->value = outSects[i].addr;
+
+        ld->execFile.symTabCurrIdx++;
+    }
+}
+
 static int BuildExecFileSymbolTable(LD *ld, outputSect *outSects)
 {
     ld->execFile.symTable = (SymTabEntry *)calloc(ld->execFile.symTabSz, sizeof(SymTabEntry));
@@ -282,6 +305,8 @@ static int BuildExecFileSymbolTable(LD *ld, outputSect *outSects)
     for (uint16_t i = 0; i < ld->args->filesCount; i++)
         if (getSymbolsFromInputFile(ld, i, outSects) < 0)
             return -1;
+
+    addSectionNamesAsSymbols(ld, outSects);
 
     return 0;
 }
@@ -337,10 +362,6 @@ static void BuildExecFileSectionHdrs(LD *ld, outputSect *outSects)
     for (uint16_t i = 0; i < ld->args->outSectsCount; i++)
     {
         outSects[i].offset = execFileDataOffset;
-
-        outSects[i].nameIdx = ld->execFile.strTableSz;
-        execFileStringTableAdd(&ld->execFile, outSects[i].sectName);
-
         execFileDataOffset += outSects[i].size;
     }
     for (uint16_t i = 0; i < ld->args->outSectsCount; i++)

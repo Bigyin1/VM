@@ -153,92 +153,79 @@ static InstrCreationErr decodeARITHM(Instruction *ins, FILE *r)
     if (fread(&byte, 1, 1, r) == 0)
         return INSTR_NOT_EXIST;
 
-    // add r1, r2
-    if (ins->Arg2.Type == ArgRegister)
+    if (ins->Arg2.Type != ArgImm)
     {
 
         ins->Arg2.RegNum = byte >> 4;
         ins->Arg1.RegNum = byte & regCodeMask;
+
+        if (ins->Arg2.Type == ArgRegisterOffsetIndirect)
+        {
+            if (fread(&ins->Arg2.ImmDisp16, sizeof(ins->Arg2.ImmDisp16), 1, r) == 0)
+                return INSTR_NOT_EXIST;
+        }
         return INSTR_OK;
     }
 
-    // arg 1
     ins->Arg1.RegNum = byte & regCodeMask;
     ins->Arg2._immArgSz = (DataSize)(byte >> 4);
 
-    // arg 2
-    return decodeCommon(&ins->Arg2, r);
-}
-
-static InstrCreationErr decodeARITHMF(Instruction *ins, FILE *r)
-{
-
-    uint8_t byte = 0;
-    if (fread(&byte, 1, 1, r) == 0)
-        return INSTR_NOT_EXIST;
-
-    // addf r1, r2
-    if (ins->Arg2.Type == ArgRegister)
-    {
-
-        ins->Arg2.RegNum = byte >> 4;
-        ins->Arg1.RegNum = byte & regCodeMask;
-        return INSTR_OK;
-    }
-
-    // arg 1
-    ins->Arg1.RegNum = byte;
-
-    // arg 2
     return decodeCommon(&ins->Arg2, r);
 }
 
 static InstrCreationErr decode_add(Instruction *ins, FILE *r)
 {
-
     return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decode_addf(Instruction *ins, FILE *r)
 {
-
-    return decodeARITHMF(ins, r);
+    return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decode_sub(Instruction *ins, FILE *r)
 {
-
     return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decode_subf(Instruction *ins, FILE *r)
 {
-
-    return decodeARITHMF(ins, r);
+    return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decode_mul(Instruction *ins, FILE *r)
 {
-
     return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decode_mulf(Instruction *ins, FILE *r)
 {
-
-    return decodeARITHMF(ins, r);
+    return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decode_div(Instruction *ins, FILE *r)
 {
-
     return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decode_divf(Instruction *ins, FILE *r)
 {
+    return decodeARITHM(ins, r);
+}
 
-    return decodeARITHMF(ins, r);
+static InstrCreationErr decode_sqrt(Instruction *ins, FILE *r)
+{
+    return decodeARITHM(ins, r);
+}
+
+static InstrCreationErr decode_cmp(Instruction *ins, FILE *r)
+{
+    return decodeARITHM(ins, r);
+}
+
+static InstrCreationErr decode_cmpf(Instruction *ins, FILE *r)
+{
+    return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decode_jmp(Instruction *ins, FILE *r)
@@ -260,12 +247,6 @@ static InstrCreationErr decode_call(Instruction *ins, FILE *r)
     ins->Arg1._immArgSz = DataWord;
 
     return decodeCommon(&ins->Arg1, r);
-}
-
-static InstrCreationErr decode_cmp(Instruction *ins, FILE *r)
-{
-
-    return decodeARITHM(ins, r);
 }
 
 static InstrCreationErr decodeNoArgs(Instruction *, FILE *)

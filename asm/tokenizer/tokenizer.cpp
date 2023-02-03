@@ -21,8 +21,6 @@ const token_meta_s generalTokens[] = {
     {ASM_T_R_PAREN, "]"},
     {ASM_T_COMMENT, "#"},
     {ASM_T_COMMA, ","},
-    {ASM_T_PLUS, "+"},
-    {ASM_T_MINUS, "-"},
     {ASM_T_NL, "\n"},
 };
 
@@ -86,7 +84,7 @@ static bool checkHexNum(Tokenizer *t)
                &t->currToken->numVal, &wordLen) == 0)
         return false;
 
-    t->currToken->type = ASM_T_UNSIGNED_INT;
+    t->currToken->type = ASM_T_INT;
 
     t->column += wordLen;
     t->input += wordLen;
@@ -104,20 +102,10 @@ static bool checkNumberToken(Tokenizer *t)
     if (numLen == 0)
         return false;
 
-    char sign = t->input[0];
-
-    uint64_t num = 0;
     int read = 0;
-    if (sign == '-')
-    {
-        if (sscanf(t->input, "%lld%n", &num, &read) == 0)
-            return false;
-    }
-    else
-    {
-        if (sscanf(t->input, "%llu%n", &num, &read) == 0)
-            return false;
-    }
+
+    if (sscanf(t->input, "%lld%n", &t->currToken->numVal, &read) == 0)
+        return false;
 
     if (read < numLen)
     {
@@ -129,16 +117,8 @@ static bool checkNumberToken(Tokenizer *t)
         memcpy(&t->currToken->numVal, &dblNum, sizeof(double));
         t->currToken->type = ASM_T_FLOAT;
     }
-    else if (sign == '-')
-    {
-        t->currToken->numVal = num;
-        t->currToken->type = ASM_T_SIGNED_INT;
-    }
     else
-    {
-        t->currToken->numVal = num;
-        t->currToken->type = ASM_T_UNSIGNED_INT;
-    }
+        t->currToken->type = ASM_T_INT;
 
     t->column += numLen;
     t->input += numLen;
@@ -177,7 +157,7 @@ static bool checkAsciiCharToken(Tokenizer *t)
 
     t->currToken->numVal = c;
 
-    t->currToken->type = ASM_T_UNSIGNED_INT;
+    t->currToken->type = ASM_T_INT;
 
     t->column += wordLen;
     t->input += wordLen;
@@ -274,6 +254,12 @@ TokErrCode Tokenize(Tokenizer *t)
         if (t->currToken->type != ASM_T_EOF)
             continue;
 
+        if (checkSimpleTokens(t))
+            continue;
+
+        if (checkNumberToken(t))
+            continue;
+
         if (checkSectNameToken(t))
             continue;
 
@@ -283,16 +269,10 @@ TokErrCode Tokenize(Tokenizer *t)
         if (checkLabelToken(t))
             continue;
 
-        if (checkNumberToken(t))
-            continue;
-
         if (checkInstrPostfixToken(t))
             continue;
 
         if (checkIdToken(t))
-            continue;
-
-        if (checkSimpleTokens(t))
             continue;
 
         if (addUnknownTokenError(t) < 0)

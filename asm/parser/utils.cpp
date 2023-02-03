@@ -64,26 +64,14 @@ void eatUntillNL(Parser *p)
         getNextToken(p->toks);
 }
 
-DataSize evalImmMinDataSz(uint64_t val, TokenType type)
+DataSize evalImmMinDataSz(int64_t val, TokenType type)
 {
-    if (type == ASM_T_UNSIGNED_INT)
-    {
-        uint64_t uVal = val;
-        if (uVal <= UINT8_MAX)
-            return DataByte;
-        if (uVal <= UINT16_MAX)
-            return DataDByte;
-        if (uVal <= UINT32_MAX)
-            return DataHalfWord;
-        return DataWord;
-    }
-    int64_t sVal = (int64_t)val;
 
-    if (sVal <= INT8_MAX && sVal >= INT8_MIN)
+    if (val <= INT8_MAX && val >= INT8_MIN)
         return DataByte;
-    if (sVal <= INT16_MAX && sVal >= INT16_MIN)
+    if (val <= INT16_MAX && val >= INT16_MIN)
         return DataDByte;
-    if (sVal <= INT32_MAX && sVal >= INT32_MIN)
+    if (val <= INT32_MAX && val >= INT32_MIN)
         return DataHalfWord;
     return DataWord;
 }

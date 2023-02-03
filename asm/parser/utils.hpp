@@ -15,7 +15,7 @@ void eatBlanks(Parser *p);
 
 void eatUntillNL(Parser *p);
 
-DataSize evalImmMinDataSz(uint64_t val, TokenType type);
+DataSize evalImmMinDataSz(int64_t val, TokenType type);
 
 #define currTokenType(p) (p)->toks->currToken->type
 

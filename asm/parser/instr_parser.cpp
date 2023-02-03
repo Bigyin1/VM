@@ -12,21 +12,12 @@
 
 static ParserErrCode parseImmDisp(Parser *parser, Argument *arg, ArgType t)
 {
-    if (currTokenType(parser) != ASM_T_MINUS &&
-        currTokenType(parser) != ASM_T_PLUS)
+    if (currTokenType(parser) != ASM_T_INT)
         return PARSER_INSUFF_TOKEN;
 
-    int8_t sign = 1;
-    if (currTokenType(parser) == ASM_T_MINUS)
-        sign = -1;
-
-    eatToken(parser, currTokenType(parser));
-
-    eatSP(parser);
-
-    arg->ImmDisp16 = currTokenNumVal(parser) * sign;
+    arg->ImmDisp16 = currTokenNumVal(parser);
     arg->Type = t;
-    if (eatToken(parser, ASM_T_UNSIGNED_INT) != PARSER_OK)
+    if (eatToken(parser, ASM_T_INT) != PARSER_OK)
         return PARSER_BAD_COMMAND;
 
     return PARSER_OK;
@@ -56,10 +47,10 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
         arg->Type = ArgImmIndirect;
         return PARSER_OK;
     }
-    else if (currTokenType(parser) == ASM_T_UNSIGNED_INT)
+    else if (currTokenType(parser) == ASM_T_INT)
     {
         arg->Imm = currTokenNumVal(parser);
-        eatToken(parser, ASM_T_UNSIGNED_INT);
+        eatToken(parser, ASM_T_INT);
 
         eatSP(parser);
 
@@ -137,7 +128,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
 
         eatToken(parser, ASM_T_FLOAT);
     }
-    else if (currTokenType(parser) == ASM_T_SIGNED_INT || currTokenType(parser) == ASM_T_UNSIGNED_INT)
+    else if (currTokenType(parser) == ASM_T_INT)
     {
         arg->Imm = currTokenNumVal(parser);
         arg->Type = ArgImm;

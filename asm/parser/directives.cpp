@@ -33,7 +33,7 @@ static const dataDirective dataDirectives[] = {
 
 };
 
-static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *node, size_t *count)
+static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, size_t *count)
 {
 
     saveCurrToken(parser->toks);
@@ -41,8 +41,7 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *n
     eatBlanks(parser);
 
     while (currTokenType(parser) == ASM_T_FLOAT ||
-           currTokenType(parser) == ASM_T_UNSIGNED_INT ||
-           currTokenType(parser) == ASM_T_SIGNED_INT ||
+           currTokenType(parser) == ASM_T_INT ||
            currTokenType(parser) == ASM_T_LABEL)
     {
         (*count)++;
@@ -65,7 +64,7 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *n
         err->line = currTokenLine(parser);
         err->column = currTokenColumn(parser);
 
-        return PARSER_COMMAND_INV_ARGS;
+        return PARSER_BAD_COMMAND;
     }
     return PARSER_OK;
 }
@@ -73,7 +72,7 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, commandNode *n
 static ParserErrCode parseDataDefDirectiveArgs(Parser *parser, commandNode *node, size_t sz)
 {
     size_t count = 0;
-    ParserErrCode err = getDataDefDirectiveArgsCount(parser, node, &count);
+    ParserErrCode err = getDataDefDirectiveArgsCount(parser, &count);
     if (err != PARSER_OK)
         return err;
 
@@ -86,8 +85,7 @@ static ParserErrCode parseDataDefDirectiveArgs(Parser *parser, commandNode *node
     size_t dataIdx = 0;
 
     while (currTokenType(parser) == ASM_T_FLOAT ||
-           currTokenType(parser) == ASM_T_UNSIGNED_INT ||
-           currTokenType(parser) == ASM_T_SIGNED_INT ||
+           currTokenType(parser) == ASM_T_INT ||
            currTokenType(parser) == ASM_T_LABEL)
     {
         count--;
@@ -140,13 +138,12 @@ ParserErrCode parseControlDirective(Parser *parser, commandNode *node)
 
     const char *symb = currTokenVal(parser);
     if (eatToken(parser, ASM_T_LABEL) != PARSER_OK)
-        return PARSER_COMMAND_INV_ARGS;
+        return PARSER_BAD_COMMAND;
 
     eatSP(parser);
 
     if (currTokenType(parser) == ASM_T_FLOAT ||
-        currTokenType(parser) == ASM_T_UNSIGNED_INT ||
-        currTokenType(parser) == ASM_T_SIGNED_INT)
+        currTokenType(parser) == ASM_T_INT)
     {
 
         if (defineNewAbsSymbol(parser, symb, currTokenNumVal(parser)) == PARSER_LABEL_REDEF)
@@ -155,6 +152,8 @@ ParserErrCode parseControlDirective(Parser *parser, commandNode *node)
 
             err->token = node->label;
             err->line = currTokenLine(parser);
+
+            return PARSER_BAD_COMMAND;
         }
         eatToken(parser, currTokenType(parser));
 
@@ -162,6 +161,6 @@ ParserErrCode parseControlDirective(Parser *parser, commandNode *node)
         return PARSER_OK;
     }
 
-    eatToken(parser, ASM_T_UNSIGNED_INT);
-    return PARSER_COMMAND_INV_ARGS;
+    eatToken(parser, currTokenType(parser));
+    return PARSER_BAD_COMMAND;
 }

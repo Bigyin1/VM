@@ -9,10 +9,8 @@ const char *tokenTypeVerbose(TokenType t)
         return "name";
     case ASM_T_FLOAT:
         return "float number";
-    case ASM_T_SIGNED_INT:
+    case ASM_T_INT:
         return "signed integer";
-    case ASM_T_UNSIGNED_INT:
-        return "unsigned integer";
     case ASM_T_LABEL:
         return "label";
     case ASM_T_SPACE:

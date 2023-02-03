@@ -95,7 +95,7 @@ Instruction testIns[] = {
     },
     {
         .im = &instructions[ins_push],
-        .Arg1 = {.Type = ArgImm, .Imm = 128, ._immArgSz = DataByte},
+        .Arg1 = {.Type = ArgImm, .Imm = 128, ._immArgSz = DataDByte},
         .Arg2 = {.Type = ArgNone},
         .ArgSetIdx = 1,
         .DataSz = DataByte,

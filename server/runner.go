@@ -97,10 +97,14 @@ func (r *Runner) setupVM(exeFile string) error {
 func (r *Runner) monitorVM() error {
 
 	go func() {
-		r.vmProc.Wait()
+		err := r.vmProc.Wait()
+		if err != nil {
+			log.Printf("process %d failed: %s", r.vmProc.Process.Pid, err)
+			return
+		}
 
 		log.Printf("process %d exited; status: %s",
-			r.vmProc.Process.Pid, r.vmProc.ProcessState.String())
+			r.vmProc.ProcessState.Pid(), r.vmProc.ProcessState.String())
 	}()
 
 	wg := &sync.WaitGroup{}
@@ -285,24 +289,24 @@ func (r *Runner) Start() error {
 		close(r.binaryResponse)
 	}()
 
-	LinkFile, err := r.compile()
+	linkableFile, err := r.compile()
 	if err != nil {
 		// log error
 		return err
 	}
 
-	ExeFile, err := r.link(LinkFile)
+	exeFile, err := r.link(linkableFile)
 	if err != nil {
 		// log error
 		return err
 	}
-	defer os.Remove(ExeFile.Name())
+	defer os.Remove(exeFile.Name())
 
-	if err = r.readobjDump(ExeFile.Name()); err != nil {
+	if err = r.readobjDump(exeFile.Name()); err != nil {
 		return err
 	}
 
-	err = r.setupVM(ExeFile.Name())
+	err = r.setupVM(exeFile.Name())
 	if err != nil {
 		return err
 	}

@@ -15,6 +15,7 @@ enum TokenType
     ASM_T_SIGNED_INT,
     ASM_T_UNSIGNED_INT,
     ASM_T_LABEL,
+    ASM_T_INSTR_POSTFIX,
     ASM_T_SPACE,
 
     ASM_T_SECTION_NAME,
@@ -23,8 +24,6 @@ enum TokenType
     ASM_T_MINUS,
     ASM_T_L_PAREN,
     ASM_T_R_PAREN,
-    ASM_T_L_SIMP_PAREN,
-    ASM_T_R_SIMP_PAREN,
     ASM_T_NL,
     ASM_T_COMMENT,
 

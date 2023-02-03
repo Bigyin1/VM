@@ -1,6 +1,6 @@
 add_library(asm_parser utils.cpp
     section_parser.cpp parser.cpp symbols.cpp directives.cpp
-    command_parser.cpp errors.cpp cmd_postfix_parser.cpp)
+    command_parser.cpp errors.cpp instr_postfix_parser.cpp instr_parser.cpp)
 
 target_link_libraries(asm_parser
     PRIVATE instr_encode project_options project_warnings

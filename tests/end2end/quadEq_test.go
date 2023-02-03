@@ -12,11 +12,6 @@ func floatsAlmostEqual(a, b float64) bool {
 	return math.Abs(a-b) <= 1e-9
 }
 
-const quadEqNoSolutions = 1
-const quadEqInfSolutions = 2
-const quadEqOneSolution = 3
-const quadEqTwoSolutions = 4
-
 type quadEqTestCase struct {
 	a float64
 	b float64
@@ -26,6 +21,11 @@ type quadEqTestCase struct {
 	root2    float64
 	solState byte
 }
+
+const quadEqNoSolutions = 1
+const quadEqInfSolutions = 2
+const quadEqOneSolution = 3
+const quadEqTwoSolutions = 4
 
 var testCases = []quadEqTestCase{
 
@@ -90,6 +90,7 @@ func TestQuadEq(t *testing.T) {
 			vm.t.Error(vm.errBuf.String())
 			return
 		}
+
 		var root1, root2 float64
 		var solState byte
 		fmt.Fscan(&buf, &root1, &root2, &solState)

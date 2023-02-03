@@ -29,10 +29,6 @@ const char *tokenTypeVerbose(TokenType t)
         return "[";
     case ASM_T_R_PAREN:
         return "]";
-    case ASM_T_L_SIMP_PAREN:
-        return "(";
-    case ASM_T_R_SIMP_PAREN:
-        return ")";
     case ASM_T_NL:
         return "newline";
     case ASM_T_COMMENT:

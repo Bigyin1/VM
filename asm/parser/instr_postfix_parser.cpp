@@ -1,7 +1,7 @@
 #include <string.h>
 #include "utils.hpp"
 #include "errors.hpp"
-#include "cmd_postfix_parser.hpp"
+#include "instr_postfix_parser.hpp"
 
 static ParserErrCode parseJumpPostfix(commandNode *node, const char *postfix)
 {
@@ -23,12 +23,15 @@ static ParserErrCode parseJumpPostfix(commandNode *node, const char *postfix)
 ParserErrCode parseInstrPostfix(Parser *parser, commandNode *node)
 {
 
+    if (currTokenType(parser) != ASM_T_INSTR_POSTFIX)
+        return PARSER_OK;
+
     const char *postfix = currTokenVal(parser);
+
     size_t line = currTokenLine(parser);
     size_t column = currTokenColumn(parser);
 
-    if (eatToken(parser, ASM_T_ID) != PARSER_OK)
-        return PARSER_BAD_COMMAND;
+    eatToken(parser, ASM_T_INSTR_POSTFIX);
 
     if (parseJumpPostfix(node, postfix) == PARSER_OK)
         return PARSER_OK;

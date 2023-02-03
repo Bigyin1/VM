@@ -19,10 +19,10 @@ typedef struct token_meta_s
 const token_meta_s generalTokens[] = {
     {ASM_T_L_PAREN, "["},
     {ASM_T_R_PAREN, "]"},
-    {ASM_T_L_SIMP_PAREN, "("}, // TODO: remove this and add single postfix token type instead.
-    {ASM_T_R_SIMP_PAREN, ")"},
     {ASM_T_COMMENT, "#"},
     {ASM_T_COMMA, ","},
+    {ASM_T_PLUS, "+"},
+    {ASM_T_MINUS, "-"},
     {ASM_T_NL, "\n"},
 };
 
@@ -184,6 +184,20 @@ static bool checkAsciiCharToken(Tokenizer *t)
     return true;
 }
 
+static bool checkInstrPostfixToken(Tokenizer *t)
+{
+    int wordLen = 0;
+    char rparen[2] = {0};
+    if (sscanf(t->input, "(%3[a-z]%1[)]%n", t->currToken->val, rparen, &wordLen) != 2)
+        return false;
+
+    t->currToken->type = ASM_T_INSTR_POSTFIX;
+
+    t->column += wordLen;
+    t->input += wordLen;
+    return true;
+}
+
 static bool checkSimpleTokens(Tokenizer *t)
 {
     for (size_t i = 0; i < sizeof(generalTokens) / sizeof(generalTokens[0]); i++)
@@ -272,10 +286,13 @@ TokErrCode Tokenize(Tokenizer *t)
         if (checkNumberToken(t))
             continue;
 
-        if (checkSimpleTokens(t))
+        if (checkInstrPostfixToken(t))
             continue;
 
         if (checkIdToken(t))
+            continue;
+
+        if (checkSimpleTokens(t))
             continue;
 
         if (addUnknownTokenError(t) < 0)

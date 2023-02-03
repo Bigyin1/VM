@@ -133,40 +133,35 @@ ParserErrCode parseDataDefDirective(Parser *parser, commandNode *node)
 ParserErrCode parseControlDirective(Parser *parser, commandNode *node)
 {
 
-    if (strcmp("equ", node->name) == 0)
+    if (strcmp("equ", node->name) != 0)
+        return PARSER_INSUFF_TOKEN;
+
+    eatSP(parser);
+
+    const char *symb = currTokenVal(parser);
+    if (eatToken(parser, ASM_T_LABEL) != PARSER_OK)
+        return PARSER_COMMAND_INV_ARGS;
+
+    eatSP(parser);
+
+    if (currTokenType(parser) == ASM_T_FLOAT ||
+        currTokenType(parser) == ASM_T_UNSIGNED_INT ||
+        currTokenType(parser) == ASM_T_SIGNED_INT)
     {
 
-        eatSP(parser);
-
-        const char *symb = currTokenVal(parser);
-        if (eatToken(parser, ASM_T_LABEL) != PARSER_OK)
-            return PARSER_COMMAND_INV_ARGS;
-
-        eatSP(parser);
-
-        if (currTokenType(parser) == ASM_T_FLOAT ||
-            currTokenType(parser) == ASM_T_UNSIGNED_INT ||
-            currTokenType(parser) == ASM_T_SIGNED_INT)
+        if (defineNewAbsSymbol(parser, symb, currTokenNumVal(parser)) == PARSER_LABEL_REDEF)
         {
+            ParserError *err = addNewParserError(parser, PARSER_LABEL_REDEF);
 
-            if (defineNewAbsSymbol(parser, symb, currTokenNumVal(parser)) == PARSER_LABEL_REDEF)
-            {
-                ParserError *err = addNewParserError(parser, PARSER_LABEL_REDEF);
-
-                err->token = node->label;
-                err->line = currTokenLine(parser);
-            }
-            eatToken(parser, currTokenType(parser));
-
-            node->Type = CMD_CONTROL;
-            return PARSER_OK;
+            err->token = node->label;
+            err->line = currTokenLine(parser);
         }
-        else
-        {
-            eatToken(parser, ASM_T_UNSIGNED_INT);
-            return PARSER_COMMAND_INV_ARGS;
-        }
+        eatToken(parser, currTokenType(parser));
+
+        node->Type = CMD_CONTROL;
+        return PARSER_OK;
     }
 
-    return PARSER_INSUFF_TOKEN;
+    eatToken(parser, ASM_T_UNSIGNED_INT);
+    return PARSER_COMMAND_INV_ARGS;
 }

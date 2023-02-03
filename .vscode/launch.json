@@ -5,8 +5,12 @@
             "name": "(gdb) Подключить",
             "type": "cppdbg",
             "request": "attach",
-            "program": "${workspaceFolder}/server/progs/my_vm",
+            "program": "${workspaceFolder}/build/vm/my_vm",
             "MIMode": "gdb",
+            "osx": {
+                "console": "externalTerminal",
+                "MIMode": "lldb"
+            },
             "setupCommands": [
                 {
                     "description": "Включить автоматическое форматирование для gdb",
@@ -19,7 +23,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "processId": 845007
+            "processId": 69380
         },
         {
             "name": "Launch server",
@@ -103,7 +107,7 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "./testdata/test2.code",
+                "./testdata/test.code",
                 "./testdata/out2"
             ],
             "stopAtEntry": false,
@@ -128,7 +132,7 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "./testdata/exeStrange"
+                "./testdata/quadeq/qExe"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

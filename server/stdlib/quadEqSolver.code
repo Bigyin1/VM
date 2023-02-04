@@ -1,0 +1,162 @@
+.data
+enterMes:
+    db 'E', 'n', 't', 'e', 'r', ' ', 'c', 'o', 'e', 'f', 'f', 's', ':', '\J', 0
+
+resultMes:
+    db 'R', 'e', 's', 'u', 'l', 't', ':', '\J', 0
+
+noSolsMes:
+    db 'N', 'o', ' ', 's', 'o', 'l', 'u', 't', 'i', 'o', 'n', 's', '\J', 0
+
+oneSolMes:
+    db 'O', 'n', 'e', ' ', 's', 'o', 'l', 'u', 't', 'i', 'o', 'n', '\J', 0
+
+twoSolsMes:
+    db 'T', 'w', 'o', ' ', 's', 'o', 'l', 'u', 't', 'i', 'o', 'n', 's', '\J', 0
+
+infSolsMes:
+    db 'I', 'n', 'f', ' ', 's', 'o', 'l', 'u', 't', 'i', 'o', 'n', 's',
+        ' ', 'c', 'o', 'u', 'n', 't', '\J', 0
+
+
+.text
+    equ :consoleDouble 10000
+    equ :consoleInt 10008
+    equ :consoleChar 10016
+
+    
+printRes:
+
+    push r2
+
+    push r1
+    mov r1, :resultMes
+    call :printStr
+    pop r1
+
+    ld(b) r2, [r1+40] 
+
+    cmp r2, 4
+    jmp(neq) :printResElse1
+
+    push r1
+    mov r1, :twoSolsMes
+    call :printStr
+    pop r1
+
+    ld r2, [r1+24]
+    st r2, [:consoleDouble]
+
+    mov r2, '\J'
+    st(b) r2, [:consoleChar]
+
+    ld r2, [r1+32]
+    st r2, [:consoleDouble]
+
+    mov r2, '\J'
+    st(b) r2, [:consoleChar]
+
+    jmp :printResEnd
+
+    printResElse1:
+
+    cmp r2, 3
+    jmp(neq) :printResElse2
+
+    push r1
+    mov r1, :oneSolMes
+    call :printStr
+    pop r1
+
+    ld r2, [r1+24]
+    st r2, [:consoleDouble]
+
+    mov r2, '\J'
+    st(b) r2, [:consoleChar]
+
+    jmp :printResEnd
+
+    printResElse2:
+
+    cmp r2, 2
+    jmp(neq) :printResElse3
+
+    push r1
+    mov r1, :infSolsMes
+    call :printStr
+    pop r1
+
+    jmp :printResEnd
+
+    printResElse3:
+
+    cmp r2, 1
+    jmp(neq) :printResEnd
+
+    push r1
+    mov r1, :noSolsMes
+    call :printStr
+    pop r1
+    
+
+    printResEnd:
+    pop r2
+    ret
+
+
+readCoeff:
+    ld r0, [:consoleDouble]
+    ret
+
+
+solveQuadEq:
+    push rbp
+    push r0
+    push r1
+
+    mov rbp, rsp
+    add rsp, 41
+
+    mov r1, :enterMes
+    call :printStr
+
+    call :readCoeff     #a
+    st r0, [rbp]
+
+    call :readCoeff     #b
+    st r0, [rbp+8]
+
+    call :readCoeff     #c
+    st r0, [rbp+16]
+
+    mov r0, 0
+    st r0, [rbp+24]
+    st r0, [rbp+32]
+    st(b) r0, [rbp+40]
+
+    ld r1, [rbp]
+    cmpf r1, 0.0
+
+    jmp(neq) :quad
+
+    mov r1, rbp
+    call :solveLinear
+    jmp :solveQuadEqEnd
+
+    quad:
+
+    mov r1, rbp
+    call :solveQuad
+    jmp :solveQuadEqEnd
+
+
+    solveQuadEqEnd:
+
+    call :printRes
+
+
+    sub rsp, 41
+    pop r1
+    pop r0
+    pop rbp
+    ret

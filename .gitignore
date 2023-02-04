@@ -1,6 +1,7 @@
 *build
 *deps
 server/progs
+server/stdlib/bin
 tests/end2end/progs
 go.work.sum
 .vscode/settings.json

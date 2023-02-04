@@ -25,8 +25,7 @@ type Runner struct {
 
 	vmProc *exec.Cmd
 
-	cancel context.CancelFunc
-	ctx    context.Context
+	ctx context.Context
 
 	vmConsoleReader io.ReadCloser
 	vmConsoleWriter io.WriteCloser
@@ -206,8 +205,9 @@ func (r *Runner) link(linkableFile *os.File) (*os.File, error) {
 
 	asmExeFile.Close()
 
-	cmd := exec.CommandContext(r.ctx, r.ldExePath,
-		"--text=0", "--data=5000", linkableFile.Name(), asmExeFile.Name())
+	ldArgs := append(stdlib, linkableFile.Name(), "--text=0", "--data=5500", asmExeFile.Name())
+
+	cmd := exec.CommandContext(r.ctx, r.ldExePath, ldArgs...)
 
 	var outBuf bytes.Buffer
 	var errBuf bytes.Buffer

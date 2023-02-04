@@ -1,0 +1,24 @@
+.text
+
+# r1 - str pointer
+printStr:
+    push r1
+    push r2
+
+    prstr:
+    ld(b) r2, [r1]
+
+    cmp r2, 0
+    jmp(eq) :prstrend
+
+    st(b) r2, [:consoleChar]
+
+    add r1, 1
+    jmp :prstr
+
+
+    prstrend:
+
+    pop r2
+    pop r1
+    ret

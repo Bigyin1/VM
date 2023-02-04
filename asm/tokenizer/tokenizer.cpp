@@ -45,9 +45,9 @@ static bool checkLabelToken(Tokenizer *t)
 
     short colon = 0;
 
-    if (sscanf(t->input, ":%" XSTR(MAX_TOKEN_LEN) "[a-zA-Z0-9_]%n",
+    if (sscanf(t->input, ":%" XSTR(MAX_TOKEN_LEN) "[.a-zA-Z0-9_]%n",
                t->currToken->val, &wordLen) == 0 &&
-        sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[a-zA-Z0-9_]%1[:]%n",
+        sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[.a-zA-Z0-9_]%1[:]%n",
                t->currToken->val, &colon, &wordLen) != 2)
         return false;
 

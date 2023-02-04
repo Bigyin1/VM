@@ -4,8 +4,6 @@ hello:
 db 'H', 'e', 'l', 'l', 'o', ' ', 'W' , 'o', 'r', 'l', 'd', '\J', 0
 
 
-equ :consoleChar    10016
-
 
 .text
 main:

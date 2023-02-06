@@ -2,7 +2,7 @@
 #include "errors.hpp"
 #include "symbols.hpp"
 
-ParserErrCode addNewSymbol(Parser *p, const char *symbol, uint64_t val, bool define, bool abs);
+static ParserErrCode addNewSymbol(Parser *p, const char *symbol, uint64_t val, bool define, bool abs);
 
 ParserErrCode defineNewSymbol(Parser *p, const char *name, uint64_t val)
 {
@@ -22,7 +22,7 @@ ParserErrCode addSymbolReference(Parser *p, const char *name, uint64_t val)
     return addNewSymbol(p, name, val, false, false);
 }
 
-static bool addSymbolToSymTab(symbolTable *t, symbolData *symb)
+static bool addSymbolToSymTab(symbolsData *t, symbolData *symb)
 {
     for (size_t i = 0; i < t->symTabSz; i++)
     {
@@ -46,22 +46,32 @@ static bool addSymbolToSymTab(symbolTable *t, symbolData *symb)
     return true;
 }
 
-ParserErrCode addNewSymbol(Parser *p, const char *name, uint64_t val, bool define, bool abs)
+static bool symbolIsGlobal(const char *name)
 {
 
-    symbolData *nextSymb = &p->symsTable.symbols[p->symsTable.symbolsSz];
+    if (name[0] != '.')
+        return true;
+
+    return false;
+}
+
+static ParserErrCode addNewSymbol(Parser *p, const char *name, uint64_t val, bool define, bool abs)
+{
+
+    symbolData *nextSymb = &p->symsData.symbols[p->symsData.symbolsSz];
 
     nextSymb->name = name;
     nextSymb->sectionName = p->currSection->name;
     nextSymb->defined = define;
     nextSymb->absolute = abs;
+    nextSymb->global = symbolIsGlobal(name);
     nextSymb->val = val;
 
-    bool added = addSymbolToSymTab(&p->symsTable, nextSymb);
+    bool added = addSymbolToSymTab(&p->symsData, nextSymb);
     if (define && !added)
         return PARSER_LABEL_REDEF;
 
-    p->symsTable.symbolsSz++;
+    p->symsData.symbolsSz++;
 
     return PARSER_OK;
 }

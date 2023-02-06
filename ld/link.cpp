@@ -168,11 +168,14 @@ static void UpdateSymbolAddresses(LD *ld, outputSect *outSects)
         updateSymbolAddressesInOutSect(ld, &outSects[i]);
 }
 
-static void evalAbsSymbCountInFile(LD *ld, LinkableFile *f)
+static void evalGlobalSymbCountInFile(LD *ld, LinkableFile *f)
 {
     for (uint32_t i = 0; i < f->symTabSz; i++)
     {
         if (f->symTable[i].sectHeaderIdx == SHN_UNDEF)
+            continue;
+
+        if (f->symTable[i].symbVis == SYMB_LOCAL)
             continue;
 
         ld->execFile.symTabSz++;
@@ -183,7 +186,7 @@ static void EvalExecFileSymbolTableSize(LD *ld)
 {
 
     for (uint16_t i = 0; i < ld->args->filesCount; i++)
-        evalAbsSymbCountInFile(ld, &ld->files[i]);
+        evalGlobalSymbCountInFile(ld, &ld->files[i]);
 
     ld->execFile.symTabSz += ld->args->outSectsCount;
 }
@@ -246,6 +249,9 @@ static int getSymbolsFromInputFile(LD *ld, uint16_t linkFileIdx, outputSect *out
     for (uint32_t i = 0; i < f->symTabSz; i++)
     {
         if (f->symTable[i].sectHeaderIdx == SHN_UNDEF)
+            continue;
+
+        if (f->symTable[i].symbVis == SYMB_LOCAL)
             continue;
 
         uint16_t outSectIdx = 0;
@@ -315,8 +321,8 @@ static void BuildOutputExeFileHeader(LD *ld)
 {
 
     ld->execFile.fileHdr.fileType = BIN_EXEC;
-    ld->execFile.fileHdr.version = formatVersion;
-    ld->execFile.fileHdr.magic = magicHeader;
+    ld->execFile.fileHdr.version = binFormatVersion;
+    ld->execFile.fileHdr.magic = binMagicHeader;
 
     ld->execFile.fileHdr.sectionsCount = ld->args->outSectsCount + 2;
     ld->execFile.fileHdr.symbolTableIdx = ld->execFile.fileHdr.sectionsCount - 2;
@@ -453,6 +459,25 @@ static SymTabEntry *getExecFileSymTabEntryByName(ExecutableFile *exe, const char
     return NULL;
 }
 
+static SymTabEntry *findGlobalSymbolByName(ExecutableFile *exe, LinkableFile *l, SymTabEntry *symb)
+{
+    const char *symbName = getNameFromStrTableByIdx(l, symb->nameIdx);
+    if (symbName == NULL)
+    {
+        fprintf(stderr, "ld: error: failed to find symbol name for relocation\n"); // TODO: do somethig with error handling
+        return NULL;
+    }
+
+    SymTabEntry *exeSymbEnt = getExecFileSymTabEntryByName(exe, symbName);
+    if (exeSymbEnt == NULL)
+    {
+        fprintf(stderr, "ld: error: symbol %s is undefined\n", symbName);
+        return NULL;
+    }
+
+    return exeSymbEnt;
+}
+
 static int relocateSectionData(ExecutableFile *exe, LinkableFile *l, RelSection *rel, char *sectData)
 {
     if (rel == NULL)
@@ -464,21 +489,19 @@ static int relocateSectionData(ExecutableFile *exe, LinkableFile *l, RelSection 
 
         SymTabEntry *symb = &l->symTable[currRelEntry->symbolIdx];
 
-        const char *symbName = getNameFromStrTableByIdx(l, symb->nameIdx);
-        if (symbName == NULL)
+        SymTabEntry *symbEnt = NULL;
+        if (symb->symbVis == SYMB_LOCAL && symb->sectHeaderIdx != SHN_UNDEF)
         {
-            fprintf(stderr, "ld: error: failed to find symbol name for relocation"); // TODO: do somethig with error handling
-            return -1;
+            symbEnt = symb;
+        }
+        else
+        {
+            symbEnt = findGlobalSymbolByName(exe, l, symb);
+            if (symbEnt == NULL)
+                return -1;
         }
 
-        SymTabEntry *exeSymbEnt = getExecFileSymTabEntryByName(exe, symbName);
-        if (exeSymbEnt == NULL)
-        {
-            fprintf(stderr, "ld: error: symbol %s is undefined\n", symbName);
-            return -1;
-        }
-
-        memcpy(sectData + currRelEntry->offset, &exeSymbEnt->value, sizeof(exeSymbEnt->value));
+        memcpy(sectData + currRelEntry->offset, &symbEnt->value, sizeof(symbEnt->value));
     }
 
     return 0;

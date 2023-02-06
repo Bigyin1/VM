@@ -53,7 +53,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	go client.readConn()
 	go client.writeConn()
 
-	runner.Start()
+	go runner.Start()
 }
 
 const staticPath = "../web/" // TODO

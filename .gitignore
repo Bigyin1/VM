@@ -6,3 +6,4 @@ tests/end2end/progs
 go.work.sum
 .vscode/settings.json
 ./testdata
+docker

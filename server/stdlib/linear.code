@@ -1,48 +1,48 @@
-.text
+section text
 
 # r1 - pointer to struct
 solveLinear:
-    push r8
-    push r9
+    push %r8
+    push %r9
 
-    ld r8, [r1+8]   # b
-    ld r9, [r1+16]  # c
+    ld %r8, [%r1+8]   # b
+    ld %r9, [%r1+16]  # c
 
-    cmpf r8, 0.0
-    jmp(eq) :bCoeffZero
+    cmpf %r8, 0.0
+    jmp(eq) .bCoeffZero
 
-    oneSol:
+    .oneSol:
 
-    mulf r9, -1.0   # -c
-    divf r9, r8     # -c / b
-    st r9, [r1+24]
+    mulf %r9, -1.0   # -c
+    divf %r9, %r8     # -c / b
+    st %r9, [%r1+24]
 
-    mov r9, 3       # one solution
-    st(b) r9, [r1+40]
+    mov %r9, 3       # one solution
+    st(b) %r9, [%r1+40]
 
-    jmp :linearEnd
-
-
-    bCoeffZero:
-
-    cmpf r9, 0.0
-    jmp(eq) :infSols
-
-    mov r8, 1       # no solutions
-    st(b) r8, [r1+40]
-
-    jmp :linearEnd
+    jmp .end
 
 
-    infSols:
-    mov r8, 2   # inf solutions
-    st(b) r8, [r1+40]
+    .bCoeffZero:
 
-    jmp :linearEnd
+    cmpf %r9, 0.0
+    jmp(eq) .infSols
+
+    mov %r8, 1       # no solutions
+    st(b) %r8, [%r1+40]
+
+    jmp .end
 
 
-    linearEnd:
+    .infSols:
+    mov %r8, 2   # inf solutions
+    st(b) %r8, [%r1+40]
 
-    pop r9
-    pop r8
+    jmp .end
+
+
+    .end:
+
+    pop %r9
+    pop %r8
     ret

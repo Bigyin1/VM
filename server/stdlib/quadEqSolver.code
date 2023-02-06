@@ -1,4 +1,4 @@
-.data
+section data
 enterMes:
     db 'E', 'n', 't', 'e', 'r', ' ', 'c', 'o', 'e', 'f', 'f', 's', ':', '\J', 0
 
@@ -19,144 +19,146 @@ infSolsMes:
         ' ', 'c', 'o', 'u', 'n', 't', '\J', 0
 
 
-.text
-    equ :consoleDouble 10000
-    equ :consoleInt 10008
-    equ :consoleChar 10016
+section text
+
+    equ consoleDouble: 10000
+    equ consoleInt: 10008
+    equ consoleChar: 10016
 
     
-printRes:
+.printRes:
 
-    push r2
+    push %r2
 
-    push r1
-    mov r1, :resultMes
-    call :printStr
-    pop r1
+    push %r1
+    mov %r1, resultMes
+    call printStr
+    pop %r1
 
-    ld(b) r2, [r1+40] 
+    ld(b) %r2, [%r1+40] 
 
-    cmp r2, 4
-    jmp(neq) :printResElse1
+    cmp %r2, 4
+    jmp(neq) .printResElse1
 
-    push r1
-    mov r1, :twoSolsMes
-    call :printStr
-    pop r1
+    push %r1
+    mov %r1, twoSolsMes
+    call printStr
+    pop %r1
 
-    ld r2, [r1+24]
-    st r2, [:consoleDouble]
+    ld %r2, [%r1+24]
+    st %r2, [consoleDouble]
 
-    mov r2, '\J'
-    st(b) r2, [:consoleChar]
+    mov %r2, '\J'
+    st(b) %r2, [consoleChar]
 
-    ld r2, [r1+32]
-    st r2, [:consoleDouble]
+    ld %r2, [%r1+32]
+    st %r2, [consoleDouble]
 
-    mov r2, '\J'
-    st(b) r2, [:consoleChar]
+    mov %r2, '\J'
+    st(b) %r2, [consoleChar]
 
-    jmp :printResEnd
+    jmp .printResEnd
 
-    printResElse1:
 
-    cmp r2, 3
-    jmp(neq) :printResElse2
+    .printResElse1:
 
-    push r1
-    mov r1, :oneSolMes
-    call :printStr
-    pop r1
+    cmp %r2, 3
+    jmp(neq) .printResElse2
 
-    ld r2, [r1+24]
-    st r2, [:consoleDouble]
+    push %r1
+    mov %r1, oneSolMes
+    call printStr
+    pop %r1
 
-    mov r2, '\J'
-    st(b) r2, [:consoleChar]
+    ld %r2, [%r1+24]
+    st %r2, [consoleDouble]
 
-    jmp :printResEnd
+    mov %r2, '\J'
+    st(b) %r2, [consoleChar]
 
-    printResElse2:
+    jmp .printResEnd
 
-    cmp r2, 2
-    jmp(neq) :printResElse3
+    .printResElse2:
 
-    push r1
-    mov r1, :infSolsMes
-    call :printStr
-    pop r1
+    cmp %r2, 2
+    jmp(neq) .printResElse3
 
-    jmp :printResEnd
+    push %r1
+    mov %r1, infSolsMes
+    call printStr
+    pop %r1
 
-    printResElse3:
+    jmp .printResEnd
 
-    cmp r2, 1
-    jmp(neq) :printResEnd
+    .printResElse3:
 
-    push r1
-    mov r1, :noSolsMes
-    call :printStr
-    pop r1
+    cmp %r2, 1
+    jmp(neq) .printResEnd
+
+    push %r1
+    mov %r1, noSolsMes
+    call printStr
+    pop %r1
     
 
-    printResEnd:
-    pop r2
+    .printResEnd:
+    pop %r2
     ret
 
 
-readCoeff:
-    ld r0, [:consoleDouble]
+.readCoeff:
+    ld %r0, [consoleDouble]
     ret
 
 
 solveQuadEq:
-    push rbp
-    push r0
-    push r1
+    push %rbp
+    push %r0
+    push %r1
 
-    mov rbp, rsp
-    add rsp, 41
+    mov %rbp, %rsp
+    add %rsp, 41
 
-    mov r1, :enterMes
-    call :printStr
+    mov %r1, enterMes
+    call printStr
 
-    call :readCoeff     #a
-    st r0, [rbp]
+    call .readCoeff     #a
+    st %r0, [%rbp]
 
-    call :readCoeff     #b
-    st r0, [rbp+8]
+    call .readCoeff     #b
+    st %r0, [%rbp+8]
 
-    call :readCoeff     #c
-    st r0, [rbp+16]
+    call .readCoeff     #c
+    st %r0, [%rbp+16]
 
-    mov r0, 0
-    st r0, [rbp+24]
-    st r0, [rbp+32]
-    st(b) r0, [rbp+40]
+    mov %r0, 0
+    st %r0, [%rbp+24]
+    st %r0, [%rbp+32]
+    st(b) %r0, [%rbp+40]
 
-    ld r1, [rbp]
-    cmpf r1, 0.0
+    ld %r1, [%rbp]
+    cmpf %r1, 0.0
 
-    jmp(neq) :quad
+    jmp(neq) .quad
 
-    mov r1, rbp
-    call :solveLinear
-    jmp :solveQuadEqEnd
+    mov %r1, %rbp
+    call solveLinear
+    jmp .solveQuadEqEnd
 
-    quad:
+    .quad:
 
-    mov r1, rbp
-    call :solveQuad
-    jmp :solveQuadEqEnd
-
-
-    solveQuadEqEnd:
-
-    call :printRes
+    mov %r1, %rbp
+    call solveQuad
+    jmp .solveQuadEqEnd
 
 
-    sub rsp, 41
-    pop r1
-    pop r0
-    pop rbp
+    .solveQuadEqEnd:
+
+    call .printRes
+
+
+    sub %rsp, 41
+    pop %r1
+    pop %r0
+    pop %rbp
     ret

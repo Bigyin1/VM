@@ -1,8 +1,8 @@
-.text
+section text
 
 RWconsDouble:
 
-ld r0, [:consoleDouble]
-st r0, [:consoleDouble]
+ld %r0, [consoleDouble]
+st %r0, [consoleDouble]
 
 ret

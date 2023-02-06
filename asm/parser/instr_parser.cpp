@@ -28,13 +28,13 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
     assert(parser != NULL);
     assert(node != NULL);
 
-    if (currTokenType(parser) == ASM_T_LABEL)
+    if (currTokenType(parser) == ASM_T_ID)
     {
         char *labelVal = currTokenVal(parser);
 
         addSymbolReference(parser, labelVal, node->offset + EvalInstrSymbolOffset(&node->instr));
 
-        eatToken(parser, ASM_T_LABEL);
+        eatToken(parser, ASM_T_ID);
 
         eatSP(parser);
 
@@ -69,7 +69,7 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
         size_t column = currTokenColumn(parser);
         const char *regVal = currTokenVal(parser);
 
-        if (eatToken(parser, ASM_T_ID) != PARSER_OK)
+        if (eatToken(parser, ASM_T_REGISTER) != PARSER_OK)
             return PARSER_BAD_COMMAND;
 
         int regNum = FindRegByName(regVal);
@@ -107,7 +107,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
     if (currTokenType(parser) == ASM_T_NL || currTokenType(parser) == ASM_T_EOF)
         return PARSER_OK;
 
-    if (currTokenType(parser) == ASM_T_LABEL)
+    if (currTokenType(parser) == ASM_T_ID)
     {
         char *labelVal = currTokenVal(parser);
 
@@ -117,7 +117,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
 
         arg->_immArgSz = DataWord; // address size
 
-        eatToken(parser, ASM_T_LABEL);
+        eatToken(parser, ASM_T_ID);
     }
     else if (currTokenType(parser) == ASM_T_FLOAT)
     {
@@ -137,7 +137,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
 
         eatToken(parser, currTokenType(parser));
     }
-    else if (currTokenType(parser) == ASM_T_ID) // register name
+    else if (currTokenType(parser) == ASM_T_REGISTER)
     {
         int regNum = FindRegByName(currTokenVal(parser));
         if (regNum < 0)
@@ -153,7 +153,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
 
         arg->RegNum = (uint8_t)regNum;
         arg->Type = ArgRegister;
-        eatToken(parser, ASM_T_ID);
+        eatToken(parser, ASM_T_REGISTER);
     }
     else
     {

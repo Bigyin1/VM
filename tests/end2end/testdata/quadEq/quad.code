@@ -1,75 +1,75 @@
-.text
+section text
 
 # r8 - a
 # r9 - b
 # r10 - c
 # return reg: r0
-evalDiscr:
-    push r8
-    push r9
+.evalDiscr:
+    push %r8
+    push %r9
 
-    mulf r9, r9     # b^2
-    mulf r8, 4.0    # 4a
-    mulf r8, r10    # 4ac
+    mulf %r9, %r9     # b^2
+    mulf %r8, 4.0    # 4a
+    mulf %r8, %r10    # 4ac
 
-    subf r9, r8     # b^2 - 4ac
+    subf %r9, %r8     # b^2 - 4ac
 
-    mov r0, r9
+    mov %r0, %r9
 
-    pop r9
-    pop r8
+    pop %r9
+    pop %r8
     ret
 
 
 # r1 - pointer to struct
 solveQuad:
-    push r8
-    push r9
-    push r10
+    push %r8
+    push %r9
+    push %r10
 
-    ld r8, [r1]     # a
-    ld r9, [r1+8]   # b
-    ld r10, [r1+16] # c
+    ld %r8, [%r1]     # a
+    ld %r9, [%r1+8]   # b
+    ld %r10, [%r1+16] # c
 
-    call :evalDiscr
+    call .evalDiscr
 
-    cmpf r0, 0.0
-    jmp(l) :quadNoSols
+    cmpf %r0, 0.0
+    jmp(l) .quadNoSols
 
-    sqrt r0, r0
-    push r9
+    sqrt %r0, %r0
+    push %r9
 
-    mulf r9, -1.0   # -b
-    addf r9, r0     # -b + sqrt(d)
-    divf r9, 2.0    # (-b + sqrt(d)) / 2.0
-    divf r9, r8     # (-b + sqrt(d)) / 2.0*a
+    mulf %r9, -1.0   # -b
+    addf %r9, %r0     # -b + sqrt(d)
+    divf %r9, 2.0    # (-b + sqrt(d)) / 2.0
+    divf %r9, %r8     # (-b + sqrt(d)) / 2.0*a
 
-    st r9, [r1+24]
+    st %r9, [%r1+24]
 
-    pop r9
+    pop %r9
 
-    mulf r9, -1.0   # -b
-    subf r9, r0     # -b - sqrt(d)
-    divf r9, 2.0    # (-b - sqrt(d)) / 2.0
-    divf r9, r8     # (-b - sqrt(d)) / 2.0*a
+    mulf %r9, -1.0   # -b
+    subf %r9, %r0     # -b - sqrt(d)
+    divf %r9, 2.0    # (-b - sqrt(d)) / 2.0
+    divf %r9, %r8     # (-b - sqrt(d)) / 2.0*a
 
-    st r9, [r1+32]
+    st %r9, [%r1+32]
 
-    mov r9, 4       # two solutions
-    st(b) r9, [r1+40]
+    mov %r9, 4       # 4 -  two solutions
+    st(b) %r9, [%r1+40]
 
-    jmp :quadEnd
-
-
-    quadNoSols:
-    mov r9, 1       # no solutions
-    st(b) r9, [r1+40]
+    jmp .end
 
 
-    quadEnd:
+    .quadNoSols:
+    mov %r9, 1       # 1 - no solutions
+    st(b) %r9, [%r1+40]
 
-    pop r10
-    pop r9
-    pop r8
+
+    .end:
+
+    pop %r10
+    pop %r9
+    pop %r8
     ret
 

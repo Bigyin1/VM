@@ -197,11 +197,11 @@ static int printImmArg(ReadObj *r, Argument *arg, uint32_t symbNameIdx, bool isS
     }
 
     if (arg->Type == ArgImm)
-        isSymbol ? fprintf(r->out, ":%s", symbName) : fprintf(r->out, " %lu", arg->Imm); // TODO print imm with sign
+        isSymbol ? fprintf(r->out, "%s", symbName) : fprintf(r->out, " %lu", arg->Imm); // TODO print imm with sign
     if (arg->Type == ArgImmIndirect)
-        isSymbol ? fprintf(r->out, "[:%s]", symbName) : fprintf(r->out, " [%lu]", arg->Imm);
+        isSymbol ? fprintf(r->out, "[%s]", symbName) : fprintf(r->out, " [%lu]", arg->Imm);
     if (arg->Type == ArgImmOffsetIndirect)
-        isSymbol ? fprintf(r->out, "[:%s+%d]", symbName, arg->ImmDisp16) : fprintf(r->out, " [%lu+%d]", arg->Imm, arg->ImmDisp16);
+        isSymbol ? fprintf(r->out, "[%s+%d]", symbName, arg->ImmDisp16) : fprintf(r->out, " [%lu+%d]", arg->Imm, arg->ImmDisp16);
 
     return 0;
 }

@@ -1,4 +1,4 @@
-add_custom_target(server_get_exe_files)
+add_custom_target(server_get_exe_files ALL)
 
 add_dependencies(server_get_exe_files my_vm my_asm my_ld readobj)
 

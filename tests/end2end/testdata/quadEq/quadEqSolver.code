@@ -1,70 +1,71 @@
 
 
-.text
-    equ :consoleDouble 10000
-    equ :consoleInt 10008
-    equ :consoleChar 10016
+section text
+
+    equ consoleDouble: 10000
+    equ consoleInt: 10008
+    equ consoleChar: 10016
 
     
-printRes:
-    ld r2, [r1+24]
-    st r2, [:consoleDouble]
+.printRes:
+    ld %r2, [%r1+24]
+    st %r2, [consoleDouble]
 
-    mov r2, '\J'
-    st(b) r2, [:consoleChar]
+    mov %r2, '\J'
+    st(b) %r2, [consoleChar]
 
-    ld r2, [r1+32]
-    st r2, [:consoleDouble]
+    ld %r2, [%r1+32]
+    st %r2, [consoleDouble]
 
-    mov r2, '\J'
-    st(b) r2, [:consoleChar]
+    mov %r2, '\J'
+    st(b) %r2, [consoleChar]
 
-    ld(b) r2, [r1+40]
-    st r2,    [:consoleInt]
+    ld(b) %r2, [%r1+40]
+    st %r2,    [consoleInt]
     ret
 
 
-readCoeff:
-    ld r0, [:consoleDouble]
+.readCoeff:
+    ld %r0, [consoleDouble]
     ret
 
 main:
 
-mov rbp, rsp
-add rsp, 41
+mov %rbp, %rsp
+add %rsp, 41
 
-call :readCoeff     #a
-st r0, [rbp]
+call .readCoeff     #a
+st %r0, [%rbp]
 
-call :readCoeff     #b
-st r0, [rbp+8]
+call .readCoeff     #b
+st %r0, [%rbp+8]
 
-call :readCoeff     #c
-st r0, [rbp+16]
+call .readCoeff     #c
+st %r0, [%rbp+16]
 
-mov r0, 0
-st r0, [rbp+24]
-st r0, [rbp+32]
-st(b) r0, [rbp+40]
+mov %r0, 0
+st %r0, [%rbp+24]
+st %r0, [%rbp+32]
+st(b) %r0, [%rbp+40]
 
-ld r1, [rbp]
-cmpf r1, 0.0
+ld %r1, [%rbp]
+cmpf %r1, 0.0
 
-jmp(neq) :quad
+jmp(neq) .quad
 
-mov r1, rbp
-call :solveLinear
-jmp :end
+mov %r1, %rbp
+call solveLinear
+jmp .end
 
-quad:
+.quad:
 
-mov r1, rbp
-call :solveQuad
-jmp :end
+mov %r1, %rbp
+call solveQuad
+jmp .end
 
 
-end:
+.end:
 
-call :printRes
+call .printRes
 
 halt

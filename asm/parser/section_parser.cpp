@@ -57,7 +57,7 @@ ParserErrCode parseSectionNode(Parser *parser, sectionNode *sectNode)
         if (currTokenType(parser) == ASM_T_EOF)
             break;
 
-        if (currTokenType(parser) == ASM_T_SECTION_NAME)
+        if (currTokenType(parser) == ASM_T_SECTION)
             break;
 
         err = reallocCommands(sectNode);

@@ -95,7 +95,13 @@ func (r *Runner) setupVM(exeFile string) error {
 
 func (r *Runner) monitorVM() error {
 
+	wg := &sync.WaitGroup{}
+	wg.Add(4)
+
 	go func() {
+
+		defer wg.Done()
+
 		err := r.vmProc.Wait()
 		if err != nil {
 			log.Printf("process %d failed: %s", r.vmProc.Process.Pid, err)
@@ -106,10 +112,8 @@ func (r *Runner) monitorVM() error {
 			r.vmProc.ProcessState.Pid(), r.vmProc.ProcessState.String())
 	}()
 
-	wg := &sync.WaitGroup{}
 	go r.inputMonitor()
 
-	wg.Add(3)
 	go r.monitorConsoleOut(wg)
 	go r.monitorGraphicsOut(wg)
 	go r.monitorErrorsOut(wg)

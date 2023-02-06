@@ -40,9 +40,12 @@ ParserErrCode ParseTokens(Parser *parser)
         if (currTokenType(parser) == ASM_T_EOF)
             break;
 
-        const char *sectName = currTokenVal(parser);
+        eatToken(parser, ASM_T_SECTION); // TODO: check for duplicating sections
 
-        eatToken(parser, ASM_T_SECTION_NAME); // TODO: check for duplicating sections
+        eatSP(parser);
+
+        const char *sectName = currTokenVal(parser);
+        eatToken(parser, ASM_T_ID);
 
         ParserErrCode err = reallocSections(parser);
         if (err != PARSER_OK)

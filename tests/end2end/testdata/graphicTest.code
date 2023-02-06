@@ -1,32 +1,33 @@
 
-.text
-equ :conXCoord      10017
-equ :conYCoord      10019
-equ :conColor       10021
+section text
+
+equ conXCoord:      10017
+equ conYCoord:      10019
+equ conColor:       10021
 
 main:
 
 
-mov r1, 0
-mov r2, 0
-mov r0, 512
+mov %r1, 0
+mov %r2, 0
+mov %r0, 512
 
-line:
+.line:
 
-cmp r0, 0
-jmp(eq) :next
+cmp %r0, 0
+jmp(eq) .next
 
 
-st(db)  r1, [:conXCoord]
-st(db)  r2, [:conYCoord]
-st(hw)  r0, [:conColor]
+st(db)  %r1, [conXCoord]
+st(db)  %r2, [conYCoord]
+st(hw)  %r0, [conColor]
 
-add r1, 1
-add r2, 1
+add %r1, 1
+add %r2, 1
 
-sub r0, 1
-jmp :line
+sub %r0, 1
+jmp .line
 
-next:
+.next:
 
 halt

@@ -54,7 +54,7 @@ typedef struct Parser
 
     sectionNode *currSection;
 
-    symbolTable symsTable;
+    symbolsData symsData;
 
     Tokenizer *toks;
 

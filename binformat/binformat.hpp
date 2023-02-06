@@ -5,11 +5,14 @@
 #include <stdio.h>
 #include "stdint.h"
 
-extern const uint32_t magicHeader;
-extern const uint16_t formatVersion;
+extern const uint32_t binMagicHeader;
+extern const uint16_t binFormatVersion;
 
 extern const uint16_t SHN_UNDEF;
 extern const uint16_t SHN_ABS;
+
+extern const uint8_t SYMB_GLOBAL;
+extern const uint8_t SYMB_LOCAL;
 
 typedef enum SectionType
 {
@@ -36,7 +39,7 @@ typedef struct SectionHeader
 
     uint64_t addr;   // addr to load; only for exec files
     uint32_t offset; // offset in file
-    uint32_t size;
+    uint32_t size;   // section size in bytes
     SectionType type;
     uint32_t nameIdx; // section name idx in string table
 
@@ -49,7 +52,7 @@ typedef struct SymTabEntry
     uint32_t nameIdx;       // idx in string table
     uint16_t sectHeaderIdx; /* idx of section, which defines symbol;
                             SHN_UNDEF if symbol is undefined; SHN_ABS for absolute(non-relocatable) symbols */
-
+    uint8_t symbVis;        // GLOBAL or LOCAL
 } SymTabEntry;
 
 typedef struct RelEntry

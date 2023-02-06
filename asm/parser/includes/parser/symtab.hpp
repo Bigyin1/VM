@@ -14,15 +14,17 @@ typedef struct symbolData
     bool defined;
     bool absolute;
 
+    bool global;
+
 } symbolData;
 
-typedef struct symbolTable
+typedef struct symbolsData
 {
-    symbolData symbols[72];
+    symbolData symbols[72]; // TODO: do something with that
     size_t symbolsSz;
 
     symbolData *symTab[72];
     size_t symTabSz;
-} symbolTable;
+} symbolsData;
 
 #endif

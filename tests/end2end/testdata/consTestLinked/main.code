@@ -1,12 +1,12 @@
-.text
+section text
 
 main:
 
 
-call :RWconsInt
+call RWconsInt
 
-call :RWconsDouble
+call RWconsDouble
 
-call :RWconsChar
+call RWconsChar
 
 halt

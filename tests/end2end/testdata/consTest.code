@@ -1,19 +1,19 @@
-.text
+section  text
 
-equ :consoleDouble  10000
-equ :consoleInt     10008
-equ :consoleChar    10016
+equ consoleDouble:  10000
+equ consoleInt:     10008
+equ consoleChar:    10016
 
 main:
 
-ld r0, [:consoleInt]
-st r0, [:consoleInt]
+ld %r0, [consoleInt]
+st %r0, [consoleInt]
 
-ld r0, [:consoleDouble]
-st r0, [:consoleDouble]
+ld %r0, [consoleDouble]
+st %r0, [consoleDouble]
 
-ld(b) r0, [:consoleChar]
-st(b) r0, [:consoleChar]
+ld(b) %r0, [consoleChar]
+st(b) %r0, [consoleChar]
 
 
 halt

@@ -1,24 +1,24 @@
-.text
+section text
 
 # r1 - str pointer
 printStr:
-    push r1
-    push r2
+    push %r1
+    push %r2
 
-    prstr:
-    ld(b) r2, [r1]
+    .prstr:
+    ld(b) %r2, [%r1]
 
-    cmp r2, 0
-    jmp(eq) :prstrend
+    cmp %r2, 0
+    jmp(eq) .end
 
-    st(b) r2, [:consoleChar]
+    st(b) %r2, [consoleChar]
 
-    add r1, 1
-    jmp :prstr
+    add %r1, 1
+    jmp .prstr
 
 
-    prstrend:
+    .end:
 
-    pop r2
-    pop r1
+    pop %r2
+    pop %r1
     ret

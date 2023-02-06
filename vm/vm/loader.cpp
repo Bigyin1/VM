@@ -71,13 +71,13 @@ int LoadExeFile(CPU *cpu, FILE *in)
         return -1;
     }
 
-    if (hdr.magic != magicHeader)
+    if (hdr.magic != binMagicHeader)
     {
         fprintf(stderr, "bad magic number in header\n");
         return -1;
     }
 
-    if (hdr.version != formatVersion)
+    if (hdr.version != binFormatVersion)
     {
         fprintf(stderr, "invalid version\n");
         return -1;

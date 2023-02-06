@@ -68,6 +68,10 @@ func compileAndLinkFiles(t *testing.T, asmPaths []string) string {
 	cmdArgs := append(linkedPaths, "--text=0", exeFile.Name())
 
 	cmd := exec.Command(ldExePath, cmdArgs...)
+
+	cmd.Stdout = &outBuf
+	cmd.Stderr = &errBuf
+
 	err = cmd.Run()
 	if err != nil {
 		os.Remove(exeFile.Name())

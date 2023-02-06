@@ -1,64 +1,64 @@
 
-.text
+section text
 main:
 ret
 
 ins_2:
-ld(hws) r0, [123]
+ld(hws) %r0, [123]
 
 ins_3:
-ld r1 , [1]
+ld %r1 , [1]
 
 ins_4:
-st r2, [r3+128]
+st %r2, [%r3+128]
 
 ins_5:
-st(db) r0, [r2]
+st(db) %r0, [%r2]
 
 ins_6:
-mov r0, -1
+mov %r0, -1
 
 ins_7:
-mov(s) r0, -1
+mov(s) %r0, -1
 
 ins_8:
-mov r0, r1
+mov %r0, %r1
 
 ins_9:
-mov r1, 256
+mov %r1, 256
 
 ins_10:
-mov r2, 3434.234
+mov %r2, 3434.234
 
 push -1234.3
-push    r1
+push    %r1
 push(b) 128
 
 # pop
 label5:
-pop(hw) r0
+pop(hw) %r0
 
 # arithmetic
 label6:
-add r0, r1
-mul r0,  3
-mulf r1, 1234.0
-divf r0, 2.00
+add %r0, %r1
+mul %r0,  3
+mulf %r1, 1234.0
+divf %r0, 2.00
 
-mul r2, [r1+10]
-subf rbp, [r5]
-cmp r6, [r2-4]
+mul %r2, [%r1+10]
+subf %rbp, [%r5]
+cmp %r6, [%r2-4]
 
 
-jmp(neq) :main
-jmp :ins_2
-jmp :ins_3
-jmp(eq) :ins_4
-jmp :ins_5
-jmp :ins_6
-jmp :ins_7
-jmp(l) :ins_8
-jmp :ins_9
-jmp(ge) :ins_10
+jmp(neq) main
+jmp ins_2
+jmp ins_3
+jmp(eq) ins_4
+jmp ins_5
+jmp ins_6
+jmp ins_7
+jmp(l) ins_8
+jmp ins_9
+jmp(ge) ins_10
 
 

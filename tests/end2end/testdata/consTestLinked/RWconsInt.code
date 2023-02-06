@@ -1,8 +1,8 @@
-.text
+section text
 
 RWconsInt:
 
-ld r0, [:consoleInt]
-st r0, [:consoleInt]
+ld %r0, [consoleInt]
+st %r0, [consoleInt]
 
 ret

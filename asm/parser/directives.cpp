@@ -42,7 +42,7 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser *parser, size_t *count)
 
     while (currTokenType(parser) == ASM_T_FLOAT ||
            currTokenType(parser) == ASM_T_INT ||
-           currTokenType(parser) == ASM_T_LABEL)
+           currTokenType(parser) == ASM_T_LABEL_DEF)
     {
         (*count)++;
 
@@ -86,11 +86,11 @@ static ParserErrCode parseDataDefDirectiveArgs(Parser *parser, commandNode *node
 
     while (currTokenType(parser) == ASM_T_FLOAT ||
            currTokenType(parser) == ASM_T_INT ||
-           currTokenType(parser) == ASM_T_LABEL)
+           currTokenType(parser) == ASM_T_LABEL_DEF)
     {
         count--;
 
-        if (currTokenType(parser) != ASM_T_LABEL)
+        if (currTokenType(parser) != ASM_T_LABEL_DEF)
             memcpy(node->data + dataIdx, &currTokenNumVal(parser), sz);
         else
             addSymbolReference(parser, currTokenVal(parser), node->offset + dataIdx);
@@ -137,7 +137,7 @@ ParserErrCode parseControlDirective(Parser *parser, commandNode *node)
     eatSP(parser);
 
     const char *symb = currTokenVal(parser);
-    if (eatToken(parser, ASM_T_LABEL) != PARSER_OK)
+    if (eatToken(parser, ASM_T_LABEL_DEF) != PARSER_OK)
         return PARSER_BAD_COMMAND;
 
     eatSP(parser);

@@ -1,47 +1,48 @@
-.data
+section data
 
 hello:
 db 'H', 'e', 'l', 'l', 'o', ' ', 'W' , 'o', 'r', 'l', 'd', '\J', 0
 
 
 
-.text
+section text
+
 main:
 
-call :printHelloFunc
+    call printHelloFunc
 
-sub r0, :hello
-mov r2, :hello
+    sub %r0, hello
+    mov %r2, hello
 
-read:
-cmp r0, 0
-jmp(eq) :next
-ld(b) r1, [:consoleChar]
-st(b) r1, [r2]
-sub r0, 1
-add r2, 1
-jmp :read
+    .read:
+    cmp %r0, 0
+    jmp(eq) .next
+    ld(b) %r1, [consoleChar]
+    st(b) %r1, [%r2]
+    sub %r0, 1
+    add %r2, 1
+    jmp .read
 
-next:
+    .next:
 
-call :printHelloFunc
+    call printHelloFunc
 
-halt
+    halt
 
 
 printHelloFunc:
-    mov r0, :hello
+    mov %r0, hello
 
-    print:
-    ld(b) r1, [r0]
+    .print:
+    ld(b) %r1, [%r0]
 
-    cmp r1, 0
+    cmp %r1, 0
 
-    jmp(eq) :end
+    jmp(eq) .end
 
-    st(b) r1, [:consoleChar]
-    add r0, 1
-    jmp :print
+    st(b) %r1, [consoleChar]
+    add %r0, 1
+    jmp .print
 
-    end:
+    .end:
     ret

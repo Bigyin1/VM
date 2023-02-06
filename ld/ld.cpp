@@ -14,12 +14,12 @@ static int readLinkableFileHeader(LinkableFile *f, fileInfo *in) // TODO create 
         return -1;
     }
 
-    if (f->fileHdr.magic != magicHeader)
+    if (f->fileHdr.magic != binMagicHeader)
     {
         fprintf(stderr, "%s: bad magic header: %x\n", in->name, f->fileHdr.magic);
         return -1;
     }
-    if (f->fileHdr.version != formatVersion)
+    if (f->fileHdr.version != binFormatVersion)
     {
         fprintf(stderr, "%s: insufficient binary file version: %d\n", in->name, f->fileHdr.version);
         return -1;

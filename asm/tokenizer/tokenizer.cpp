@@ -21,6 +21,7 @@ const token_meta_s generalTokens[] = {
     {ASM_T_R_PAREN, "]"},
     {ASM_T_COMMENT, "#"},
     {ASM_T_COMMA, ","},
+    {ASM_T_SECTION, "section"},
     {ASM_T_NL, "\n"},
 };
 
@@ -38,36 +39,17 @@ static bool checkSimpleToken(Tokenizer *t, TokenType type, const char *tokVal)
     return true;
 }
 
-static bool checkLabelToken(Tokenizer *t)
+static bool checkLabelDefToken(Tokenizer *t)
 {
 
     int wordLen = 0;
-
     short colon = 0;
 
-    if (sscanf(t->input, ":%" XSTR(MAX_TOKEN_LEN) "[.a-zA-Z0-9_]%n",
-               t->currToken->val, &wordLen) == 0 &&
-        sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[.a-zA-Z0-9_]%1[:]%n",
+    if (sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[.a-zA-Z0-9_]%1[:]%n",
                t->currToken->val, &colon, &wordLen) != 2)
         return false;
 
-    t->currToken->type = ASM_T_LABEL;
-
-    t->column += wordLen;
-    t->input += wordLen;
-    return true;
-}
-
-static bool checkSectNameToken(Tokenizer *t)
-{
-
-    int wordLen = 0;
-
-    if (sscanf(t->input, ".%" XSTR(MAX_TOKEN_LEN) "[a-zA-Z]%n",
-               t->currToken->val, &wordLen) == 0)
-        return false;
-
-    t->currToken->type = ASM_T_SECTION_NAME;
+    t->currToken->type = ASM_T_LABEL_DEF;
 
     t->column += wordLen;
     t->input += wordLen;
@@ -129,12 +111,28 @@ static bool checkIdToken(Tokenizer *t)
 {
 
     int wordLen = 0;
-    sscanf(t->input, "%*[0-9a-zA-Z]%n", &wordLen);
+
+    sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[._0-9a-zA-Z]%n", t->currToken->val, &wordLen);
     if (wordLen == 0)
         return false;
 
-    sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[0-9a-zA-Z]", t->currToken->val);
     t->currToken->type = ASM_T_ID;
+
+    t->column += wordLen;
+    t->input += wordLen;
+    return true;
+}
+
+static bool checkRegisterToken(Tokenizer *t)
+{
+
+    int wordLen = 0;
+
+    sscanf(t->input, "%%%" XSTR(MAX_TOKEN_LEN) "[0-9a-z]%n", t->currToken->val, &wordLen);
+    if (wordLen <= 1)
+        return false;
+
+    t->currToken->type = ASM_T_REGISTER;
 
     t->column += wordLen;
     t->input += wordLen;
@@ -260,16 +258,16 @@ TokErrCode Tokenize(Tokenizer *t)
         if (checkNumberToken(t))
             continue;
 
-        if (checkSectNameToken(t))
-            continue;
-
         if (checkAsciiCharToken(t))
             continue;
 
-        if (checkLabelToken(t))
+        if (checkLabelDefToken(t))
             continue;
 
         if (checkInstrPostfixToken(t))
+            continue;
+
+        if (checkRegisterToken(t))
             continue;
 
         if (checkIdToken(t))

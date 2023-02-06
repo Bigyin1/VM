@@ -10,7 +10,7 @@
 static ParserErrCode parseCmdLabel(Parser *parser, commandNode *node)
 {
 
-    if (currTokenType(parser) != ASM_T_LABEL)
+    if (currTokenType(parser) != ASM_T_LABEL_DEF)
         return PARSER_OK;
 
     node->label = currTokenVal(parser);
@@ -23,7 +23,7 @@ static ParserErrCode parseCmdLabel(Parser *parser, commandNode *node)
         err->line = currTokenLine(parser);
         err->column = currTokenColumn(parser);
     }
-    eatToken(parser, ASM_T_LABEL);
+    eatToken(parser, ASM_T_LABEL_DEF);
     eatBlanks(parser);
 
     return PARSER_OK;

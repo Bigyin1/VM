@@ -26,7 +26,7 @@ add_test(NAME quadEqTest COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.go
 )
 
-add_custom_target(end2end_get_exe_files)
+add_custom_target(end2end_get_exe_files ALL)
 
 add_dependencies(end2end_get_exe_files my_vm my_asm my_ld readobj)
 

@@ -376,7 +376,7 @@ static FILE *getTextSectionData(char *buf, size_t sz)
         return NULL;
     }
 
-    if (hdr.magic != magicHeader)
+    if (hdr.magic != binMagicHeader)
     {
         printf("bad magic number in header\n");
         fclose(f);

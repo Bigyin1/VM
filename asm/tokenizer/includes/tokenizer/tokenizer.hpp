@@ -13,16 +13,15 @@ enum TokenType
     ASM_T_ID,
     ASM_T_FLOAT,
     ASM_T_INT,
-    ASM_T_LABEL,
+    ASM_T_LABEL_DEF,
+    ASM_T_REGISTER,
     ASM_T_INSTR_POSTFIX,
     ASM_T_SPACE,
 
-    ASM_T_SECTION_NAME,
+    ASM_T_SECTION,
     ASM_T_COMMA,
-
     ASM_T_PLUS,
     ASM_T_MINUS,
-
     ASM_T_L_PAREN,
     ASM_T_R_PAREN,
     ASM_T_NL,

@@ -5,12 +5,12 @@
 
 static int printFileHeader(BinformatHeader *hdr, FILE *out)
 {
-    if (hdr->magic != magicHeader)
+    if (hdr->magic != binMagicHeader)
     {
         fprintf(stderr, "bad magic header: %x\n", hdr->magic);
         return -1;
     }
-    if (hdr->version != formatVersion)
+    if (hdr->version != binFormatVersion)
     {
         fprintf(stderr, "insufficient binary file version: %d\n", hdr->version);
         return -1;

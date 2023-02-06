@@ -6,7 +6,7 @@
 #include "encode.hpp"
 #include "asmencoder/asmencoder.hpp"
 
-static bool sectionHasRelocs(symbolTable *symTab, const char *sectName)
+static bool sectionHasRelocs(symbolsData *symTab, const char *sectName)
 {
 
     for (size_t j = 0; j < symTab->symbolsSz; j++)
@@ -26,7 +26,7 @@ static uint16_t getSectionsCount(AsmEncoder *as)
 
     for (size_t i = 0; i < as->parser->sectionsSz; i++)
     {
-        if (sectionHasRelocs(&as->parser->symsTable, as->parser->sections[i].name))
+        if (sectionHasRelocs(&as->parser->symsData, as->parser->sections[i].name))
             sectCount++;
     }
 
@@ -38,7 +38,7 @@ static size_t getRelocSectsCount(AsmEncoder *as)
     size_t sectCount = 0;
     for (size_t i = 0; i < as->parser->sectionsSz; i++)
     {
-        if (sectionHasRelocs(&as->parser->symsTable, as->parser->sections[i].name))
+        if (sectionHasRelocs(&as->parser->symsData, as->parser->sections[i].name))
             sectCount++;
     }
 
@@ -55,7 +55,7 @@ static uint32_t getUserDefinedSectionsSummarySize(AsmEncoder *as)
     return size;
 }
 
-static uint32_t getRelocationsCountInSection(symbolTable *symTab, const char *sectName)
+static uint32_t getRelocationsCountInSection(symbolsData *symTab, const char *sectName)
 {
     uint32_t count = 0;
     for (size_t i = 0; i < symTab->symbolsSz; i++)
@@ -110,12 +110,12 @@ static uint16_t getSectHdrIdxBySectName(AsmEncoder *as, const char *sectName)
 
 static void buildSymTab(AsmEncoder *as)
 {
-    size_t symTabSz = as->parser->symsTable.symTabSz;
+    size_t symTabSz = as->parser->symsData.symTabSz;
     SymTabEntry *symTab = (SymTabEntry *)calloc(symTabSz, sizeof(SymTabEntry));
 
     for (size_t i = 0; i < symTabSz; i++)
     {
-        symbolData *currSymb = as->parser->symsTable.symTab[i];
+        symbolData *currSymb = as->parser->symsData.symTab[i];
 
         symTab[i].nameIdx = as->strTabSize;
         strTabAdd(as, currSymb->name, true);
@@ -129,6 +129,11 @@ static void buildSymTab(AsmEncoder *as)
             symTab[i].sectHeaderIdx = SHN_ABS;
         else if (currSymb->defined)
             symTab[i].sectHeaderIdx = getSectHdrIdxBySectName(as, currSymb->sectionName);
+
+        if (currSymb->global)
+            symTab[i].symbVis = SYMB_GLOBAL;
+        else
+            symTab[i].symbVis = SYMB_LOCAL;
     }
 
     as->symTable = symTab;
@@ -162,7 +167,7 @@ static void buildUserAndRelSectionHeaders(AsmEncoder *as)
 
         userSectsBodyOffset += currUsrSect->size;
 
-        uint32_t sectRelocsCount = getRelocationsCountInSection(&as->parser->symsTable, currUsrSectNode->name);
+        uint32_t sectRelocsCount = getRelocationsCountInSection(&as->parser->symsData, currUsrSectNode->name);
 
         if (sectRelocsCount == 0)
             continue;
@@ -260,7 +265,7 @@ static uint32_t getSymbolIdx(AsmEncoder *as, const char *symbolName)
 
     for (uint32_t i = 0; i < as->symTabSz; i++)
     {
-        symbolData *currSymb = as->parser->symsTable.symTab[i];
+        symbolData *currSymb = as->parser->symsData.symTab[i];
         if (strcmp(currSymb->name, symbolName) == 0)
             return i;
     }
@@ -270,9 +275,9 @@ static uint32_t getSymbolIdx(AsmEncoder *as, const char *symbolName)
 
 static void writeRelocForSection(AsmEncoder *as, const char *sectName)
 {
-    for (size_t i = 0; i < as->parser->symsTable.symbolsSz; i++)
+    for (size_t i = 0; i < as->parser->symsData.symbolsSz; i++)
     {
-        symbolData *currSymb = &as->parser->symsTable.symbols[i];
+        symbolData *currSymb = &as->parser->symsData.symbols[i];
         if (currSymb->defined)
             continue;
 
@@ -296,7 +301,7 @@ static void writeRelocSectionsBody(AsmEncoder *as)
     for (size_t i = 0; i < as->usrSectionCount; i++)
     {
 
-        if (!sectionHasRelocs(&as->parser->symsTable, as->parser->sections[i].name))
+        if (!sectionHasRelocs(&as->parser->symsData, as->parser->sections[i].name))
             continue;
 
         writeRelocForSection(as, as->parser->sections[i].name);
@@ -307,8 +312,8 @@ static EncErrCode writeFileHeader(AsmEncoder *as)
 {
 
     as->header.fileType = BIN_LINKABLE;
-    as->header.magic = magicHeader;
-    as->header.version = formatVersion;
+    as->header.magic = binMagicHeader;
+    as->header.version = binFormatVersion;
 
     as->header.sectionsCount = getSectionsCount(as);
     as->header.stringTableIdx = as->header.sectionsCount - 1;
@@ -328,7 +333,7 @@ EncErrCode GenObjectFile(AsmEncoder *as)
     as->strTabCapacity = 32;
 
     buildUserAndRelSectionHeaders(as);
-    buildSymTab(as); // TODO need large refactoring
+    buildSymTab(as); // TODO: need large refactoring
     buildStrTabAndSymTabHdrs(as);
 
     writeFileHeader(as);

@@ -16,7 +16,6 @@ INSTR(ld, 1,
           {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
           {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
           {.First = ArgRegister COMMA .Second = ArgImmIndirect} COMMA
-          {.First = ArgRegister COMMA .Second = ArgImmOffsetIndirect} COMMA
       }
 )
 
@@ -25,7 +24,6 @@ INSTR(st, 2,
           {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
           {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
           {.First = ArgRegister COMMA .Second = ArgImmIndirect} COMMA
-          {.First = ArgRegister COMMA .Second = ArgImmOffsetIndirect} COMMA
       }
 
 )

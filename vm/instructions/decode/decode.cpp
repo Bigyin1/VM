@@ -36,13 +36,6 @@ static InstrCreationErr decodeCommon(Argument *arg, FILE *r)
             return INSTR_NOT_EXIST;
         break;
 
-    case ArgImmOffsetIndirect:
-        if (fread(&arg->Imm, DataSzToBytesSz(arg->_immArgSz), 1, r) == 0)
-            return INSTR_NOT_EXIST;
-        if (fread(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, r) == 0)
-            return INSTR_NOT_EXIST;
-        break;
-
     case ArgNone:
         return INSTR_OK;
     }

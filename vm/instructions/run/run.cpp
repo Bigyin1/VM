@@ -88,10 +88,6 @@ static uint64_t getEffectiveAddress(CPU *cpu, Argument *arg)
         addr = cpu->gpRegs[arg->RegNum] + arg->ImmDisp16;
         break;
 
-    case ArgImmOffsetIndirect:
-        addr = arg->Imm + arg->ImmDisp16;
-        break;
-
     default:
         return 0;
     }

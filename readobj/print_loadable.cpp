@@ -119,9 +119,9 @@ static uint32_t findSymbolNameForInstructionInLinkableFile(ReadObj *r,
 static uint32_t findSymbolNameForInstructionInExecFile(ReadObj *r, Instruction *instr, bool *ok)
 {
     uint64_t val = 0;
-    if (instr->Arg1.Type == ArgImm || instr->Arg1.Type == ArgImmIndirect || instr->Arg1.Type == ArgImmOffsetIndirect)
+    if (instr->Arg1.Type == ArgImm || instr->Arg1.Type == ArgImmIndirect)
         val = instr->Arg1.Imm;
-    else if (instr->Arg2.Type == ArgImm || instr->Arg2.Type == ArgImmIndirect || instr->Arg2.Type == ArgImmOffsetIndirect)
+    else if (instr->Arg2.Type == ArgImm || instr->Arg2.Type == ArgImmIndirect)
         val = instr->Arg2.Imm;
     else
     {
@@ -186,7 +186,7 @@ static bool printRegisterArg(ReadObj *r, Argument *arg)
 static int printImmArg(ReadObj *r, Argument *arg, uint32_t symbNameIdx, bool isSymbol)
 {
 
-    if (arg->Type != ArgImm && arg->Type != ArgImmIndirect && arg->Type != ArgImmOffsetIndirect)
+    if (arg->Type != ArgImm && arg->Type != ArgImmIndirect)
         return false;
 
     const char *symbName = getNameFromStrTable(r, symbNameIdx);
@@ -197,11 +197,9 @@ static int printImmArg(ReadObj *r, Argument *arg, uint32_t symbNameIdx, bool isS
     }
 
     if (arg->Type == ArgImm)
-        isSymbol ? fprintf(r->out, "%s", symbName) : fprintf(r->out, " %lu", arg->Imm); // TODO print imm with sign
+        isSymbol ? fprintf(r->out, "%s", symbName) : fprintf(r->out, "%lu", arg->Imm); // TODO print imm with sign
     if (arg->Type == ArgImmIndirect)
-        isSymbol ? fprintf(r->out, "[%s]", symbName) : fprintf(r->out, " [%lu]", arg->Imm);
-    if (arg->Type == ArgImmOffsetIndirect)
-        isSymbol ? fprintf(r->out, "[%s+%d]", symbName, arg->ImmDisp16) : fprintf(r->out, " [%lu+%d]", arg->Imm, arg->ImmDisp16);
+        isSymbol ? fprintf(r->out, "[%s]", symbName) : fprintf(r->out, "[%lu]", arg->Imm);
 
     return 0;
 }

@@ -295,21 +295,6 @@ static bool argsEq(Argument *arg1, Argument *arg2)
         }
         break;
 
-    case ArgImmOffsetIndirect:
-        if (arg1->Imm != arg2->Imm)
-        {
-            printf("failed: different immediates: wanted: %llu, got: %llu",
-                   arg1->Imm, arg2->Imm);
-            return false;
-        }
-        if (arg1->ImmDisp16 != arg2->ImmDisp16)
-        {
-            printf("failed: different disp immediates: wanted: %d, got: %d",
-                   arg1->ImmDisp16, arg2->ImmDisp16);
-            return false;
-        }
-        break;
-
     default:
         break;
     }

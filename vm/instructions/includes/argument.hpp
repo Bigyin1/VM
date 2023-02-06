@@ -23,7 +23,6 @@ typedef enum ArgType
     ArgRegisterIndirect,       // [r1]
     ArgRegisterOffsetIndirect, // [r1+128]
     ArgImmIndirect,            // [128]
-    ArgImmOffsetIndirect,      // [128+128]
 
 } ArgType;
 

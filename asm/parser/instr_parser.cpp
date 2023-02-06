@@ -38,12 +38,6 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
 
         eatSP(parser);
 
-        ParserErrCode err = parseImmDisp(parser, arg, ArgImmOffsetIndirect);
-        if (err != PARSER_INSUFF_TOKEN)
-            return err;
-
-        eatSP(parser);
-
         arg->Type = ArgImmIndirect;
         return PARSER_OK;
     }
@@ -51,12 +45,6 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
     {
         arg->Imm = currTokenNumVal(parser);
         eatToken(parser, ASM_T_INT);
-
-        eatSP(parser);
-
-        ParserErrCode err = parseImmDisp(parser, arg, ArgImmOffsetIndirect);
-        if (err != PARSER_INSUFF_TOKEN)
-            return err;
 
         eatSP(parser);
 

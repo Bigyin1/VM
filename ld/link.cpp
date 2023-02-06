@@ -178,7 +178,7 @@ static void evalGlobalSymbCountInFile(LD *ld, LinkableFile *f)
         if (f->symTable[i].symbVis == SYMB_LOCAL)
             continue;
 
-        ld->execFile.symTabSz++;
+        ld->execFile.symTabSz++; // TODO: maybe count symbols only in included sections
     }
 }
 

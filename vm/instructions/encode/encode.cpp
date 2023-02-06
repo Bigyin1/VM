@@ -42,11 +42,6 @@ static size_t encodeCommon(Argument *arg, FILE *w, DataSize argSz, bool evalSz, 
         return my_fwrite(&arg->RegNum, 1, 1, w, evalSz) +
                my_fwrite(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, w, evalSz);
 
-    case ArgImmOffsetIndirect:
-
-        return my_fwrite(&arg->Imm, sizeof(arg->Imm), 1, w, evalSz) +
-               my_fwrite(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, w, evalSz);
-
     case ArgNone:
         return 0;
     }

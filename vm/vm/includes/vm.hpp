@@ -2,8 +2,9 @@
 #ifndef VM_HPP
 #define VM_HPP
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
+
 #include "cpu.hpp"
 
 typedef struct VMConfig
@@ -14,13 +15,13 @@ typedef struct VMConfig
 
 } VMConfig;
 
-int InitVM(CPU *cpu, const VMConfig *cfg);
+int InitVM(CPU* cpu, const VMConfig* cfg);
 
-int LoadExeFile(CPU *cpu, FILE *in);
+int LoadExeFile(CPU* cpu, FILE* in);
 
-void RunVM(CPU *cpu);
+void RunVM(CPU* cpu);
 
-void DestructVM(CPU *cpu, const VMConfig *cfg);
+void DestructVM(CPU* cpu, const VMConfig* cfg);
 
 extern const size_t romDevIdx;
 extern const size_t ramDevIdx;

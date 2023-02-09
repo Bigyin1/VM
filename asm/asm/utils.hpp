@@ -7,6 +7,6 @@
 /// @brief
 /// @param name
 /// @return
-char *readFile(FILE *f);
+char* readFile(FILE* f);
 
 #endif

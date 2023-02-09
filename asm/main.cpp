@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "assemble/assemble.hpp"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 
     if (argc != 3)
@@ -11,14 +12,14 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    FILE *in = fopen(argv[1], "r");
+    FILE* in = fopen(argv[1], "r");
     if (in == NULL)
     {
         perror(argv[1]);
         return EXIT_FAILURE;
     }
 
-    FILE *out = fopen(argv[2], "w");
+    FILE* out = fopen(argv[2], "w");
     if (out == NULL)
     {
         perror(argv[2]);

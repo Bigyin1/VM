@@ -1,28 +1,31 @@
-#include <string.h>
-#include "errors.hpp"
 #include "symbols.hpp"
 
-static ParserErrCode addNewSymbol(Parser *p, const char *symbol, uint64_t val, bool define, bool abs);
+#include <string.h>
 
-ParserErrCode defineNewSymbol(Parser *p, const char *name, uint64_t val)
+#include "errors.hpp"
+
+static ParserErrCode addNewSymbol(Parser* p, const char* symbol, uint64_t val,
+                                  bool define, bool abs);
+
+ParserErrCode defineNewSymbol(Parser* p, const char* name, uint64_t val)
 {
 
     return addNewSymbol(p, name, val, true, false);
 }
 
-ParserErrCode defineNewAbsSymbol(Parser *p, const char *name, uint64_t val)
+ParserErrCode defineNewAbsSymbol(Parser* p, const char* name, uint64_t val)
 {
 
     return addNewSymbol(p, name, val, true, true);
 }
 
-ParserErrCode addSymbolReference(Parser *p, const char *name, uint64_t val)
+ParserErrCode addSymbolReference(Parser* p, const char* name, uint64_t val)
 {
 
     return addNewSymbol(p, name, val, false, false);
 }
 
-static bool addSymbolToSymTab(symbolsData *t, symbolData *symb)
+static bool addSymbolToSymTab(symbolsData* t, symbolData* symb)
 {
     for (size_t i = 0; i < t->symTabSz; i++)
     {
@@ -46,7 +49,7 @@ static bool addSymbolToSymTab(symbolsData *t, symbolData *symb)
     return true;
 }
 
-static bool symbolIsGlobal(const char *name)
+static bool symbolIsGlobal(const char* name)
 {
 
     if (name[0] != '.')
@@ -55,17 +58,18 @@ static bool symbolIsGlobal(const char *name)
     return false;
 }
 
-static ParserErrCode addNewSymbol(Parser *p, const char *name, uint64_t val, bool define, bool abs)
+static ParserErrCode addNewSymbol(Parser* p, const char* name, uint64_t val,
+                                  bool define, bool abs)
 {
 
-    symbolData *nextSymb = &p->symsData.symbols[p->symsData.symbolsSz];
+    symbolData* nextSymb = &p->symsData.symbols[p->symsData.symbolsSz];
 
-    nextSymb->name = name;
+    nextSymb->name        = name;
     nextSymb->sectionName = p->currSection->name;
-    nextSymb->defined = define;
-    nextSymb->absolute = abs;
-    nextSymb->global = symbolIsGlobal(name);
-    nextSymb->val = val;
+    nextSymb->defined     = define;
+    nextSymb->absolute    = abs;
+    nextSymb->global      = symbolIsGlobal(name);
+    nextSymb->val         = val;
 
     bool added = addSymbolToSymTab(&p->symsData, nextSymb);
     if (define && !added)

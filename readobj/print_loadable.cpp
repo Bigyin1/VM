@@ -1,19 +1,21 @@
+#include "print_loadable.hpp"
+
 #include <stdlib.h>
 #include <string.h>
-#include "print_loadable.hpp"
-#include "registers.hpp"
-#include "readobj.hpp"
+
 #include "decode.hpp"
+#include "readobj.hpp"
+#include "registers.hpp"
 
-static const char *dataJmpTypeToPostfix(InstructionName instr, JumpType jmpT)
+static const char* dataJmpTypeToPostfix(InstructionName instr, JumpType jmpT)
 {
-
-    if (strcmp(instr, "jmp") != 0) /* TODO !!! check VM files argument.hpp and instructions.hpp;
-                                                                 Add validation for DataSize, JmpType and SignExtend fields */
+    if (strcmp(instr, "jmp") != 0) /* TODO !!! check VM files argument.hpp and
+                                      instructions.hpp; Add validation for
+                                      DataSize, JmpType and SignExtend fields */
         return NULL;
 
-#define JMP_POSTFIX(pfix, jmpType) \
-    if (jmpT == jmpType)           \
+#define JMP_POSTFIX(pfix, jmpType)                                             \
+    if (jmpT == jmpType)                                                       \
         return #pfix;
 
 #include "jmpTypePostfix.inc"
@@ -23,18 +25,19 @@ static const char *dataJmpTypeToPostfix(InstructionName instr, JumpType jmpT)
     return NULL;
 }
 
-static const char *dataSzAndSignToPostfix(InstructionName instr, DataSize sz, SignExtend sign)
+static const char* dataSzAndSignToPostfix(InstructionName instr, DataSize sz,
+                                          SignExtend sign)
 {
-
     if (strcmp(instr, "st") != 0 && strcmp(instr, "ld") != 0 &&
-        strcmp(instr, "mov") != 0 &&
-        strcmp(instr, "pop") != 0 && strcmp(instr, "push") != 0) /* TODO !!! check VM files argument.hpp and instructions.hpp;
-                                                                 Add validation for DataSize and SignExtend fields */
+        strcmp(instr, "mov") != 0 && strcmp(instr, "pop") != 0 &&
+        strcmp(instr, "push") !=
+            0) /* TODO !!! check VM files argument.hpp and instructions.hpp;
+               Add validation for DataSize and SignExtend fields */
 
         return NULL;
 
-#define DATA_POSTFIX(pfix, dataSz, signExt) \
-    if (sz == dataSz && sign == signExt)    \
+#define DATA_POSTFIX(pfix, dataSz, signExt)                                    \
+    if (sz == dataSz && sign == signExt)                                       \
         return #pfix;
 
 #include "cmdDataPostfixes.inc"
@@ -44,34 +47,35 @@ static const char *dataSzAndSignToPostfix(InstructionName instr, DataSize sz, Si
     return NULL;
 }
 
-static const char *getInstrPostfix(Instruction *instr)
+static const char* getInstrPostfix(Instruction* instr)
 {
-
-    const char *pfix = dataJmpTypeToPostfix(instr->im->Name, instr->JmpType);
+    const char* pfix = dataJmpTypeToPostfix(instr->im->Name, instr->JmpType);
 
     if (pfix == NULL)
-        pfix = dataSzAndSignToPostfix(instr->im->Name, instr->DataSz, instr->SignExt);
+        pfix = dataSzAndSignToPostfix(instr->im->Name, instr->DataSz,
+                                      instr->SignExt);
 
     return pfix;
 }
 
-static int readSymbolTable(ReadObj *r)
+static int readSymbolTable(ReadObj* r)
 {
-
-    r->symTabSz = r->sectHdrs[r->fileHdr.symbolTableIdx].size / (uint32_t)sizeof(SymTabEntry);
-    r->symTable = (SymTabEntry *)calloc(r->symTabSz, sizeof(SymTabEntry));
+    r->symTabSz = r->sectHdrs[r->fileHdr.symbolTableIdx].size /
+                  (uint32_t)sizeof(SymTabEntry);
+    r->symTable = (SymTabEntry*)calloc(r->symTabSz, sizeof(SymTabEntry));
     if (r->symTable == NULL)
         return -1;
 
     fseek(r->in, r->sectHdrs[r->fileHdr.symbolTableIdx].offset, SEEK_SET);
 
-    if (fread(r->symTable, sizeof(SymTabEntry), r->symTabSz, r->in) != r->symTabSz)
+    if (fread(r->symTable, sizeof(SymTabEntry), r->symTabSz, r->in) !=
+        r->symTabSz)
         return -1;
 
     return 0;
 }
 
-static void printBareData(ReadObj *r, SectionHeader *hdr, uint32_t offset)
+static void printBareData(ReadObj* r, SectionHeader* hdr, uint32_t offset)
 {
     uint8_t bytesInRow = 16; // TODO to config
 
@@ -95,12 +99,14 @@ static void printBareData(ReadObj *r, SectionHeader *hdr, uint32_t offset)
     fprintf(r->out, "\n");
 }
 
-static uint32_t findSymbolNameForInstructionInLinkableFile(ReadObj *r,
-                                                           uint32_t instrOffset, uint8_t instrSz, bool *ok)
+static uint32_t findSymbolNameForInstructionInLinkableFile(ReadObj* r,
+                                                           uint32_t instrOffset,
+                                                           uint8_t  instrSz,
+                                                           bool*    ok)
 {
     for (uint32_t i = 0; i < r->currRelSectSz; i++)
     {
-        RelEntry *currEntry = &r->currRelSect[i];
+        RelEntry* currEntry = &r->currRelSect[i];
 
         if (currEntry->offset <= instrOffset)
             continue;
@@ -116,7 +122,8 @@ static uint32_t findSymbolNameForInstructionInLinkableFile(ReadObj *r,
     return 0;
 }
 
-static uint32_t findSymbolNameForInstructionInExecFile(ReadObj *r, Instruction *instr, bool *ok)
+static uint32_t
+findSymbolNameForInstructionInExecFile(ReadObj* r, Instruction* instr, bool* ok)
 {
     uint64_t val = 0;
     if (instr->Arg1.Type == ArgImm || instr->Arg1.Type == ArgImmIndirect)
@@ -131,7 +138,7 @@ static uint32_t findSymbolNameForInstructionInExecFile(ReadObj *r, Instruction *
 
     for (uint32_t i = 0; i < r->symTabSz; i++)
     {
-        SymTabEntry *currSymb = &r->symTable[i];
+        SymTabEntry* currSymb = &r->symTable[i];
 
         if (currSymb->value == val)
         {
@@ -144,12 +151,12 @@ static uint32_t findSymbolNameForInstructionInExecFile(ReadObj *r, Instruction *
     return 0;
 }
 
-static uint32_t findDefinedSymbolAtOffset(ReadObj *r, uint16_t hdrIdx, uint32_t offset, bool *ok)
+static uint32_t findDefinedSymbolAtOffset(ReadObj* r, uint16_t hdrIdx,
+                                          uint32_t offset, bool* ok)
 {
-
     for (uint32_t i = 0; i < r->symTabSz; i++)
     {
-        SymTabEntry *currSymb = &r->symTable[i];
+        SymTabEntry* currSymb = &r->symTable[i];
 
         if (currSymb->sectHeaderIdx != hdrIdx)
             continue;
@@ -165,10 +172,10 @@ static uint32_t findDefinedSymbolAtOffset(ReadObj *r, uint16_t hdrIdx, uint32_t 
     return 0;
 }
 
-static bool printRegisterArg(ReadObj *r, Argument *arg)
+static bool printRegisterArg(ReadObj* r, Argument* arg)
 {
-
-    if (arg->Type != ArgRegister && arg->Type != ArgRegisterIndirect && arg->Type != ArgRegisterOffsetIndirect)
+    if (arg->Type != ArgRegister && arg->Type != ArgRegisterIndirect &&
+        arg->Type != ArgRegisterOffsetIndirect)
         return false;
 
     RegName regName = FindRegByCode(arg->RegNum);
@@ -178,51 +185,59 @@ static bool printRegisterArg(ReadObj *r, Argument *arg)
     if (arg->Type == ArgRegisterIndirect)
         fprintf(r->out, "[%s]", regName);
     if (arg->Type == ArgRegisterOffsetIndirect)
-        arg->ImmDisp16 >= 0 ? fprintf(r->out, "[%s+%d]", regName, arg->ImmDisp16) : fprintf(r->out, "[%s%d]", regName, arg->ImmDisp16);
+        arg->ImmDisp16 >= 0
+            ? fprintf(r->out, "[%s+%d]", regName, arg->ImmDisp16)
+            : fprintf(r->out, "[%s%d]", regName, arg->ImmDisp16);
 
     return true;
 }
 
-static int printImmArg(ReadObj *r, Argument *arg, uint32_t symbNameIdx, bool isSymbol)
+static int printImmArg(ReadObj* r, Argument* arg, uint32_t symbNameIdx,
+                       bool isSymbol)
 {
-
     if (arg->Type != ArgImm && arg->Type != ArgImmIndirect)
         return false;
 
-    const char *symbName = getNameFromStrTable(r, symbNameIdx);
+    const char* symbName = getNameFromStrTable(r, symbNameIdx);
     if (symbName == NULL)
     {
-        fprintf(stderr, "\tfailed to get symbol name for idx: %u\n", symbNameIdx);
+        fprintf(stderr, "\tfailed to get symbol name for idx: %u\n",
+                symbNameIdx);
         return -1;
     }
 
     if (arg->Type == ArgImm)
-        isSymbol ? fprintf(r->out, "%s", symbName) : fprintf(r->out, "%lu", arg->Imm); // TODO print imm with sign
+        isSymbol ? fprintf(r->out, "%s", symbName)
+                 : fprintf(r->out, "%lu", arg->Imm); // TODO print imm with sign
     if (arg->Type == ArgImmIndirect)
-        isSymbol ? fprintf(r->out, "[%s]", symbName) : fprintf(r->out, "[%lu]", arg->Imm);
+        isSymbol ? fprintf(r->out, "[%s]", symbName)
+                 : fprintf(r->out, "[%lu]", arg->Imm);
 
     return 0;
 }
 
-static int disasmInstruction(ReadObj *r, uint16_t sectHdrIdx, Instruction *instr, uint32_t instrOffset, uint8_t instrSz)
+static int disasmInstruction(ReadObj* r, uint16_t sectHdrIdx,
+                             Instruction* instr, uint32_t instrOffset,
+                             uint8_t instrSz)
 {
-
-    bool isLabel = false;
-    uint32_t labelNameIdx = findDefinedSymbolAtOffset(r, sectHdrIdx, instrOffset, &isLabel);
+    bool     isLabel = false;
+    uint32_t labelNameIdx =
+        findDefinedSymbolAtOffset(r, sectHdrIdx, instrOffset, &isLabel);
     if (isLabel)
     {
-        const char *labelName = getNameFromStrTable(r, labelNameIdx);
+        const char* labelName = getNameFromStrTable(r, labelNameIdx);
         if (labelName == NULL)
         {
-            fprintf(stderr, "\tfailed to get label name for idx: %u\n", labelNameIdx);
+            fprintf(stderr, "\tfailed to get label name for idx: %u\n",
+                    labelNameIdx);
             return -1;
         }
 
         fprintf(r->out, "%s:\n", labelName);
     }
 
-    InstructionName instrName = instr->im->Name;
-    const char *instrPostfix = getInstrPostfix(instr);
+    InstructionName instrName    = instr->im->Name;
+    const char*     instrPostfix = getInstrPostfix(instr);
 
     fprintf(r->out, "%u:  %s", instrOffset, instrName);
     if (instrPostfix != NULL)
@@ -236,13 +251,15 @@ static int disasmInstruction(ReadObj *r, uint16_t sectHdrIdx, Instruction *instr
 
     fprintf(r->out, " ");
 
-    bool isSymbol = false;
+    bool     isSymbol    = false;
     uint32_t symbNameIdx = 0;
 
     if (r->fileHdr.fileType == BIN_LINKABLE)
-        symbNameIdx = findSymbolNameForInstructionInLinkableFile(r, instrOffset, instrSz, &isSymbol);
+        symbNameIdx = findSymbolNameForInstructionInLinkableFile(
+            r, instrOffset, instrSz, &isSymbol);
     else
-        symbNameIdx = findSymbolNameForInstructionInExecFile(r, instr, &isSymbol);
+        symbNameIdx =
+            findSymbolNameForInstructionInExecFile(r, instr, &isSymbol);
 
     if (!printRegisterArg(r, &instr->Arg1))
         if (printImmArg(r, &instr->Arg1, symbNameIdx, isSymbol) < 0)
@@ -265,20 +282,21 @@ static int disasmInstruction(ReadObj *r, uint16_t sectHdrIdx, Instruction *instr
     return 0;
 }
 
-static int printLoadableSection(ReadObj *r, SectionHeader *hdr, uint16_t sectHdrIdx)
+static int printLoadableSection(ReadObj* r, SectionHeader* hdr,
+                                uint16_t sectHdrIdx)
 {
-    const char *sectName = getNameFromStrTable(r, hdr->nameIdx);
+    const char* sectName = getNameFromStrTable(r, hdr->nameIdx);
 
     getSectionRelocations(r, hdr);
 
-    fprintf(r->out, "\nLoadable section \"%s\" at address: %lu: \n", sectName, hdr->addr);
+    fprintf(r->out, "\nLoadable section \"%s\" at address: %lu: \n", sectName,
+            hdr->addr);
 
     long offset = 0;
     while (offset < hdr->size)
     {
-
-        Instruction instr = {0};
-        InstrCreationErr err = Decode(&instr, r->in);
+        Instruction      instr = {0};
+        InstrCreationErr err   = Decode(&instr, r->in);
         if (err != INSTR_OK)
         {
             fseek(r->in, hdr->offset + offset, SEEK_SET);
@@ -292,7 +310,8 @@ static int printLoadableSection(ReadObj *r, SectionHeader *hdr, uint16_t sectHdr
 
         long instrSz = ftell(r->in) - (hdr->offset + offset);
 
-        if (disasmInstruction(r, sectHdrIdx, &instr, (uint32_t)offset, (uint8_t)instrSz) < 0)
+        if (disasmInstruction(r, sectHdrIdx, &instr, (uint32_t)offset,
+                              (uint8_t)instrSz) < 0)
         {
             free(r->currRelSect);
             return -1;
@@ -303,7 +322,9 @@ static int printLoadableSection(ReadObj *r, SectionHeader *hdr, uint16_t sectHdr
 
     if (offset != hdr->size)
     {
-        fprintf(stderr, "wrong section size: instruction decoding overflows section \"%s\"\n",
+        fprintf(stderr,
+                "wrong section size: instruction decoding overflows section "
+                "\"%s\"\n",
                 sectName);
         free(r->currRelSect);
         return -1;
@@ -315,7 +336,7 @@ static int printLoadableSection(ReadObj *r, SectionHeader *hdr, uint16_t sectHdr
     return 0;
 }
 
-int printLoadableSections(ReadObj *r)
+int printLoadableSections(ReadObj* r)
 {
     if (readSymbolTable(r) < 0)
         return -1;

@@ -1,22 +1,26 @@
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "console.hpp"
+
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "argument.hpp"
 
-int ConstructMajesticConsole(Device *conDev, const MajesticConsoleConfig *config)
+int ConstructMajesticConsole(Device*                      conDev,
+                             const MajesticConsoleConfig* config)
 {
-    conDev->lowAddr = config->address;
+    conDev->lowAddr  = config->address;
     conDev->highAddr = conDev->lowAddr + MajesticConsoleMemSize - 1;
 
-    MajesticConsole *con = (MajesticConsole *)calloc(1, sizeof(MajesticConsole));
+    MajesticConsole* con = (MajesticConsole*)calloc(1, sizeof(MajesticConsole));
+
     conDev->concreteDevice = con;
 
     conDev->name = "Majestic Console";
 
     conDev->readFrom = MajesticConsoleReadFrom;
-    conDev->writeTo = MajesticConsoleWriteTo;
-    conDev->tick = MajesticConsoleTicker;
+    conDev->writeTo  = MajesticConsoleWriteTo;
+    conDev->tick     = MajesticConsoleTicker;
 
     con->config = config;
 
@@ -29,9 +33,9 @@ int ConstructMajesticConsole(Device *conDev, const MajesticConsoleConfig *config
     return 0;
 }
 
-void DestructMajesticConsole(Device *conDev)
+void DestructMajesticConsole(Device* conDev)
 {
-    MajesticConsole *con = (MajesticConsole *)conDev->concreteDevice;
+    MajesticConsole* con = (MajesticConsole*)conDev->concreteDevice;
 
     fclose(con->formattedIn);
     fclose(con->formattedOut);
@@ -41,10 +45,10 @@ void DestructMajesticConsole(Device *conDev)
     return;
 }
 
-int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
+int MajesticConsoleReadFrom(void* dev, size_t addr, uint64_t* data, DataSize sz)
 {
 
-    MajesticConsole *console = (MajesticConsole *)dev;
+    MajesticConsole* console = (MajesticConsole*)dev;
 
     if (addr == offsetof(MajesticConsoleMemMap, doubleInOut))
     {
@@ -72,10 +76,10 @@ int MajesticConsoleReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
     return 0;
 }
 
-int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz)
+int MajesticConsoleWriteTo(void* dev, size_t addr, uint64_t data, DataSize sz)
 {
 
-    MajesticConsole *console = (MajesticConsole *)dev;
+    MajesticConsole* console = (MajesticConsole*)dev;
 
     if (addr == offsetof(MajesticConsoleMemMap, doubleInOut))
     {
@@ -124,7 +128,8 @@ int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz)
         memcpy(console->mem.rgb, &data, sizeof(console->mem.rgb));
 
         write(console->config->graphicsPixelOutFD, &console->mem.screenX,
-              sizeof(console->mem.screenX) + sizeof(console->mem.screenY) + sizeof(console->mem.rgb));
+              sizeof(console->mem.screenX) + sizeof(console->mem.screenY) +
+                  sizeof(console->mem.rgb));
         return 0;
     }
 
@@ -134,7 +139,7 @@ int MajesticConsoleWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz)
     return 0;
 }
 
-void MajesticConsoleTicker(void *)
+void MajesticConsoleTicker(void*)
 {
 
     return; // TODO

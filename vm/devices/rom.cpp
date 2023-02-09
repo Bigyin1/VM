@@ -1,24 +1,26 @@
-#include <stdlib.h>
-#include <string.h>
 #include "rom.hpp"
 
-int ConstructROM(Device *romDev, const ROMConfig *config)
+#include <stdlib.h>
+#include <string.h>
+
+int ConstructROM(Device* romDev, const ROMConfig* config)
 {
-    romDev->lowAddr = config->address;
+    romDev->lowAddr  = config->address;
     romDev->highAddr = romDev->lowAddr + config->size - 1;
 
     romDev->name = "ROM";
 
     romDev->getReader = ROMGetReaderOnAddr;
     romDev->getWriter = ROMGetWriterOnAddr;
-    romDev->readFrom = ROMReadFrom;
-    romDev->writeTo = ROMWriteTo;
+    romDev->readFrom  = ROMReadFrom;
+    romDev->writeTo   = ROMWriteTo;
 
-    ROM *rom = (ROM *)calloc(1, sizeof(ROM));
+    ROM* rom = (ROM*)calloc(1, sizeof(ROM));
+
     romDev->concreteDevice = rom;
 
     rom->config = config;
-    rom->mem = (char *)calloc(rom->config->size, 1);
+    rom->mem    = (char*)calloc(rom->config->size, 1);
     if (rom->mem == NULL)
     {
         perror("vm");
@@ -33,10 +35,10 @@ int ConstructROM(Device *romDev, const ROMConfig *config)
     return 0;
 }
 
-void DestructROM(Device *romDev)
+void DestructROM(Device* romDev)
 {
 
-    ROM *rom = (ROM *)romDev->concreteDevice;
+    ROM* rom = (ROM*)romDev->concreteDevice;
 
     fclose(rom->reader);
     fclose(rom->writer);
@@ -46,9 +48,9 @@ void DestructROM(Device *romDev)
     free(romDev->concreteDevice);
 }
 
-FILE *ROMGetReaderOnAddr(void *dev, size_t addr)
+FILE* ROMGetReaderOnAddr(void* dev, size_t addr)
 {
-    ROM *rom = (ROM *)dev;
+    ROM* rom = (ROM*)dev;
     if (addr >= rom->config->size)
         return NULL;
 
@@ -57,9 +59,9 @@ FILE *ROMGetReaderOnAddr(void *dev, size_t addr)
     return rom->reader;
 }
 
-FILE *ROMGetWriterOnAddr(void *dev, size_t addr)
+FILE* ROMGetWriterOnAddr(void* dev, size_t addr)
 {
-    ROM *rom = (ROM *)dev;
+    ROM* rom = (ROM*)dev;
     if (addr >= rom->config->size)
         return NULL;
 
@@ -68,9 +70,9 @@ FILE *ROMGetWriterOnAddr(void *dev, size_t addr)
     return rom->writer;
 }
 
-int ROMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
+int ROMReadFrom(void* dev, size_t addr, uint64_t* data, DataSize sz)
 {
-    ROM *rom = (ROM *)dev;
+    ROM* rom = (ROM*)dev;
 
     size_t toRead = DataSzToBytesSz(sz);
     if (addr + toRead > rom->config->size)
@@ -81,7 +83,7 @@ int ROMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
     return 0;
 }
 
-int ROMWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz)
+int ROMWriteTo(void* dev, size_t addr, uint64_t data, DataSize sz)
 {
 
     return -1;

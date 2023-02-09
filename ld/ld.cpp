@@ -1,11 +1,15 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include "utils.hpp"
-#include "binformat.hpp"
 #include "ld.hpp"
 
-static int readLinkableFileHeader(LinkableFile *f, fileInfo *in) // TODO create separate library to use here and in readobj
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "binformat.hpp"
+#include "utils.hpp"
+
+static int
+readLinkableFileHeader(LinkableFile* f,
+                       fileInfo*     in) // TODO create separate library to use here and in readobj
 {
 
     if (getObjFileHeader(in->file, &f->fileHdr) < 0)
@@ -33,12 +37,12 @@ static int readLinkableFileHeader(LinkableFile *f, fileInfo *in) // TODO create 
     return 0;
 }
 
-static int readSymbolTable(LinkableFile *f, fileInfo *in)
+static int readSymbolTable(LinkableFile* f, fileInfo* in)
 {
-    SectionHeader *symTabHdr = &f->sectHdrs[f->fileHdr.symbolTableIdx];
-    f->symTabSz = symTabHdr->size / (uint32_t)sizeof(SymTabEntry);
+    SectionHeader* symTabHdr = &f->sectHdrs[f->fileHdr.symbolTableIdx];
+    f->symTabSz              = symTabHdr->size / (uint32_t)sizeof(SymTabEntry);
 
-    f->symTable = (SymTabEntry *)calloc(f->symTabSz, sizeof(SymTabEntry));
+    f->symTable = (SymTabEntry*)calloc(f->symTabSz, sizeof(SymTabEntry));
     if (f->symTable == NULL)
         return -1;
 
@@ -50,13 +54,13 @@ static int readSymbolTable(LinkableFile *f, fileInfo *in)
     return 0;
 }
 
-static int readStringTable(LinkableFile *f, fileInfo *in)
+static int readStringTable(LinkableFile* f, fileInfo* in)
 {
 
-    SectionHeader *strTabHdr = &f->sectHdrs[f->fileHdr.stringTableIdx];
-    f->strTableSz = strTabHdr->size;
+    SectionHeader* strTabHdr = &f->sectHdrs[f->fileHdr.stringTableIdx];
+    f->strTableSz            = strTabHdr->size;
 
-    f->strTable = (char *)calloc(strTabHdr->size, sizeof(char));
+    f->strTable = (char*)calloc(strTabHdr->size, sizeof(char));
     if (f->strTable == NULL)
         return -1;
 
@@ -68,13 +72,15 @@ static int readStringTable(LinkableFile *f, fileInfo *in)
     return 0;
 }
 
-static int findLoadableSectForRelocSect(LinkableFile *f, RelSection *relSect)
+static int findLoadableSectForRelocSect(LinkableFile* f, RelSection* relSect)
 {
 
-    const char *relSectName = getNameFromStrTableByIdx(f, f->sectHdrs[relSect->relSectHeaderIdx].nameIdx);
+    const char* relSectName =
+        getNameFromStrTableByIdx(f, f->sectHdrs[relSect->relSectHeaderIdx].nameIdx);
     if (relSectName == NULL)
     {
-        fprintf(stderr, "failed to find section %u name", f->sectHdrs[relSect->relSectHeaderIdx].nameIdx);
+        fprintf(stderr, "failed to find section %u name",
+                f->sectHdrs[relSect->relSectHeaderIdx].nameIdx);
         return -1;
     }
 
@@ -82,11 +88,11 @@ static int findLoadableSectForRelocSect(LinkableFile *f, RelSection *relSect)
 
     for (uint32_t i = 0; i < f->sectHdrsSz; i++)
     {
-        SectionHeader *currHdr = &f->sectHdrs[i];
+        SectionHeader* currHdr = &f->sectHdrs[i];
         if (currHdr->type != SECT_LOAD)
             continue;
 
-        const char *loadSectName = getNameFromStrTableByIdx(f, currHdr->nameIdx);
+        const char* loadSectName = getNameFromStrTableByIdx(f, currHdr->nameIdx);
         if (loadSectName == NULL)
         {
             fprintf(stderr, "failed to find section %u name\n", currHdr->nameIdx);
@@ -106,15 +112,16 @@ static int findLoadableSectForRelocSect(LinkableFile *f, RelSection *relSect)
     return -1;
 }
 
-static int readRelocSection(LinkableFile *f, RelSection *relSect, fileInfo *in)
+static int readRelocSection(LinkableFile* f, RelSection* relSect, fileInfo* in)
 {
-    SectionHeader *sectHdr = &f->sectHdrs[relSect->relSectHeaderIdx];
+    SectionHeader* sectHdr = &f->sectHdrs[relSect->relSectHeaderIdx];
     fseek(in->file, sectHdr->offset, SEEK_SET);
 
-    relSect->relSectSz = sectHdr->size / (uint32_t)sizeof(RelEntry);
-    relSect->relSectEnries = (RelEntry *)calloc(relSect->relSectSz, sizeof(RelEntry));
+    relSect->relSectSz     = sectHdr->size / (uint32_t)sizeof(RelEntry);
+    relSect->relSectEnries = (RelEntry*)calloc(relSect->relSectSz, sizeof(RelEntry));
 
-    if (fread(relSect->relSectEnries, sizeof(RelEntry), relSect->relSectSz, in->file) != relSect->relSectSz)
+    if (fread(relSect->relSectEnries, sizeof(RelEntry), relSect->relSectSz, in->file) !=
+        relSect->relSectSz)
         return -1;
 
     if (findLoadableSectForRelocSect(f, relSect) < 0)
@@ -123,7 +130,7 @@ static int readRelocSection(LinkableFile *f, RelSection *relSect, fileInfo *in)
     return 0;
 }
 
-static int readRelocSections(LinkableFile *f, fileInfo *in)
+static int readRelocSections(LinkableFile* f, fileInfo* in)
 {
     for (uint32_t i = 0; i < f->sectHdrsSz; i++)
     {
@@ -136,7 +143,7 @@ static int readRelocSections(LinkableFile *f, fileInfo *in)
     if (f->relSectionsSz == 0)
         return 0;
 
-    f->relSections = (RelSection *)calloc(f->relSectionsSz, sizeof(RelSection));
+    f->relSections = (RelSection*)calloc(f->relSectionsSz, sizeof(RelSection));
     if (f->relSections == NULL)
         return -1;
 
@@ -157,7 +164,7 @@ static int readRelocSections(LinkableFile *f, fileInfo *in)
     return 0;
 }
 
-static int readFileData(LinkableFile *f, fileInfo *in)
+static int readFileData(LinkableFile* f, fileInfo* in)
 {
     if (readLinkableFileHeader(f, in) < 0)
         return -1;
@@ -188,9 +195,9 @@ static int readFileData(LinkableFile *f, fileInfo *in)
     return 0;
 }
 
-int ReadFilesData(LD *ld)
+int ReadFilesData(LD* ld)
 {
-    ld->files = (LinkableFile *)calloc(ld->args->filesCount, sizeof(LinkableFile));
+    ld->files = (LinkableFile*)calloc(ld->args->filesCount, sizeof(LinkableFile));
     if (ld->files == 0)
     {
         perror("ld");
@@ -206,7 +213,7 @@ int ReadFilesData(LD *ld)
     return 0;
 }
 
-static void freeExecFile(ExecutableFile *exec)
+static void freeExecFile(ExecutableFile* exec)
 {
 
     free(exec->sectHdrs);
@@ -214,7 +221,7 @@ static void freeExecFile(ExecutableFile *exec)
     free(exec->symTable);
 }
 
-static void freeLinkableFile(LinkableFile *l)
+static void freeLinkableFile(LinkableFile* l)
 {
     for (size_t i = 0; i < l->relSectionsSz; i++)
     {
@@ -227,7 +234,7 @@ static void freeLinkableFile(LinkableFile *l)
     free(l->symTable);
 }
 
-static void freeCmdArgs(cmdArgs *args)
+static void freeCmdArgs(cmdArgs* args)
 {
 
     fclose(args->out);
@@ -238,7 +245,7 @@ static void freeCmdArgs(cmdArgs *args)
     }
 }
 
-void FreeLD(LD *ld)
+void FreeLD(LD* ld)
 {
     freeExecFile(&ld->execFile);
 

@@ -79,10 +79,10 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "./testdata/out2",
-                "./testdata/out3",
+                "./tests/end2end/link3588962281",
+                "./tests/end2end/link1576969710",
+                "./tests/end2end/link4250657462",
                 "--text=0",
-                "--data=5096",
                 "./testdata/exe"
             ],
             "stopAtEntry": false,

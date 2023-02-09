@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "vmconfig/config.hpp"
-#include "vm.hpp"
 
-int main(int argc, char **argv)
+#include "vm.hpp"
+#include "vmconfig/config.hpp"
+
+int main(int argc, char** argv)
 {
     if (argc != 2)
     {
@@ -11,7 +12,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    FILE *in = fopen(argv[1], "r");
+    FILE* in = fopen(argv[1], "r");
     if (in == NULL)
         return EXIT_FAILURE;
 

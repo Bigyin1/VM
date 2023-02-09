@@ -1,12 +1,14 @@
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
-target_compile_options(project_options INTERFACE
-    -fcheck-new -fsized-deallocation -fstack-check -fstack-protector
-    -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer
-    -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,nonnull-attribute,leak,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr)
 
-target_link_options(project_options INTERFACE
-    -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,nonnull-attribute,leak,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    target_compile_options(project_options INTERFACE
+        -fcheck-new -fsized-deallocation -fstack-check -fstack-protector
+        -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer
+        -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,nonnull-attribute,leak,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr)
+    target_link_options(project_options INTERFACE
+        -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,nonnull-attribute,leak,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr)
+endif()
 
 add_library(project_warnings INTERFACE)
 target_compile_options(project_warnings INTERFACE

@@ -4,8 +4,7 @@
 
 typedef enum InstrOpCode
 {
-#define INSTR(name, opCode, ...) \
-    ins_##name = opCode,
+#define INSTR(name, opCode, ...) ins_##name = opCode,
 
 #include "instructionsMeta.inc"
 

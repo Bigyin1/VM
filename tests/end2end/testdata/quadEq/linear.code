@@ -13,11 +13,11 @@ solveLinear:
 
     oneSol:
 
-    mulf %r9, -1.0   # -c
-    divf %r9, %r8     # -c / b
+    mulf %r9, -1.0          # -c
+    divf %r9, %r8           # -c / b
     st %r9, [%r1+24]
 
-    mov %r9, 3       # 3 - one solution
+    mov %r9, 3              # 3 - one solution
     st(b) %r9, [%r1+40]
 
     jmp .end
@@ -28,14 +28,14 @@ solveLinear:
     cmpf %r9, 0.0
     jmp(eq) .infSols
 
-    mov %r8, 1       # 1 - no solutions
+    mov %r8, 1              # 1 - no solutions
     st(b) %r8, [%r1+40]
 
     jmp .end
 
 
     .infSols:
-    mov %r8, 2   # inf solutions
+    mov %r8, 2              # inf solutions
     st(b) %r8, [%r1+40]
 
     jmp .end

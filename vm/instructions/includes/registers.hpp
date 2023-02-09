@@ -2,10 +2,11 @@
 #ifndef CPU_REGISTERS_HPP
 #define CPU_REGISTERS_HPP
 
-#include <cstddef>
 #include <stdint.h>
 
-typedef const char *RegName;
+#include <cstddef>
+
+typedef const char* RegName;
 
 typedef enum RegCodes
 {
@@ -37,6 +38,6 @@ typedef struct RegMeta
 
 int FindRegByName(RegName name);
 
-const char *FindRegByCode(uint8_t regCode);
+const char* FindRegByCode(uint8_t regCode);
 
 #endif

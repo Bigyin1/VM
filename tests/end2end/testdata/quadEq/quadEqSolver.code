@@ -34,13 +34,13 @@ main:
 mov %rbp, %rsp
 add %rsp, 41
 
-call .readCoeff     #a
+call .readCoeff     # a
 st %r0, [%rbp]
 
-call .readCoeff     #b
+call .readCoeff     # b
 st %r0, [%rbp+8]
 
-call .readCoeff     #c
+call .readCoeff     # c
 st %r0, [%rbp+16]
 
 mov %r0, 0

@@ -4,6 +4,6 @@
 
 #include "readobj.hpp"
 
-int printHeaders(ReadObj *r);
+int printHeaders(ReadObj* r);
 
 #endif

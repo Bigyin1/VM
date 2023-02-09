@@ -2,8 +2,9 @@
 #ifndef CPU_ARGUMENT_HPP
 #define CPU_ARGUMENT_HPP
 
-#include <cstddef>
 #include <stdint.h>
+
+#include <cstddef>
 
 typedef enum DataSize // TODO: add default invalid value
 {
@@ -31,7 +32,7 @@ typedef struct Argument
     ArgType Type;
 
     uint64_t Imm;
-    uint8_t RegNum;
+    uint8_t  RegNum;
 
     int16_t ImmDisp16;
 

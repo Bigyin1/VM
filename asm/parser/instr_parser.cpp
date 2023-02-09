@@ -1,36 +1,38 @@
-#include <assert.h>
-#include <string.h>
-#include <math.h>
-#include "registers.hpp"
-#include "encode.hpp"
-#include "instr_postfix_parser.hpp"
-#include "symbols.hpp"
-#include "utils.hpp"
-#include "directives.hpp"
-#include "errors.hpp"
 #include "instr_parser.hpp"
 
-static ParserErrCode parseImmDisp(Parser *parser, Argument *arg, ArgType t)
+#include <assert.h>
+#include <math.h>
+#include <string.h>
+
+#include "directives.hpp"
+#include "encode.hpp"
+#include "errors.hpp"
+#include "instr_postfix_parser.hpp"
+#include "registers.hpp"
+#include "symbols.hpp"
+#include "utils.hpp"
+
+static ParserErrCode parseImmDisp(Parser* parser, Argument* arg, ArgType t)
 {
     if (currTokenType(parser) != ASM_T_INT)
         return PARSER_INSUFF_TOKEN;
 
-    arg->ImmDisp16 = currTokenNumVal(parser);
-    arg->Type = t;
+    arg->ImmDisp16 = (int16_t)currTokenNumVal(parser);
+    arg->Type      = t;
     if (eatToken(parser, ASM_T_INT) != PARSER_OK)
         return PARSER_BAD_COMMAND;
 
     return PARSER_OK;
 }
 
-static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argument *arg)
+static ParserErrCode parseIndirectArg(Parser* parser, CommandNode* node, Argument* arg)
 {
     assert(parser != NULL);
     assert(node != NULL);
 
     if (currTokenType(parser) == ASM_T_ID)
     {
-        char *labelVal = currTokenVal(parser);
+        char* labelVal = currTokenVal(parser);
 
         addSymbolReference(parser, labelVal, node->offset + EvalInstrSymbolOffset(&node->instr));
 
@@ -53,9 +55,9 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
     }
     else
     {
-        size_t line = currTokenLine(parser);
-        size_t column = currTokenColumn(parser);
-        const char *regVal = currTokenVal(parser);
+        size_t      line   = currTokenLine(parser);
+        size_t      column = currTokenColumn(parser);
+        const char* regVal = currTokenVal(parser);
 
         if (eatToken(parser, ASM_T_REGISTER) != PARSER_OK)
             return PARSER_BAD_COMMAND;
@@ -64,10 +66,10 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
 
         if (regNum < 0)
         {
-            ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_REGISTER);
+            ParserError* err = addNewParserError(parser, PARSER_UNKNOWN_REGISTER);
 
-            err->token = regVal;
-            err->line = line;
+            err->token  = regVal;
+            err->line   = line;
             err->column = column;
 
             return PARSER_BAD_COMMAND;
@@ -87,7 +89,7 @@ static ParserErrCode parseIndirectArg(Parser *parser, commandNode *node, Argumen
     }
 }
 
-static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument *arg)
+static ParserErrCode parseCommandArg(Parser* parser, CommandNode* node, Argument* arg)
 {
     assert(parser != NULL);
     assert(node != NULL);
@@ -97,7 +99,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
 
     if (currTokenType(parser) == ASM_T_ID)
     {
-        char *labelVal = currTokenVal(parser);
+        char* labelVal = currTokenVal(parser);
 
         addSymbolReference(parser, labelVal, node->offset + EvalInstrSymbolOffset(&node->instr));
 
@@ -109,7 +111,7 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
     }
     else if (currTokenType(parser) == ASM_T_FLOAT)
     {
-        arg->Imm = currTokenNumVal(parser);
+        arg->Imm  = currTokenNumVal(parser);
         arg->Type = ArgImm;
 
         arg->_immArgSz = DataWord; // double size
@@ -118,10 +120,10 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
     }
     else if (currTokenType(parser) == ASM_T_INT)
     {
-        arg->Imm = currTokenNumVal(parser);
+        arg->Imm  = currTokenNumVal(parser);
         arg->Type = ArgImm;
 
-        arg->_immArgSz = evalImmMinDataSz(arg->Imm, currTokenType(parser));
+        arg->_immArgSz = evalImmMinDataSz((int64_t)arg->Imm);
 
         eatToken(parser, currTokenType(parser));
     }
@@ -130,17 +132,17 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
         int regNum = FindRegByName(currTokenVal(parser));
         if (regNum < 0)
         {
-            ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_REGISTER);
+            ParserError* err = addNewParserError(parser, PARSER_UNKNOWN_REGISTER);
 
-            err->token = currTokenVal(parser);
-            err->line = currTokenLine(parser);
+            err->token  = currTokenVal(parser);
+            err->line   = currTokenLine(parser);
             err->column = currTokenColumn(parser);
 
             return PARSER_BAD_COMMAND;
         }
 
         arg->RegNum = (uint8_t)regNum;
-        arg->Type = ArgRegister;
+        arg->Type   = ArgRegister;
         eatToken(parser, ASM_T_REGISTER);
     }
     else
@@ -163,33 +165,32 @@ static ParserErrCode parseCommandArg(Parser *parser, commandNode *node, Argument
     return PARSER_OK;
 }
 
-static ParserErrCode createInstruction(Parser *parser, commandNode *node)
+static ParserErrCode createInstruction(Parser* parser, CommandNode* node)
 {
-
     InstrCreationErr instrErr = NewInstruction(node->name, &node->instr);
     if (instrErr == INSTR_WRONG_OPERANDS)
     {
-        ParserError *err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
+        ParserError* err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
 
         err->token = node->name;
-        err->line = node->line;
+        err->line  = node->line;
         return PARSER_BAD_COMMAND;
     }
 
-    parser->currSection->currOffset += EvalInstrSize(&node->instr);
+    parser->currSection->size += EvalInstrSize(&node->instr);
 
     return PARSER_OK;
 }
 
-ParserErrCode parseInstr(Parser *parser, commandNode *node)
+ParserErrCode parseInstr(Parser* parser, CommandNode* node)
 {
     node->instr.im = FindInsMetaByName(node->name);
     if (node->instr.im == NULL)
     {
-        ParserError *err = addNewParserError(parser, PARSER_UNKNOWN_COMMAND);
+        ParserError* err = addNewParserError(parser, PARSER_UNKNOWN_COMMAND);
 
         err->token = node->name;
-        err->line = node->line;
+        err->line  = node->line;
         return PARSER_BAD_COMMAND;
     }
 

@@ -1,17 +1,18 @@
-#include <assert.h>
-#include <string.h>
-#include <ctype.h>
 #include "instructions.hpp"
+
+#include <assert.h>
+#include <ctype.h>
+#include <string.h>
 
 const InstructionMeta instructions[] = {
 
 #define COMMA ,
 
-#define INSTR(name, opCode, argSets)   \
-    {                                  \
-        .Name = #name,                 \
-        .OpCode = InstrOpCode(opCode), \
-        .ArgSets = argSets,            \
+#define INSTR(name, opCode, argSets)                                           \
+    {                                                                          \
+        .Name    = #name,                                                      \
+        .OpCode  = InstrOpCode(opCode),                                        \
+        .ArgSets = argSets,                                                    \
     },
 
 #include "instructionsMeta.inc"
@@ -21,7 +22,7 @@ const InstructionMeta instructions[] = {
 
 };
 
-const InstructionMeta *FindInsMetaByName(InstructionName name)
+const InstructionMeta* FindInsMetaByName(InstructionName name)
 {
     assert(name != NULL);
 
@@ -35,7 +36,7 @@ const InstructionMeta *FindInsMetaByName(InstructionName name)
     return NULL;
 }
 
-const InstructionMeta *FindInsMetaByOpCode(InstrOpCode opCode)
+const InstructionMeta* FindInsMetaByOpCode(InstrOpCode opCode)
 {
 
     for (size_t i = 0; i < sizeof(instructions) / sizeof(InstructionMeta); i++)
@@ -48,7 +49,7 @@ const InstructionMeta *FindInsMetaByOpCode(InstrOpCode opCode)
     return NULL;
 }
 
-static int findArgSetIdx(const InstructionMeta *im, ArgSet args)
+static int findArgSetIdx(const InstructionMeta* im, ArgSet args)
 {
 
     for (size_t j = 0; j < sizeof(im->ArgSets) / sizeof(ArgSet); j++)
@@ -62,7 +63,7 @@ static int findArgSetIdx(const InstructionMeta *im, ArgSet args)
     return -1;
 }
 
-InstrCreationErr NewInstruction(InstructionName name, Instruction *instr)
+InstrCreationErr NewInstruction(InstructionName name, Instruction* instr)
 {
 
     ArgSet argSet = {.First = instr->Arg1.Type, .Second = instr->Arg2.Type};

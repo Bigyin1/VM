@@ -4,8 +4,8 @@
 
 #include "parser/parser.hpp"
 
-ParserErrCode parseDataDefDirective(Parser *parser, commandNode *node);
+ParserErrCode parseDataDefDirective(Parser* parser, CommandNode* node);
 
-ParserErrCode parseControlDirective(Parser *parser, commandNode *node);
+ParserErrCode parseControlDirective(Parser* parser, CommandNode* node);
 
 #endif

@@ -29,11 +29,46 @@ const quadEqTwoSolutions = 4
 
 var testCases = []quadEqTestCase{
 
-	{a: 1.0, b: 2.0, c: 1.0, root1: -1.0, root2: -1.0, solState: quadEqTwoSolutions},
-	{a: 0, b: 2.0, c: 1.0, root1: -0.5, root2: 0, solState: quadEqOneSolution},
-	{a: 0, b: 0, c: 0, root1: 0, root2: 0, solState: quadEqInfSolutions},
-	{a: 1, b: 3, c: 5, root1: 0, root2: 0, solState: quadEqNoSolutions},
-	{a: 0, b: 0, c: -9, root1: 0, root2: 0, solState: quadEqNoSolutions},
+	{
+		a:        1.0,
+		b:        2.0,
+		c:        1.0,
+		root1:    -1.0,
+		root2:    -1.0,
+		solState: quadEqTwoSolutions,
+	},
+	{
+		a:        0,
+		b:        2.0,
+		c:        1.0,
+		root1:    -0.5,
+		root2:    0,
+		solState: quadEqOneSolution,
+	},
+	{
+		a:        0,
+		b:        0,
+		c:        0,
+		root1:    0,
+		root2:    0,
+		solState: quadEqInfSolutions,
+	},
+	{
+		a:        1,
+		b:        3,
+		c:        5,
+		root1:    0,
+		root2:    0,
+		solState: quadEqNoSolutions,
+	},
+	{
+		a:        0,
+		b:        0,
+		c:        -9,
+		root1:    0,
+		root2:    0,
+		solState: quadEqNoSolutions,
+	},
 }
 
 func TestQuadEq(t *testing.T) {

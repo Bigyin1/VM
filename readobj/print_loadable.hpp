@@ -4,6 +4,6 @@
 
 #include "readobj.hpp"
 
-int printLoadableSections(ReadObj *r);
+int printLoadableSections(ReadObj* r);
 
 #endif

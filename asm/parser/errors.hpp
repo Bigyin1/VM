@@ -4,6 +4,6 @@
 
 #include "parser/parser.hpp"
 
-ParserError *addNewParserError(Parser *p, ParserErrCode eCode);
+ParserError* addNewParserError(Parser* p, ParserErrCode eCode);
 
 #endif

@@ -1,7 +1,8 @@
-#include <assert.h>
 #include "device.hpp"
 
-Device *FindDevice(Device *devices, size_t addr)
+#include <assert.h>
+
+Device* FindDevice(Device* devices, size_t addr)
 {
     assert(devices != NULL);
 

@@ -4,6 +4,6 @@
 
 #include "tokenizer/tokenizer.hpp"
 
-int addUnknownTokenError(Tokenizer *t);
+int addUnknownTokenError(Tokenizer* t);
 
 #endif

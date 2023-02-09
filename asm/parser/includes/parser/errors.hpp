@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+
 #include "tokenizer/tokenizer.hpp"
 
 typedef enum ParserErrCode
@@ -25,12 +26,12 @@ typedef enum ParserErrCode
 
 typedef struct ParserError
 {
-    ParserError *next;
+    ParserError* next;
 
     size_t line;
     size_t column;
 
-    const char *token;
+    const char* token;
 
     TokenType got;
     TokenType expected;
@@ -39,6 +40,6 @@ typedef struct ParserError
 
 } ParserError;
 
-void reportParserErrors(ParserError *err, FILE *f);
+void reportParserErrors(ParserError* err, FILE* f);
 
 #endif

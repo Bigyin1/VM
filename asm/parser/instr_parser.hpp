@@ -4,6 +4,6 @@
 
 #include "parser/parser.hpp"
 
-ParserErrCode parseInstr(Parser *parser, commandNode *node);
+ParserErrCode parseInstr(Parser* parser, CommandNode* node);
 
 #endif

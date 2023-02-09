@@ -1,14 +1,16 @@
-#include <string.h>
-#include "utils.hpp"
 #include "assemble/assemble.hpp"
-#include "tokenizer/tokenizer.hpp"
-#include "parser/parser.hpp"
-#include "asmencoder/asmencoder.hpp"
 
-AsmErrCode assemble(FILE *in, FILE *out)
+#include <string.h>
+
+#include "asmencoder/asmencoder.hpp"
+#include "parser/parser.hpp"
+#include "tokenizer/tokenizer.hpp"
+#include "utils.hpp"
+
+AsmErrCode assemble(FILE* in, FILE* out)
 {
 
-    char *text = readFile(in);
+    char* text = readFile(in);
     if (text == NULL)
         return ASM_SYSTEM_ERROR;
 
@@ -41,7 +43,7 @@ AsmErrCode assemble(FILE *in, FILE *out)
         return ASM_USER_ERROR;
     }
 
-    AsmEncoder as = {.parser = &parser, .out = out};
+    AsmEncoder as  = {.parser = &parser, .out = out};
     EncErrCode err = GenObjectFile(&as);
 
     fclose(out);

@@ -1,15 +1,17 @@
+#include "vm.hpp"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "vmconfig/config.hpp"
+
 #include "instructions.hpp"
 #include "registers.hpp"
 #include "run.hpp"
-#include "vm.hpp"
+#include "vmconfig/config.hpp"
 
 #define REPORT_TEST_START printf("Test: %s: ", __FUNCTION__)
 
-typedef bool (*vmTest)(CPU *cpu);
+typedef bool (*vmTest)(CPU* cpu);
 
 static bool vmTestWrapper(vmTest test)
 {
@@ -29,22 +31,24 @@ static bool vmTestWrapper(vmTest test)
     return testStat;
 }
 
-static bool testMOV_Register(CPU *cpu)
+static bool testMOV_Register(CPU* cpu)
 {
     REPORT_TEST_START;
     uint64_t desiredVal = 129;
-    cpu->gpRegs[R5] = desiredVal;
+    cpu->gpRegs[R5]     = desiredVal;
 
     Instruction instr = {
         .im = &instructions[ins_mov],
-        .Arg1 = Argument{
-            .Type = ArgRegister,
-            .RegNum = R0,
-        },
-        .Arg2 = Argument{
-            .Type = ArgRegister,
-            .RegNum = R5,
-        },
+        .Arg1 =
+            Argument{
+                .Type   = ArgRegister,
+                .RegNum = R0,
+            },
+        .Arg2 =
+            Argument{
+                .Type   = ArgRegister,
+                .RegNum = R5,
+            },
     };
 
     if (Run(cpu, &instr) < 0)
@@ -56,7 +60,7 @@ static bool testMOV_Register(CPU *cpu)
     return true;
 }
 
-static bool testMOV_Imm(CPU *cpu)
+static bool testMOV_Imm(CPU* cpu)
 {
     REPORT_TEST_START;
     uint64_t desiredVal = 477;
@@ -64,14 +68,16 @@ static bool testMOV_Imm(CPU *cpu)
     // test 1
     Instruction instr = {
         .im = &instructions[ins_mov],
-        .Arg1 = Argument{
-            .Type = ArgRegister,
-            .RegNum = R11,
-        },
-        .Arg2 = Argument{
-            .Type = ArgImm,
-            .Imm = desiredVal,
-        },
+        .Arg1 =
+            Argument{
+                .Type   = ArgRegister,
+                .RegNum = R11,
+            },
+        .Arg2 =
+            Argument{
+                .Type = ArgImm,
+                .Imm  = desiredVal,
+            },
 
     };
 
@@ -82,7 +88,7 @@ static bool testMOV_Imm(CPU *cpu)
         return false;
 
     // test 2
-    desiredVal = INT64_MAX;
+    desiredVal     = INT64_MAX;
     instr.Arg2.Imm = desiredVal;
 
     if (Run(cpu, &instr) < 0)
@@ -94,7 +100,7 @@ static bool testMOV_Imm(CPU *cpu)
     return true;
 }
 
-static bool testMOV_ImmSignExtend(CPU *cpu)
+static bool testMOV_ImmSignExtend(CPU* cpu)
 {
     REPORT_TEST_START;
 
@@ -103,15 +109,17 @@ static bool testMOV_ImmSignExtend(CPU *cpu)
     // test 1
     Instruction instr = {
         .im = &instructions[ins_mov],
-        .Arg1 = Argument{
-            .Type = ArgRegister,
-            .RegNum = R10,
-        },
-        .Arg2 = Argument{
-            .Type = ArgImm,
-            .Imm = 477,
-            ._immArgSz = DataDByte,
-        },
+        .Arg1 =
+            Argument{
+                .Type   = ArgRegister,
+                .RegNum = R10,
+            },
+        .Arg2 =
+            Argument{
+                .Type      = ArgImm,
+                .Imm       = 477,
+                ._immArgSz = DataDByte,
+            },
         .SignExt = SignExtended,
     };
 
@@ -122,9 +130,9 @@ static bool testMOV_ImmSignExtend(CPU *cpu)
         return false;
 
     // test 2
-    desiredVal = -1;
+    desiredVal           = -1;
     instr.Arg2._immArgSz = DataByte;
-    instr.Arg2.Imm = uint8_t(desiredVal);
+    instr.Arg2.Imm       = uint8_t(desiredVal);
 
     if (Run(cpu, &instr) < 0)
         return false;
@@ -133,9 +141,9 @@ static bool testMOV_ImmSignExtend(CPU *cpu)
         return false;
 
     // test 3
-    desiredVal = INT16_MIN + 1968;
+    desiredVal           = INT16_MIN + 1968;
     instr.Arg2._immArgSz = DataDByte;
-    instr.Arg2.Imm = uint16_t(desiredVal);
+    instr.Arg2.Imm       = uint16_t(desiredVal);
 
     if (Run(cpu, &instr) < 0)
         return false;
@@ -144,9 +152,9 @@ static bool testMOV_ImmSignExtend(CPU *cpu)
         return false;
 
     // test 4
-    desiredVal = INT32_MIN + 968;
+    desiredVal           = INT32_MIN + 968;
     instr.Arg2._immArgSz = DataHalfWord;
-    instr.Arg2.Imm = uint32_t(desiredVal);
+    instr.Arg2.Imm       = uint32_t(desiredVal);
 
     if (Run(cpu, &instr) < 0)
         return false;
@@ -157,7 +165,7 @@ static bool testMOV_ImmSignExtend(CPU *cpu)
     return true;
 }
 
-static bool testLD_ImmInd(CPU *cpu)
+static bool testLD_ImmInd(CPU* cpu)
 {
     REPORT_TEST_START;
 
@@ -165,24 +173,25 @@ static bool testLD_ImmInd(CPU *cpu)
 
     Instruction instr = {
         .im = &instructions[ins_ld],
-        .Arg1 = Argument{
-            .Type = ArgRegister,
-            .RegNum = R0,
-        },
-        .Arg2 = Argument{
-            .Type = ArgImmIndirect,
-            .Imm = 5000,
-        },
+        .Arg1 =
+            Argument{
+                .Type   = ArgRegister,
+                .RegNum = R0,
+            },
+        .Arg2 =
+            Argument{
+                .Type = ArgImmIndirect,
+                .Imm  = 5000,
+            },
         .DataSz = DataWord,
     };
 
-    Device *dev = FindDevice(cpu->devices, cpu->gpRegs[RSP]);
+    Device* dev = FindDevice(cpu->devices, cpu->gpRegs[RSP]);
     if (dev == NULL)
         return false;
 
-    if (dev->writeTo(dev->concreteDevice,
-                     instr.Arg2.Imm - dev->lowAddr,
-                     desiredVal, instr.DataSz) < 0)
+    if (dev->writeTo(dev->concreteDevice, instr.Arg2.Imm - dev->lowAddr, desiredVal, instr.DataSz) <
+        0)
         return false;
 
     if (Run(cpu, &instr) < 0)
@@ -194,7 +203,7 @@ static bool testLD_ImmInd(CPU *cpu)
     return true;
 }
 
-static bool testLD_RegInd(CPU *cpu)
+static bool testLD_RegInd(CPU* cpu)
 {
     REPORT_TEST_START;
 
@@ -204,24 +213,25 @@ static bool testLD_RegInd(CPU *cpu)
 
     Instruction instr = {
         .im = &instructions[ins_ld],
-        .Arg1 = Argument{
-            .Type = ArgRegister,
-            .RegNum = R0,
-        },
-        .Arg2 = Argument{
-            .Type = ArgRegisterIndirect,
-            .RegNum = RSP,
-        },
+        .Arg1 =
+            Argument{
+                .Type   = ArgRegister,
+                .RegNum = R0,
+            },
+        .Arg2 =
+            Argument{
+                .Type   = ArgRegisterIndirect,
+                .RegNum = RSP,
+            },
         .DataSz = DataDByte,
     };
 
-    Device *dev = FindDevice(cpu->devices, cpu->gpRegs[RSP]);
+    Device* dev = FindDevice(cpu->devices, cpu->gpRegs[RSP]);
     if (dev == NULL)
         return false;
 
-    if (dev->writeTo(dev->concreteDevice,
-                     cpu->gpRegs[RSP] - dev->lowAddr,
-                     desiredVal, instr.DataSz) < 0)
+    if (dev->writeTo(dev->concreteDevice, cpu->gpRegs[RSP] - dev->lowAddr, desiredVal,
+                     instr.DataSz) < 0)
         return false;
 
     if (Run(cpu, &instr) < 0)
@@ -233,7 +243,7 @@ static bool testLD_RegInd(CPU *cpu)
     return true;
 }
 
-static bool testST_ImmInd(CPU *cpu)
+static bool testST_ImmInd(CPU* cpu)
 {
     REPORT_TEST_START;
 
@@ -243,27 +253,28 @@ static bool testST_ImmInd(CPU *cpu)
 
     Instruction instr = {
         .im = &instructions[ins_st],
-        .Arg1 = Argument{
-            .Type = ArgRegister,
-            .RegNum = R0,
-        },
-        .Arg2 = Argument{
-            .Type = ArgImmIndirect,
-            .Imm = 5000,
-        },
+        .Arg1 =
+            Argument{
+                .Type   = ArgRegister,
+                .RegNum = R0,
+            },
+        .Arg2 =
+            Argument{
+                .Type = ArgImmIndirect,
+                .Imm  = 5000,
+            },
         .DataSz = DataByte,
     };
 
     if (Run(cpu, &instr) < 0)
         return false;
 
-    Device *dev = FindDevice(cpu->devices, instr.Arg2.Imm);
+    Device* dev = FindDevice(cpu->devices, instr.Arg2.Imm);
     if (dev == NULL)
         return false;
 
-    if (dev->readFrom(dev->concreteDevice,
-                      instr.Arg2.Imm - dev->lowAddr,
-                      &desiredVal, instr.DataSz) < 0)
+    if (dev->readFrom(dev->concreteDevice, instr.Arg2.Imm - dev->lowAddr, &desiredVal,
+                      instr.DataSz) < 0)
         return false;
 
     if (cpu->gpRegs[R0] != desiredVal)
@@ -272,37 +283,38 @@ static bool testST_ImmInd(CPU *cpu)
     return true;
 }
 
-static bool testST_RegInd(CPU *cpu)
+static bool testST_RegInd(CPU* cpu)
 {
     REPORT_TEST_START;
     uint64_t desiredVal = INT32_MIN + 100;
 
-    cpu->gpRegs[R0] = desiredVal;
-    cpu->gpRegs[R5] = 8000;
+    cpu->gpRegs[R0]   = desiredVal;
+    cpu->gpRegs[R5]   = 8000;
     Instruction instr = {
         .im = &instructions[ins_st],
-        .Arg1 = Argument{
-            .Type = ArgRegister,
-            .RegNum = R0,
-        },
-        .Arg2 = Argument{
-            .Type = ArgRegisterIndirect,
-            .RegNum = R5,
-        },
+        .Arg1 =
+            Argument{
+                .Type   = ArgRegister,
+                .RegNum = R0,
+            },
+        .Arg2 =
+            Argument{
+                .Type   = ArgRegisterIndirect,
+                .RegNum = R5,
+            },
         .DataSz = DataHalfWord,
     };
 
     if (Run(cpu, &instr) < 0)
         return false;
 
-    Device *dev = FindDevice(cpu->devices, cpu->gpRegs[R5]);
+    Device* dev = FindDevice(cpu->devices, cpu->gpRegs[R5]);
     if (dev == NULL)
         return false;
 
     desiredVal = 0;
-    if (dev->readFrom(dev->concreteDevice,
-                      cpu->gpRegs[R5] - dev->lowAddr,
-                      &desiredVal, instr.DataSz) < 0)
+    if (dev->readFrom(dev->concreteDevice, cpu->gpRegs[R5] - dev->lowAddr, &desiredVal,
+                      instr.DataSz) < 0)
         return false;
 
     if ((uint32_t)cpu->gpRegs[R0] != (uint32_t)desiredVal)
@@ -312,13 +324,9 @@ static bool testST_RegInd(CPU *cpu)
 }
 
 const vmTest tests[] = {
-    testMOV_Register,
-    testMOV_Imm,
-    testMOV_ImmSignExtend,
-    testLD_ImmInd,
-    testLD_RegInd,
-    testST_ImmInd,
-    testST_RegInd,
+    testMOV_Register, testMOV_Imm,   testMOV_ImmSignExtend,
+    testLD_ImmInd,    testLD_RegInd, testST_ImmInd,
+    testST_RegInd, // TODO: add more vm tests
 };
 
 int main()

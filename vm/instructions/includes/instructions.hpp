@@ -2,8 +2,9 @@
 #ifndef CPU_INSTRUCTS_HPP
 #define CPU_INSTRUCTS_HPP
 
-#include <cstddef>
 #include <stdint.h>
+
+#include <cstddef>
 
 #include "argument.hpp"
 #include "opcodes.hpp"
@@ -36,25 +37,25 @@ typedef struct ArgSet
 
 } ArgSet;
 
-typedef const char *InstructionName;
+typedef const char* InstructionName;
 
 struct InstructionMeta
 {
     InstructionName Name;
-    InstrOpCode OpCode;
-    ArgSet ArgSets[8];
+    InstrOpCode     OpCode;
+    ArgSet          ArgSets[8];
 };
 
 extern const InstructionMeta instructions[];
 
 typedef struct Instruction
 {
-    const InstructionMeta *im;
-    Argument Arg1;
-    Argument Arg2;
-    uint8_t ArgSetIdx;
+    const InstructionMeta* im;
+    Argument               Arg1;
+    Argument               Arg2;
+    uint8_t                ArgSetIdx;
 
-    DataSize DataSz;
+    DataSize   DataSz;
     SignExtend SignExt;
 
     JumpType JmpType;
@@ -71,10 +72,10 @@ typedef enum InstrCreationErr
 
 } InstrCreationErr;
 
-InstrCreationErr NewInstruction(InstructionName name, Instruction *instr);
+InstrCreationErr NewInstruction(InstructionName name, Instruction* instr);
 
-const InstructionMeta *FindInsMetaByOpCode(InstrOpCode opCode);
+const InstructionMeta* FindInsMetaByOpCode(InstrOpCode opCode);
 
-const InstructionMeta *FindInsMetaByName(InstructionName name);
+const InstructionMeta* FindInsMetaByName(InstructionName name);
 
 #endif

@@ -3,10 +3,11 @@
 #define ASM_PARSER_HPP
 
 #include <stddef.h>
+
+#include "instructions.hpp"
+#include "parser/errors.hpp"
 #include "symtab.hpp"
 #include "tokenizer/tokenizer.hpp"
-#include "parser/errors.hpp"
-#include "instructions.hpp"
 
 typedef enum CmdType
 {
@@ -17,54 +18,54 @@ typedef enum CmdType
 
 } CmdType;
 
-typedef struct commandNode
+typedef struct CommandNode
 {
     CmdType Type;
 
-    const char *label;
-    const char *name;
-    Instruction instr; // TODO !!! change to pointer
+    const char* label;
+    const char* name;
 
-    char *data; // data defenition directive data
+    Instruction instr;
+
+    char*  data; // data defenition directive data
     size_t dataSz;
 
     size_t line;
 
     size_t offset; // instr offset in section
 
-} commandNode;
+} CommandNode;
 
-typedef struct sectionNode
+typedef struct SectionNode
 {
-    const char *name;
-    size_t addr;
+    const char* name;
 
-    commandNode *commands;
-    size_t commandsSz;
-    size_t commandsCap;
+    CommandNode* commands;
+    size_t       commandsSz;
+    size_t       commandsCap;
 
-    size_t currOffset; // section size
+    size_t size; // section size
 
-} sectionNode;
+} SectionNode;
 
 typedef struct Parser
 {
-    sectionNode *sections;
-    size_t sectionsSz;
+    SectionNode* sections;
+    size_t       sectionsSz;
 
-    sectionNode *currSection;
+    SectionNode* currSection;
 
     symbolsData symsData;
 
-    Tokenizer *toks;
+    Tokenizer* toks;
 
-    ParserError *userErrors;
+    ParserError* userErrors;
 } Parser;
 
-ParserErrCode ParseTokens(Parser *p);
+ParserErrCode ParseTokens(Parser* p);
 
-ParserErrCode ParserInit(Parser *p, Tokenizer *toks);
+ParserErrCode ParserInit(Parser* p, Tokenizer* toks);
 
-void parserFree(Parser *p);
+void parserFree(Parser* p);
 
 #endif

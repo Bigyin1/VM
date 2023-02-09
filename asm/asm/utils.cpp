@@ -1,12 +1,14 @@
-#include <stdlib.h>
-#include <cassert>
 #include "utils.hpp"
 
-char *readFile(FILE *f)
+#include <stdlib.h>
+
+#include <cassert>
+
+char* readFile(FILE* f)
 {
     assert(f != NULL);
 
-    char *text = NULL;
+    char* text = NULL;
 
     if (fseek(f, 0, SEEK_END) != 0)
         return NULL;
@@ -18,7 +20,7 @@ char *readFile(FILE *f)
     if (fseek(f, 0, SEEK_SET) != 0)
         return NULL;
 
-    text = (char *)calloc((size_t)fSize + 1, sizeof(char));
+    text = (char*)calloc((size_t)fSize + 1, sizeof(char));
     if (text == NULL)
         return NULL;
 

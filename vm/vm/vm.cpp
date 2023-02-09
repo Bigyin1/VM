@@ -1,14 +1,16 @@
-#include <stdlib.h>
-#include <assert.h>
-#include "instructions.hpp"
-#include "run.hpp"
-#include "decode.hpp"
-#include "registers.hpp"
 #include "vm.hpp"
 
-static int execNextInstruction(CPU *cpu)
+#include <assert.h>
+#include <stdlib.h>
+
+#include "decode.hpp"
+#include "instructions.hpp"
+#include "registers.hpp"
+#include "run.hpp"
+
+static int execNextInstruction(CPU* cpu)
 {
-    Device *dev = FindDevice(cpu->devices, cpu->regIP);
+    Device* dev = FindDevice(cpu->devices, cpu->regIP);
     if (dev == NULL)
     {
         fprintf(stderr, "vm: unmapped address: %zu\n", cpu->regIP);
@@ -17,11 +19,11 @@ static int execNextInstruction(CPU *cpu)
 
     if (dev->getReader == NULL)
     {
-        fprintf(stderr, "vm: device %s unable to execute code\n");
+        fprintf(stderr, "vm: device %s unable to execute code\n", dev->name);
         return -1;
     }
 
-    FILE *reader = dev->getReader(dev->concreteDevice, cpu->regIP - dev->lowAddr);
+    FILE* reader = dev->getReader(dev->concreteDevice, cpu->regIP - dev->lowAddr);
     if (reader == NULL)
     {
         fprintf(stderr, "vm: device %s unable to serve execute request at address: %zu\n",
@@ -58,7 +60,7 @@ static int execNextInstruction(CPU *cpu)
     return 0;
 }
 
-void RunVM(CPU *cpu)
+void RunVM(CPU* cpu)
 {
     assert(cpu != NULL);
 

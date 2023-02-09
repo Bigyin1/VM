@@ -4,6 +4,6 @@
 
 #include "readobj.hpp"
 
-int printRelocSections(ReadObj *r);
+int printRelocSections(ReadObj* r);
 
 #endif

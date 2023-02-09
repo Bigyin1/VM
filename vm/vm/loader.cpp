@@ -1,15 +1,16 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include "vm.hpp"
-#include "binformat.hpp"
+#include <stdlib.h>
 
-static int loadSection(CPU *cpu, SectionHeader *sectHdr, FILE *in)
+#include "binformat.hpp"
+#include "vm.hpp"
+
+static int loadSection(CPU* cpu, SectionHeader* sectHdr, FILE* in)
 {
 
     if (sectHdr->type != SECT_LOAD)
         return 0;
 
-    Device *dev = FindDevice(cpu->devices, sectHdr->addr);
+    Device* dev = FindDevice(cpu->devices, sectHdr->addr);
     if (dev == NULL)
     {
         fprintf(stderr, "vm: failed to load section on unmapped address: %zu\n", sectHdr->addr);
@@ -22,10 +23,12 @@ static int loadSection(CPU *cpu, SectionHeader *sectHdr, FILE *in)
         return -1;
     }
 
-    FILE *writer = dev->getWriter(dev->concreteDevice, sectHdr->addr - dev->lowAddr);
+    FILE* writer = dev->getWriter(dev->concreteDevice, sectHdr->addr - dev->lowAddr);
     if (writer == NULL)
     {
-        fprintf(stderr, "vm: failed to load section: device %s unable to serve write request at address: %zu\n",
+        fprintf(stderr,
+                "vm: failed to load section: device %s unable to serve write "
+                "request at address: %zu\n",
                 dev->name, sectHdr->addr - dev->lowAddr);
         return -1;
     }
@@ -36,7 +39,7 @@ static int loadSection(CPU *cpu, SectionHeader *sectHdr, FILE *in)
         return -1;
     }
 
-    char *buf = (char *)calloc(sectHdr->size, 1);
+    char* buf = (char*)calloc(sectHdr->size, 1);
     if (buf == NULL)
     {
         perror("asm: load section: ");
@@ -62,7 +65,7 @@ static int loadSection(CPU *cpu, SectionHeader *sectHdr, FILE *in)
     return 0;
 }
 
-int LoadExeFile(CPU *cpu, FILE *in)
+int LoadExeFile(CPU* cpu, FILE* in)
 {
     BinformatHeader hdr = {0};
     if (getObjFileHeader(in, &hdr) < 0)
@@ -89,7 +92,7 @@ int LoadExeFile(CPU *cpu, FILE *in)
         return -1;
     }
 
-    SectionHeader *sectHdrs = getSectionHeaders(in, hdr.sectionsCount);
+    SectionHeader* sectHdrs = getSectionHeaders(in, hdr.sectionsCount);
     if (sectHdrs == NULL)
     {
         perror("asm: load exe file:");

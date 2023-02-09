@@ -7,9 +7,9 @@
 
 typedef struct symbolData
 {
-    const char *name;
-    const char *sectionName;
-    uint64_t val;
+    const char* name;
+    const char* sectionName;
+    uint64_t    val;
 
     bool defined;
     bool absolute;
@@ -21,10 +21,11 @@ typedef struct symbolData
 typedef struct symbolsData
 {
     symbolData symbols[72]; // TODO: do something with that
-    size_t symbolsSz;
+    size_t     symbolsSz;
 
-    symbolData *symTab[72];
-    size_t symTabSz;
+    symbolData* symTab[72];
+    uint32_t    symTabSz;
+
 } symbolsData;
 
 #endif

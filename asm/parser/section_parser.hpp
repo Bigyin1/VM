@@ -4,6 +4,6 @@
 
 #include "parser/parser.hpp"
 
-ParserErrCode parseSectionNode(Parser *parser, sectionNode *sectNode);
+ParserErrCode parseSectionNode(Parser* parser, SectionNode* sectNode);
 
 #endif

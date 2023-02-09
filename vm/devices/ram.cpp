@@ -1,24 +1,26 @@
-#include <stdlib.h>
-#include <string.h>
 #include "ram.hpp"
 
-int ConstructRAM(Device *ramDev, const RAMConfig *config)
+#include <stdlib.h>
+#include <string.h>
+
+int ConstructRAM(Device* ramDev, const RAMConfig* config)
 {
-    ramDev->lowAddr = config->address;
+    ramDev->lowAddr  = config->address;
     ramDev->highAddr = ramDev->lowAddr + config->size - 1;
 
     ramDev->name = "RAM";
 
-    RAM *ram = (RAM *)calloc(1, sizeof(RAM));
+    RAM* ram = (RAM*)calloc(1, sizeof(RAM));
+
     ramDev->concreteDevice = ram;
 
     ramDev->getReader = RAMGetReaderOnAddr;
     ramDev->getWriter = RAMGetWriterOnAddr;
-    ramDev->readFrom = RAMReadFrom;
-    ramDev->writeTo = RAMWriteTo;
+    ramDev->readFrom  = RAMReadFrom;
+    ramDev->writeTo   = RAMWriteTo;
 
     ram->config = config;
-    ram->mem = (char *)calloc(ram->config->size, 1);
+    ram->mem    = (char*)calloc(ram->config->size, 1);
     if (ram->mem == NULL)
     {
         perror("vm");
@@ -33,10 +35,10 @@ int ConstructRAM(Device *ramDev, const RAMConfig *config)
     return 0;
 }
 
-void DestructRAM(Device *ramDev)
+void DestructRAM(Device* ramDev)
 {
 
-    RAM *ram = (RAM *)ramDev->concreteDevice;
+    RAM* ram = (RAM*)ramDev->concreteDevice;
 
     fclose(ram->reader);
     fclose(ram->writer);
@@ -45,9 +47,9 @@ void DestructRAM(Device *ramDev)
     free(ramDev->concreteDevice);
 }
 
-FILE *RAMGetReaderOnAddr(void *dev, size_t addr)
+FILE* RAMGetReaderOnAddr(void* dev, size_t addr)
 {
-    RAM *ram = (RAM *)dev;
+    RAM* ram = (RAM*)dev;
     if (addr >= ram->config->size)
         return NULL;
 
@@ -56,9 +58,9 @@ FILE *RAMGetReaderOnAddr(void *dev, size_t addr)
     return ram->reader;
 }
 
-FILE *RAMGetWriterOnAddr(void *dev, size_t addr)
+FILE* RAMGetWriterOnAddr(void* dev, size_t addr)
 {
-    RAM *ram = (RAM *)dev;
+    RAM* ram = (RAM*)dev;
     if (addr >= ram->config->size)
         return NULL;
 
@@ -67,9 +69,9 @@ FILE *RAMGetWriterOnAddr(void *dev, size_t addr)
     return ram->writer;
 }
 
-int RAMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
+int RAMReadFrom(void* dev, size_t addr, uint64_t* data, DataSize sz)
 {
-    RAM *ram = (RAM *)dev;
+    RAM* ram = (RAM*)dev;
 
     size_t toRead = DataSzToBytesSz(sz);
     if (addr + toRead > ram->config->size)
@@ -80,10 +82,10 @@ int RAMReadFrom(void *dev, size_t addr, uint64_t *data, DataSize sz)
     return 0;
 }
 
-int RAMWriteTo(void *dev, size_t addr, uint64_t data, DataSize sz)
+int RAMWriteTo(void* dev, size_t addr, uint64_t data, DataSize sz)
 {
 
-    RAM *ram = (RAM *)dev;
+    RAM* ram = (RAM*)dev;
 
     size_t toWrite = DataSzToBytesSz(sz);
     if (addr + toWrite > ram->config->size)

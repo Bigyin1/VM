@@ -1,70 +1,71 @@
-#include <string.h>
 #include "registers.hpp"
+
+#include <string.h>
 
 const RegMeta regs[] = {
 
     {
-        .Name = "r0",
+        .Name    = "r0",
         .RegCode = R0,
     },
     {
-        .Name = "r1",
+        .Name    = "r1",
         .RegCode = R1,
     },
     {
-        .Name = "r2",
+        .Name    = "r2",
         .RegCode = R2,
     },
     {
-        .Name = "r3",
+        .Name    = "r3",
         .RegCode = R3,
     },
     {
-        .Name = "r4",
+        .Name    = "r4",
         .RegCode = R4,
     },
     {
-        .Name = "r5",
+        .Name    = "r5",
         .RegCode = R5,
     },
     {
-        .Name = "r6",
+        .Name    = "r6",
         .RegCode = R6,
     },
     {
-        .Name = "r7",
+        .Name    = "r7",
         .RegCode = R7,
     },
     {
-        .Name = "r8",
+        .Name    = "r8",
         .RegCode = R8,
     },
     {
-        .Name = "r9",
+        .Name    = "r9",
         .RegCode = R9,
     },
     {
-        .Name = "r10",
+        .Name    = "r10",
         .RegCode = R10,
     },
     {
-        .Name = "r11",
+        .Name    = "r11",
         .RegCode = R11,
     },
     {
-        .Name = "r12",
+        .Name    = "r12",
         .RegCode = R12,
     },
     {
-        .Name = "r13",
+        .Name    = "r13",
         .RegCode = R13,
     },
     {
-        .Name = "rbp",
+        .Name    = "rbp",
         .RegCode = RBP,
     },
     {
-        .Name = "rsp",
+        .Name    = "rsp",
         .RegCode = RSP,
     },
 };
@@ -81,7 +82,7 @@ int FindRegByName(RegName name)
     return -1;
 }
 
-const char *FindRegByCode(uint8_t regCode)
+const char* FindRegByCode(uint8_t regCode)
 {
 
     for (size_t i = 0; i < sizeof(regs) / sizeof(RegMeta); i++)

@@ -4,6 +4,6 @@
 
 #include "readobj.hpp"
 
-int printSymbolTable(ReadObj *r);
+int printSymbolTable(ReadObj* r);
 
 #endif

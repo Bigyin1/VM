@@ -1,34 +1,36 @@
-#include <assert.h>
-#include <string.h>
-#include <math.h>
 #include "parser/parser.hpp"
-#include "section_parser.hpp"
-#include "utils.hpp"
-#include "symbols.hpp"
 
-static ParserErrCode reallocSections(Parser *parser)
+#include <assert.h>
+#include <math.h>
+#include <string.h>
+
+#include "section_parser.hpp"
+#include "symbols.hpp"
+#include "utils.hpp"
+
+static ParserErrCode reallocSections(Parser* parser)
 {
     if (parser->sectionsSz == 0)
     {
-        parser->sections = (sectionNode *)calloc(++parser->sectionsSz, sizeof(sectionNode));
+        parser->sections = (SectionNode*)calloc(++parser->sectionsSz, sizeof(SectionNode));
         return PARSER_OK;
     }
 
-    size_t newSz = parser->sectionsSz + 1;
-    sectionNode *newSections = (sectionNode *)calloc(newSz, sizeof(sectionNode));
+    size_t       newSz       = parser->sectionsSz + 1;
+    SectionNode* newSections = (SectionNode*)calloc(newSz, sizeof(SectionNode));
 
     if (newSections == NULL)
         return PARSER_SYSTEM_ERR;
 
-    memcpy(newSections, parser->sections, parser->sectionsSz * sizeof(sectionNode));
+    memcpy(newSections, parser->sections, parser->sectionsSz * sizeof(SectionNode));
     free(parser->sections);
 
     parser->sectionsSz = newSz;
-    parser->sections = newSections;
+    parser->sections   = newSections;
     return PARSER_OK;
 }
 
-ParserErrCode ParseTokens(Parser *parser)
+ParserErrCode ParseTokens(Parser* parser)
 {
     assert(parser != NULL);
 
@@ -44,14 +46,14 @@ ParserErrCode ParseTokens(Parser *parser)
 
         eatSP(parser);
 
-        const char *sectName = currTokenVal(parser);
+        const char* sectName = currTokenVal(parser);
         eatToken(parser, ASM_T_ID);
 
         ParserErrCode err = reallocSections(parser);
         if (err != PARSER_OK)
             return err;
 
-        parser->currSection = parser->sections + parser->sectionsSz - 1;
+        parser->currSection       = parser->sections + parser->sectionsSz - 1;
         parser->currSection->name = sectName;
 
         eatSP(parser);
@@ -64,7 +66,7 @@ ParserErrCode ParseTokens(Parser *parser)
     return PARSER_OK;
 }
 
-ParserErrCode ParserInit(Parser *p, Tokenizer *toks)
+ParserErrCode ParserInit(Parser* p, Tokenizer* toks)
 {
     assert(p != NULL);
 
@@ -73,11 +75,11 @@ ParserErrCode ParserInit(Parser *p, Tokenizer *toks)
     return PARSER_OK;
 }
 
-void parserFree(Parser *p)
+void parserFree(Parser* p)
 {
     for (size_t i = 0; i < p->sectionsSz; i++)
     {
-        sectionNode *currSect = p->sections + i;
+        SectionNode* currSect = p->sections + i;
 
         for (size_t j = 0; j < currSect->commandsSz; j++)
             if (currSect->commands[j].dataSz > 0)
@@ -88,8 +90,8 @@ void parserFree(Parser *p)
 
     while (p->userErrors != NULL)
     {
-        ParserError *err = p->userErrors;
-        p->userErrors = p->userErrors->next;
+        ParserError* err = p->userErrors;
+        p->userErrors    = p->userErrors->next;
 
         free(err);
     }

@@ -1,20 +1,21 @@
-#include <stdlib.h>
 #include <assert.h>
-#include "vmconfig/config.hpp"
+#include <stdlib.h>
+
+#include "console.hpp"
 #include "instructions.hpp"
+#include "ram.hpp"
 #include "registers.hpp"
 #include "rom.hpp"
-#include "ram.hpp"
-#include "console.hpp"
 #include "vm.hpp"
+#include "vmconfig/config.hpp"
 
-const size_t romDevIdx = 0;
-const size_t ramDevIdx = 1;
+const size_t romDevIdx     = 0;
+const size_t ramDevIdx     = 1;
 const size_t consoleDevIdx = 2;
 
 #define DEVICE(idx) cpu->devices[idx]
 
-static int attachROM(CPU *cpu, const ROMConfig *cfg)
+static int attachROM(CPU* cpu, const ROMConfig* cfg)
 {
 
     if (ConstructROM(&cpu->devices[romDevIdx], cfg) < 0)
@@ -23,7 +24,7 @@ static int attachROM(CPU *cpu, const ROMConfig *cfg)
     return 0;
 }
 
-static int attachRAM(CPU *cpu, const RAMConfig *cfg)
+static int attachRAM(CPU* cpu, const RAMConfig* cfg)
 {
 
     if (ConstructRAM(&cpu->devices[ramDevIdx], cfg) < 0)
@@ -32,7 +33,7 @@ static int attachRAM(CPU *cpu, const RAMConfig *cfg)
     return 0;
 }
 
-static int attachConsole(CPU *cpu, const MajesticConsoleConfig *cfg)
+static int attachConsole(CPU* cpu, const MajesticConsoleConfig* cfg)
 {
 
     if (ConstructMajesticConsole(&cpu->devices[consoleDevIdx], cfg) < 0)
@@ -41,7 +42,7 @@ static int attachConsole(CPU *cpu, const MajesticConsoleConfig *cfg)
     return 0;
 }
 
-int InitVM(CPU *cpu, const VMConfig *cfg)
+int InitVM(CPU* cpu, const VMConfig* cfg)
 {
     assert(cpu != NULL);
 
@@ -59,7 +60,7 @@ int InitVM(CPU *cpu, const VMConfig *cfg)
     return 0;
 }
 
-void DestructVM(CPU *cpu, const VMConfig *cfg)
+void DestructVM(CPU* cpu, const VMConfig* cfg)
 {
     assert(cpu != NULL);
     if (cfg->attachRAM)

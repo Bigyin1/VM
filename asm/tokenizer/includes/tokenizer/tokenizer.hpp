@@ -73,8 +73,6 @@ TokErrCode Tokenize(Tokenizer* t);
 
 Token* getNextToken(Tokenizer* t);
 
-Token* peekNextToken(Tokenizer* t);
-
 Token* saveCurrToken(Tokenizer* t);
 
 Token* restoreSavedToken(Tokenizer* t);
@@ -83,6 +81,6 @@ void tokenizerFree(Tokenizer* t);
 
 void tokenizerDump(Tokenizer* t, FILE* out);
 
-const char* tokenTypeVerbose(TokenType t);
+const char* TokenTypeVerbose(TokenType t);
 
 #endif

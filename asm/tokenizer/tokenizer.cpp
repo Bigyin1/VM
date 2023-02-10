@@ -7,205 +7,9 @@
 #include <string.h>
 
 #include "errors.hpp"
+#include "tockCheckers.hpp"
 
-static const char* spaces = " \t";
-
-typedef struct token_meta_s
-{
-
-    TokenType   type;
-    const char* val;
-
-} token_meta_s;
-
-const token_meta_s generalTokens[] = {
-    {ASM_T_L_PAREN, "["}, {ASM_T_R_PAREN, "]"},       {ASM_T_COMMENT, "#"},
-    {ASM_T_COMMA, ","},   {ASM_T_SECTION, "section"}, {ASM_T_NL, "\n"},
-};
-
-static bool checkSimpleToken(Tokenizer* t, TokenType type, const char* tokVal)
-{
-
-    size_t tokLen = strlen(tokVal);
-    if (strncmp(t->input, tokVal, tokLen) != 0)
-        return false;
-
-    t->currToken->type = type;
-
-    t->column += tokLen;
-    t->input += tokLen;
-    return true;
-}
-
-static bool checkLabelDefToken(Tokenizer* t)
-{
-
-    int   wordLen = 0;
-    short colon   = 0;
-
-    if (sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[.a-zA-Z0-9_]%1[:]%n",
-               t->currToken->val, &colon, &wordLen) != 2)
-        return false;
-
-    t->currToken->type = ASM_T_LABEL_DEF;
-
-    t->column += wordLen;
-    t->input += wordLen;
-    return true;
-}
-
-static bool checkHexNum(Tokenizer* t)
-{
-
-    int wordLen = 0;
-
-    if (sscanf(t->input,
-               "0x"
-               "%llx%n",
-               &t->currToken->numVal, &wordLen) == 0)
-        return false;
-
-    t->currToken->type = ASM_T_INT;
-
-    t->column += wordLen;
-    t->input += wordLen;
-    return true;
-}
-
-static bool checkNumberToken(Tokenizer* t)
-{
-
-    if (checkHexNum(t))
-        return true;
-
-    int numLen = 0;
-    sscanf(t->input, "%*[0-9.+-]%n", &numLen);
-    if (numLen == 0)
-        return false;
-
-    int read = 0;
-
-    if (sscanf(t->input, "%lld%n", &t->currToken->numVal, &read) == 0)
-        return false;
-
-    if (read < numLen)
-    {
-        double dblNum = 0;
-        sscanf(t->input, "%lf%n", &dblNum, &read);
-        if (read < numLen)
-            return false;
-
-        memcpy(&t->currToken->numVal, &dblNum, sizeof(double));
-        t->currToken->type = ASM_T_FLOAT;
-    }
-    else
-        t->currToken->type = ASM_T_INT;
-
-    t->column += numLen;
-    t->input += numLen;
-    return true;
-}
-
-static bool checkIdToken(Tokenizer* t)
-{
-
-    int wordLen = 0;
-
-    sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "[._0-9a-zA-Z]%n",
-           t->currToken->val, &wordLen);
-    if (wordLen == 0)
-        return false;
-
-    t->currToken->type = ASM_T_ID;
-
-    t->column += wordLen;
-    t->input += wordLen;
-    return true;
-}
-
-static bool checkRegisterToken(Tokenizer* t)
-{
-
-    int wordLen = 0;
-
-    sscanf(t->input, "%%%" XSTR(MAX_TOKEN_LEN) "[0-9a-z]%n", t->currToken->val,
-           &wordLen);
-    if (wordLen <= 1)
-        return false;
-
-    t->currToken->type = ASM_T_REGISTER;
-
-    t->column += wordLen;
-    t->input += wordLen;
-    return true;
-}
-
-static bool checkAsciiCharToken(Tokenizer* t)
-{
-
-    int  wordLen      = 0;
-    char c            = 0;
-    char backslash[2] = {0};
-    char qoute[2]     = {0};
-    if (sscanf(t->input, "'%1[\\]%1c%1[']%n", backslash, &c, qoute, &wordLen) !=
-            3 &&
-        sscanf(t->input, "'%1c%1[']%n", &c, qoute, &wordLen) != 2)
-        return false;
-
-    if (backslash[0] && c != '\\')
-        c &= 0b00111111;
-
-    t->currToken->numVal = c;
-
-    t->currToken->type = ASM_T_INT;
-
-    t->column += wordLen;
-    t->input += wordLen;
-    return true;
-}
-
-static bool checkInstrPostfixToken(Tokenizer* t)
-{
-    int  wordLen   = 0;
-    char rparen[2] = {0};
-    if (sscanf(t->input, "(%3[a-z]%1[)]%n", t->currToken->val, rparen,
-               &wordLen) != 2)
-        return false;
-
-    t->currToken->type = ASM_T_INSTR_POSTFIX;
-
-    t->column += wordLen;
-    t->input += wordLen;
-    return true;
-}
-
-static bool checkSimpleTokens(Tokenizer* t)
-{
-    for (size_t i = 0; i < sizeof(generalTokens) / sizeof(generalTokens[0]);
-         i++)
-    {
-        if (checkSimpleToken(t, generalTokens[i].type, generalTokens[i].val))
-        {
-            if (generalTokens[i].type == ASM_T_NL)
-            {
-                t->line++;
-                t->column = 1;
-                return true;
-            }
-            if (generalTokens[i].type == ASM_T_COMMENT)
-            {
-                int len = 0;
-                sscanf(t->input, "%*[^\n]%n", &len);
-                t->column += len;
-                t->input += len;
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
-static Token* reallocTokens(Tokenizer* t)
+static Token* getNextFreeToken(Tokenizer* t)
 {
     if (t->tokensSz < t->tokensCap)
     {
@@ -220,11 +24,44 @@ static Token* reallocTokens(Tokenizer* t)
 
     t->currToken = newToks + t->tokensCap;
     memset(t->currToken, 0, sizeof(Token) * (newCap - t->tokensCap));
+
     t->tokens    = newToks;
     t->tokensCap = newCap;
 
     t->tokensSz++;
     return t->tokens + t->tokensSz - 1;
+}
+
+typedef size_t (*TockCheckFunc)(const char* input, Token* tok);
+
+static TockCheckFunc tockCheckers[] = {
+    checkSpaceToken,        checkSimpleTokens,   checkHexNum,
+    checkNumberToken,       checkAsciiCharToken, checkLabelDefToken,
+    checkInstrPostfixToken, checkRegisterToken,  checkIdToken,
+};
+
+static bool checkTokens(Tokenizer* t)
+{
+
+    for (size_t i = 0; i < sizeof(tockCheckers) / sizeof(TockCheckFunc); i++)
+    {
+        size_t tokLen = tockCheckers[i](t->input, t->currToken);
+        if (tokLen == 0)
+            continue;
+
+        t->column += tokLen;
+        t->input += tokLen;
+
+        if (t->currToken->type == ASM_T_NL)
+        {
+            t->line++;
+            t->column = 1;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 TokErrCode Tokenize(Tokenizer* t)
@@ -234,7 +71,7 @@ TokErrCode Tokenize(Tokenizer* t)
 
     for (; *t->input != '\0';)
     {
-        t->currToken = reallocTokens(t);
+        t->currToken = getNextFreeToken(t);
         if (t->currToken == NULL)
         {
             free(textStart);
@@ -244,37 +81,7 @@ TokErrCode Tokenize(Tokenizer* t)
         t->currToken->column = t->column;
         t->currToken->line   = t->line;
 
-        size_t tokLen = strspn(t->input, spaces);
-        if (tokLen != 0)
-        {
-            t->currToken->type = ASM_T_SPACE;
-            t->input += tokLen;
-            t->column += tokLen;
-            continue;
-        }
-
-        if (t->currToken->type != ASM_T_EOF)
-            continue;
-
-        if (checkSimpleTokens(t))
-            continue;
-
-        if (checkNumberToken(t))
-            continue;
-
-        if (checkAsciiCharToken(t))
-            continue;
-
-        if (checkLabelDefToken(t))
-            continue;
-
-        if (checkInstrPostfixToken(t))
-            continue;
-
-        if (checkRegisterToken(t))
-            continue;
-
-        if (checkIdToken(t))
+        if (checkTokens(t))
             continue;
 
         if (addUnknownTokenError(t) < 0)
@@ -284,7 +91,7 @@ TokErrCode Tokenize(Tokenizer* t)
         }
     }
 
-    t->currToken = reallocTokens(t);
+    t->currToken = getNextFreeToken(t);
     if (t->currToken == NULL)
     {
         free(textStart);
@@ -292,7 +99,8 @@ TokErrCode Tokenize(Tokenizer* t)
     }
 
     t->currToken->type = ASM_T_EOF;
-    t->currToken       = NULL;
+
+    t->currToken = NULL;
 
     free(textStart);
 
@@ -349,22 +157,6 @@ Token* restoreSavedToken(Tokenizer* t)
     t->currToken = t->saved;
 
     return t->currToken;
-}
-
-Token* peekNextToken(Tokenizer* t)
-{
-    assert(t != NULL);
-
-    if (t->currToken == NULL)
-    {
-        t->currToken = t->tokens;
-        return t->currToken;
-    }
-
-    if (t->currToken->type == ASM_T_EOF)
-        return t->currToken;
-
-    return t->currToken + 1;
 }
 
 void tokenizerFree(Tokenizer* t)

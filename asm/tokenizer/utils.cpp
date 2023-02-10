@@ -1,6 +1,6 @@
 #include "tokenizer/tokenizer.hpp"
 
-const char* tokenTypeVerbose(TokenType t)
+const char* TokenTypeVerbose(TokenType t)
 {
 
     switch (t)

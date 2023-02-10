@@ -72,13 +72,13 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser* parser, size_t* count)
 
 static ParserErrCode parseDataDefDirectiveArgs(Parser* parser, CommandNode* node, size_t sz)
 {
-    size_t        count = 0;
-    ParserErrCode err   = getDataDefDirectiveArgsCount(parser, &count);
+    size_t        argsCount = 0;
+    ParserErrCode err       = getDataDefDirectiveArgsCount(parser, &argsCount);
     if (err != PARSER_OK)
         return err;
 
-    node->data   = (char*)calloc(count, sz);
-    node->dataSz = count * sz;
+    node->data   = (char*)calloc(argsCount, sz);
+    node->dataSz = argsCount * sz;
     restoreSavedToken(parser->toks);
 
     eatBlanks(parser);
@@ -88,7 +88,7 @@ static ParserErrCode parseDataDefDirectiveArgs(Parser* parser, CommandNode* node
     while (currTokenType(parser) == ASM_T_FLOAT || currTokenType(parser) == ASM_T_INT ||
            currTokenType(parser) == ASM_T_LABEL_DEF)
     {
-        count--;
+        argsCount--;
 
         if (currTokenType(parser) != ASM_T_LABEL_DEF)
             memcpy(node->data + dataIdx, &currTokenNumVal(parser), sz);
@@ -100,7 +100,7 @@ static ParserErrCode parseDataDefDirectiveArgs(Parser* parser, CommandNode* node
         eatToken(parser, currTokenType(parser));
         eatSP(parser);
 
-        if (count == 0)
+        if (argsCount == 0)
             break;
 
         if (currTokenType(parser) != ASM_T_COMMA)
@@ -111,6 +111,7 @@ static ParserErrCode parseDataDefDirectiveArgs(Parser* parser, CommandNode* node
     }
 
     node->Type = CMD_DATA_DEF;
+
     parser->currSection->size += node->dataSz;
 
     return PARSER_OK;

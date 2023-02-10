@@ -77,7 +77,7 @@ void reportParserErrors(ParserError* err, FILE* f)
             case PARSER_INSUFF_TOKEN:
             {
                 fprintf(f, "asm: line: %zu column: %zu: got: %s  expected: %s\n", err->line,
-                        err->column, tokenTypeVerbose(err->got), tokenTypeVerbose(err->expected));
+                        err->column, TokenTypeVerbose(err->got), TokenTypeVerbose(err->expected));
                 break;
             }
             default:

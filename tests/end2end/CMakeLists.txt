@@ -26,16 +26,4 @@ add_test(NAME quadEqTest COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.go
 )
 
-add_custom_target(end2end_get_exe_files ALL)
-
-add_dependencies(end2end_get_exe_files my_vm my_asm my_ld readobj)
-
-add_custom_command(TARGET end2end_get_exe_files POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E rm -r -f ${CMAKE_CURRENT_SOURCE_DIR}/progs
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/progs
-    COMMAND ${CMAKE_COMMAND} -E copy
-    $<TARGET_FILE:my_asm> ${CMAKE_CURRENT_SOURCE_DIR}/progs
-    COMMAND ${CMAKE_COMMAND} -E copy
-    $<TARGET_FILE:${vm_name}> ${CMAKE_CURRENT_SOURCE_DIR}/progs
-    COMMAND ${CMAKE_COMMAND} -E copy
-    $<TARGET_FILE:my_ld> ${CMAKE_CURRENT_SOURCE_DIR}/progs)
+install(TARGETS my_asm my_ld my_vm DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/progs)

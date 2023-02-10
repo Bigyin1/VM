@@ -33,6 +33,10 @@ const char* TokenTypeVerbose(TokenType t)
             return "newline";
         case ASM_T_COMMENT:
             return "comment string";
+        case ASM_T_EOF:
+            return "";
+        case ASM_T_INSTR_POSTFIX:
+            return "instruction postfix";
 
         default:
             return "unknown";

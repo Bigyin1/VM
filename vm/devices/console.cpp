@@ -6,8 +6,7 @@
 
 #include "argument.hpp"
 
-int ConstructMajesticConsole(Device*                      conDev,
-                             const MajesticConsoleConfig* config)
+int ConstructMajesticConsole(Device* conDev, const MajesticConsoleConfig* config)
 {
     conDev->lowAddr  = config->address;
     conDev->highAddr = conDev->lowAddr + MajesticConsoleMemSize - 1;
@@ -55,12 +54,12 @@ int MajesticConsoleReadFrom(void* dev, size_t addr, uint64_t* data, DataSize sz)
         if (sz != DataWord)
             return -1;
 
-        fscanf(console->formattedIn, "%lf", data);
+        fscanf(console->formattedIn, "%lf", (double*)data);
         fscanf(console->formattedIn, "%*c"); // read out newline
     }
     else if (addr == offsetof(MajesticConsoleMemMap, intInOut))
     {
-        fscanf(console->formattedIn, "%ld", data);
+        fscanf(console->formattedIn, "%lld", (int64_t*)data);
         fscanf(console->formattedIn, "%*c");
     }
     else if (addr == offsetof(MajesticConsoleMemMap, charInOut))
@@ -68,7 +67,7 @@ int MajesticConsoleReadFrom(void* dev, size_t addr, uint64_t* data, DataSize sz)
         if (sz != DataByte)
             return -1;
 
-        fscanf(console->formattedIn, "%c", data);
+        fscanf(console->formattedIn, "%c", (char*)data);
     }
     else
         return -1;
@@ -93,7 +92,7 @@ int MajesticConsoleWriteTo(void* dev, size_t addr, uint64_t data, DataSize sz)
     else if (addr == offsetof(MajesticConsoleMemMap, intInOut))
     {
         int64_t i = (int64_t)data;
-        fprintf(console->formattedOut, "%ld", i);
+        fprintf(console->formattedOut, "%lld", i);
     }
     else if (addr == offsetof(MajesticConsoleMemMap, charInOut))
     {

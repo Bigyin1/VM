@@ -8,11 +8,11 @@ const InstructionMeta instructions[] = {
 
 #define COMMA ,
 
-#define INSTR(name, opCode, argSets)                                           \
-    {                                                                          \
-        .Name    = #name,                                                      \
-        .OpCode  = InstrOpCode(opCode),                                        \
-        .ArgSets = argSets,                                                    \
+#define INSTR(name, opCode, argSets)                                                               \
+    {                                                                                              \
+        .Name    = #name,                                                                          \
+        .OpCode  = InstrOpCode(opCode),                                                            \
+        .ArgSets = argSets,                                                                        \
     },
 
 #include "instructionsMeta.inc"
@@ -54,16 +54,15 @@ static int findArgSetIdx(const InstructionMeta* im, ArgSet args)
 
     for (size_t j = 0; j < sizeof(im->ArgSets) / sizeof(ArgSet); j++)
     {
-        if (im->ArgSets[j].First == args.First &&
-            im->ArgSets[j].Second == args.Second)
+        if (im->ArgSets[j].First == args.First && im->ArgSets[j].Second == args.Second)
 
-            return j;
+            return (int)j;
     }
 
     return -1;
 }
 
-InstrCreationErr NewInstruction(InstructionName name, Instruction* instr)
+InstrCreationErr NewInstruction(Instruction* instr)
 {
 
     ArgSet argSet = {.First = instr->Arg1.Type, .Second = instr->Arg2.Type};

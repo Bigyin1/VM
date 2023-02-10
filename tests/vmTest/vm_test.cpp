@@ -130,7 +130,7 @@ static bool testMOV_ImmSignExtend(CPU* cpu)
         return false;
 
     // test 2
-    desiredVal           = -1;
+    desiredVal           = (uint64_t)-1;
     instr.Arg2._immArgSz = DataByte;
     instr.Arg2.Imm       = uint8_t(desiredVal);
 
@@ -141,7 +141,7 @@ static bool testMOV_ImmSignExtend(CPU* cpu)
         return false;
 
     // test 3
-    desiredVal           = INT16_MIN + 1968;
+    desiredVal           = (uint64_t)(INT16_MIN + 1968);
     instr.Arg2._immArgSz = DataDByte;
     instr.Arg2.Imm       = uint16_t(desiredVal);
 
@@ -152,7 +152,7 @@ static bool testMOV_ImmSignExtend(CPU* cpu)
         return false;
 
     // test 4
-    desiredVal           = INT32_MIN + 968;
+    desiredVal           = (uint64_t)(INT32_MIN + 968);
     instr.Arg2._immArgSz = DataHalfWord;
     instr.Arg2.Imm       = uint32_t(desiredVal);
 
@@ -286,7 +286,7 @@ static bool testST_ImmInd(CPU* cpu)
 static bool testST_RegInd(CPU* cpu)
 {
     REPORT_TEST_START;
-    uint64_t desiredVal = INT32_MIN + 100;
+    uint64_t desiredVal = (uint64_t)(INT32_MIN + 100);
 
     cpu->gpRegs[R0]   = desiredVal;
     cpu->gpRegs[R5]   = 8000;

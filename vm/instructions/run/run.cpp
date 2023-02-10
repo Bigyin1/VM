@@ -16,7 +16,7 @@ static int writeToAddr(CPU* cpu, uint64_t addr, uint64_t val, DataSize sz)
     Device* dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
-        fprintf(stderr, "vm: unmapped address: %zu\n", addr);
+        fprintf(stderr, "vm: unmapped address: %llu\n", addr);
         return -1;
     }
 
@@ -24,7 +24,7 @@ static int writeToAddr(CPU* cpu, uint64_t addr, uint64_t val, DataSize sz)
     if (res < 0)
     {
         fprintf(stderr,
-                "vm: device %s unable to serve write request at address: %zu; "
+                "vm: device %s unable to serve write request at address: %llu; "
                 "size: %zu\n",
                 dev->name, addr, DataSzToBytesSz(sz));
         return -1;
@@ -40,7 +40,7 @@ static int readFromAddr(CPU* cpu, uint64_t addr, uint64_t* val, DataSize sz)
     Device* dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
-        fprintf(stderr, "vm: unmapped address: %zu\n", addr);
+        fprintf(stderr, "vm: unmapped address: %llu\n", addr);
         return -1;
     }
 
@@ -48,7 +48,7 @@ static int readFromAddr(CPU* cpu, uint64_t addr, uint64_t* val, DataSize sz)
     if (res < 0)
     {
         fprintf(stderr,
-                "vm: device %s unable to serve read request at address: %zu; "
+                "vm: device %s unable to serve read request at address: %llu; "
                 "size: %zu\n",
                 dev->name, addr, DataSzToBytesSz(sz));
         return -1;
@@ -80,6 +80,7 @@ static uint64_t getEffectiveAddress(CPU* cpu, Argument* arg)
 {
 
     uint64_t addr = 0;
+
     switch (arg->Type)
     {
         case ArgRegisterIndirect:
@@ -91,8 +92,15 @@ static uint64_t getEffectiveAddress(CPU* cpu, Argument* arg)
             break;
 
         case ArgRegisterOffsetIndirect:
-            addr = cpu->gpRegs[arg->RegNum] + arg->ImmDisp16;
+            addr = cpu->gpRegs[arg->RegNum];
+
+            arg->ImmDisp16 > 0 ? addr += (uint64_t)arg->ImmDisp16
+                               : addr -= (uint64_t)arg->ImmDisp16;
             break;
+
+        case ArgNone:
+        case ArgRegister:
+        case ArgImm:
 
         default:
             return 0;
@@ -107,27 +115,30 @@ static uint64_t signExtendValue(uint64_t val, DataSize sz)
     switch (sz)
     {
         case DataWord:
-            break;
+            return val;
 
         case DataByte:
         {
-            int8_t  v8  = val;
+            int8_t  v8  = (int8_t)val;
             int64_t v64 = v8;
-            return v64;
+            return (uint64_t)v64;
         }
 
         case DataDByte:
         {
-            int16_t v16 = val;
+            int16_t v16 = (int16_t)val;
             int64_t v64 = v16;
-            return v64;
+            return (uint64_t)v64;
         }
         case DataHalfWord:
         {
-            int32_t v32 = val;
+            int32_t v32 = (int32_t)val;
             int64_t v64 = v32;
-            return v64;
+            return (uint64_t)v64;
         }
+
+        default:
+            break;
     }
 
     return val;
@@ -145,8 +156,7 @@ static int run_ld(CPU* cpu, Instruction* ins)
     if (readFromAddr(cpu, addr, &val, ins->DataSz) < 0)
         return -1;
 
-    cpu->gpRegs[ins->Arg1.RegNum] =
-        ins->SignExt ? signExtendValue(val, ins->DataSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExt ? signExtendValue(val, ins->DataSz) : val;
 
     return 0;
 }
@@ -175,8 +185,7 @@ static int run_mov(CPU* cpu, Instruction* ins)
     else
         val = cpu->gpRegs[ins->Arg2.RegNum];
 
-    cpu->gpRegs[ins->Arg1.RegNum] =
-        ins->SignExt ? signExtendValue(val, ins->Arg2._immArgSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExt ? signExtendValue(val, ins->Arg2._immArgSz) : val;
 
     return 0;
 }
@@ -216,8 +225,7 @@ static int run_pop(CPU* cpu, Instruction* ins)
     if (readFromAddr(cpu, addr, &val, ins->DataSz) < 0)
         return -1;
 
-    cpu->gpRegs[ins->Arg1.RegNum] =
-        ins->SignExt ? signExtendValue(val, ins->DataSz) : val;
+    cpu->gpRegs[ins->Arg1.RegNum] = ins->SignExt ? signExtendValue(val, ins->DataSz) : val;
 
     return 0;
 }
@@ -392,7 +400,7 @@ static int run_divf(CPU* cpu, Instruction* ins)
     return runArithmf(cpu, ins, opDivf);
 }
 
-static void opSqrt(CPU* cpu, Instruction* ins, double op1, double op2)
+static void opSqrt(CPU* cpu, Instruction* ins, double, double op2)
 {
     double res = sqrt(op2);
 
@@ -408,7 +416,7 @@ static int run_sqrt(CPU* cpu, Instruction* ins)
     return runArithmf(cpu, ins, opSqrt);
 }
 
-static void opCmp(CPU* cpu, Instruction* ins, uint64_t op1, uint64_t op2)
+static void opCmp(CPU* cpu, Instruction*, uint64_t op1, uint64_t op2)
 {
     int64_t res = (int64_t)(op1 - op2);
 
@@ -419,10 +427,7 @@ static void opCmp(CPU* cpu, Instruction* ins, uint64_t op1, uint64_t op2)
         cpu->statusReg = -1;
 }
 
-static int run_cmp(CPU* cpu, Instruction* ins)
-{
-    return runArithm(cpu, ins, opCmp);
-}
+static int run_cmp(CPU* cpu, Instruction* ins) { return runArithm(cpu, ins, opCmp); }
 
 static void opCmpf(CPU* cpu, Instruction*, double op1, double op2)
 {
@@ -487,6 +492,8 @@ static int run_jmp(CPU* cpu, Instruction* ins)
             if (cpu->statusReg == 0)
                 return 0;
             break;
+        default:
+            break;
     }
 
     uint64_t addr = 0;
@@ -535,8 +542,8 @@ static RunFunc getRunFunc(InstrOpCode opCode)
     switch (opCode)
     {
 
-#define INSTR(name, opCode, argSets)                                           \
-    case opCode:                                                               \
+#define INSTR(name, opCode, argSets)                                                               \
+    case opCode:                                                                                   \
         return run_##name;
 
 #include "instructionsMeta.inc"
@@ -550,8 +557,4 @@ static RunFunc getRunFunc(InstrOpCode opCode)
     return NULL;
 }
 
-int Run(CPU* cpu, Instruction* ins)
-{
-
-    return getRunFunc(ins->im->OpCode)(cpu, ins);
-}
+int Run(CPU* cpu, Instruction* ins) { return getRunFunc(ins->im->OpCode)(cpu, ins); }

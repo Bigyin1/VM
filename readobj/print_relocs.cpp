@@ -1,24 +1,26 @@
-#include <stdlib.h>
-#include "readobj.hpp"
 #include "print_relocs.hpp"
 
-static int printRelSection(ReadObj *r, SectionHeader *hdr)
+#include <stdlib.h>
+
+#include "readobj.hpp"
+
+static int printRelSection(ReadObj* r, SectionHeader* hdr)
 {
 
     readRelSection(r, hdr);
 
-    const char *sectName = getNameFromStrTable(r, hdr->nameIdx);
+    const char* sectName = getNameFromStrTable(r, hdr->nameIdx);
 
-    fprintf(r->out, "\nRelocation section \"%s\" at offset %u has %u elements:\n",
-            sectName, hdr->offset, r->currRelSectSz);
+    fprintf(r->out, "\nRelocation section \"%s\" at offset %u has %u elements:\n", sectName,
+            hdr->offset, r->currRelSectSz);
 
     fprintf(r->out, "  Offset\tSymb. Value\tSymb. Name\n");
 
     for (uint32_t i = 0; i < r->currRelSectSz; i++)
     {
-        SymTabEntry *symb = &r->symTable[r->currRelSect[i].symbolIdx];
-        fprintf(r->out, "%09lu\t%011lu\t%s\n",
-                r->currRelSect[i].offset, symb->value, getNameFromStrTable(r, symb->nameIdx));
+        SymTabEntry* symb = &r->symTable[r->currRelSect[i].symbolIdx];
+        fprintf(r->out, "%09llu\t%011llu\t%s\n", r->currRelSect[i].offset, symb->value,
+                getNameFromStrTable(r, symb->nameIdx));
     }
 
     free(r->currRelSect);
@@ -27,7 +29,7 @@ static int printRelSection(ReadObj *r, SectionHeader *hdr)
     return 0;
 }
 
-int printRelocSections(ReadObj *r)
+int printRelocSections(ReadObj* r)
 {
 
     for (uint16_t i = 0; i < r->fileHdr.sectionsCount; i++)

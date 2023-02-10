@@ -23,8 +23,8 @@ int addUnknownTokenError(Tokenizer* t)
     newErr->line   = t->line;
     newErr->text   = text;
 
-    int wordLen = 0;
-    sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "s%n", newErr->text, &wordLen);
+    unsigned wordLen = 0;
+    sscanf(t->input, "%" XSTR(MAX_TOKEN_LEN) "s%n", newErr->text, (int*)&wordLen);
 
     t->input += wordLen;
     t->column += wordLen;

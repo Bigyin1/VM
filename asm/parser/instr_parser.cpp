@@ -45,7 +45,7 @@ static ParserErrCode parseIndirectArg(Parser* parser, CommandNode* node, Argumen
     }
     else if (currTokenType(parser) == ASM_T_INT)
     {
-        arg->Imm = currTokenNumVal(parser);
+        arg->Imm = (uint64_t)currTokenNumVal(parser);
         eatToken(parser, ASM_T_INT);
 
         eatSP(parser);
@@ -111,7 +111,7 @@ static ParserErrCode parseCommandArg(Parser* parser, CommandNode* node, Argument
     }
     else if (currTokenType(parser) == ASM_T_FLOAT)
     {
-        arg->Imm  = currTokenNumVal(parser);
+        arg->Imm  = (uint64_t)currTokenNumVal(parser);
         arg->Type = ArgImm;
 
         arg->_immArgSz = DataWord; // double size
@@ -120,7 +120,7 @@ static ParserErrCode parseCommandArg(Parser* parser, CommandNode* node, Argument
     }
     else if (currTokenType(parser) == ASM_T_INT)
     {
-        arg->Imm  = currTokenNumVal(parser);
+        arg->Imm  = (uint64_t)currTokenNumVal(parser);
         arg->Type = ArgImm;
 
         arg->_immArgSz = evalImmMinDataSz((int64_t)arg->Imm);
@@ -167,7 +167,7 @@ static ParserErrCode parseCommandArg(Parser* parser, CommandNode* node, Argument
 
 static ParserErrCode createInstruction(Parser* parser, CommandNode* node)
 {
-    InstrCreationErr instrErr = NewInstruction(node->name, &node->instr);
+    InstrCreationErr instrErr = NewInstruction(&node->instr);
     if (instrErr == INSTR_WRONG_OPERANDS)
     {
         ParserError* err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);

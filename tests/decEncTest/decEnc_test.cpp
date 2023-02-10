@@ -12,13 +12,13 @@ static bool argsEq(Argument* arg1, Argument* arg2)
 
     if (arg1->Type != arg2->Type)
     {
-        printf("failed: different arg types: wanted: %u, got: %u", arg1->Type, arg2->Type);
+        printf("failed: different arg types: wanted: %d, got: %d", arg1->Type, arg2->Type);
         return false;
     }
 
     if (arg1->_immArgSz != arg2->_immArgSz)
     {
-        printf("failed: different argument sizes: wanted: %u, got: %u",
+        printf("failed: different argument sizes: wanted: %zu, got: %zu",
                DataSzToBytesSz(arg1->_immArgSz), DataSzToBytesSz(arg2->_immArgSz));
         return false;
     }
@@ -75,6 +75,8 @@ static bool argsEq(Argument* arg1, Argument* arg2)
                 return false;
             }
             break;
+        case ArgNone:
+            break;
 
         default:
             break;
@@ -98,19 +100,19 @@ static bool instrEq(Instruction* ins1, Instruction* ins2)
     }
     if (ins1->DataSz != ins2->DataSz)
     {
-        printf("failed: wrong data size for %s; wanted: %u, got: %u\n", ins1->im->Name,
+        printf("failed: wrong data size for %s; wanted: %zu, got: %zu\n", ins1->im->Name,
                DataSzToBytesSz(ins1->DataSz), DataSzToBytesSz(ins2->DataSz));
         return false;
     }
     if (ins1->JmpType != ins2->JmpType)
     {
-        printf("failed: wrong jump type for %s; wanted: %u, got: %u\n", ins1->im->Name,
+        printf("failed: wrong jump type for %s; wanted: %d, got: %d\n", ins1->im->Name,
                ins1->JmpType, ins2->JmpType);
         return false;
     }
     if (ins1->SignExt != ins2->SignExt)
     {
-        printf("failed: wrong sign extention for %s; wanted: %u, got: %u\n", ins1->im->Name,
+        printf("failed: wrong sign extention for %s; wanted: %d, got: %d\n", ins1->im->Name,
                ins1->SignExt, ins2->SignExt);
         return false;
     }

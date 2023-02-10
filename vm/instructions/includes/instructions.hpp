@@ -72,7 +72,7 @@ typedef enum InstrCreationErr
 
 } InstrCreationErr;
 
-InstrCreationErr NewInstruction(InstructionName name, Instruction* instr);
+InstrCreationErr NewInstruction(Instruction* instr);
 
 const InstructionMeta* FindInsMetaByOpCode(InstrOpCode opCode);
 

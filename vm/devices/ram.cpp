@@ -53,7 +53,7 @@ FILE* RAMGetReaderOnAddr(void* dev, size_t addr)
     if (addr >= ram->config->size)
         return NULL;
 
-    fseek(ram->reader, addr, SEEK_SET);
+    fseek(ram->reader, (long)addr, SEEK_SET);
 
     return ram->reader;
 }
@@ -64,7 +64,7 @@ FILE* RAMGetWriterOnAddr(void* dev, size_t addr)
     if (addr >= ram->config->size)
         return NULL;
 
-    fseek(ram->writer, addr, SEEK_SET);
+    fseek(ram->writer, (long)addr, SEEK_SET);
 
     return ram->writer;
 }

@@ -13,7 +13,7 @@ static int loadSection(CPU* cpu, SectionHeader* sectHdr, FILE* in)
     Device* dev = FindDevice(cpu->devices, sectHdr->addr);
     if (dev == NULL)
     {
-        fprintf(stderr, "vm: failed to load section on unmapped address: %zu\n", sectHdr->addr);
+        fprintf(stderr, "vm: failed to load section on unmapped address: %llu\n", sectHdr->addr);
         return -1;
     }
 
@@ -28,7 +28,7 @@ static int loadSection(CPU* cpu, SectionHeader* sectHdr, FILE* in)
     {
         fprintf(stderr,
                 "vm: failed to load section: device %s unable to serve write "
-                "request at address: %zu\n",
+                "request at address: %llu\n",
                 dev->name, sectHdr->addr - dev->lowAddr);
         return -1;
     }

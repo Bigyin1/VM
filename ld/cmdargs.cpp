@@ -30,12 +30,12 @@ static bool trySectionInfo(cmdArgs* args, char* arg)
 {
     size_t argLen = strlen(arg);
 
-    int wordLen     = 0;
-    int sectNameLen = 0;
+    unsigned wordLen     = 0;
+    unsigned sectNameLen = 0;
 
     uint64_t sectAddr = 0;
 
-    if (sscanf(arg, "--%*[^=]%n=%lu%n", &sectNameLen, &sectAddr, &wordLen) == 0)
+    if (sscanf(arg, "--%*[^=]%n=%llu%n", (int*)&sectNameLen, &sectAddr, (int*)&wordLen) == 0)
         return false;
 
     if ((size_t)wordLen != argLen)

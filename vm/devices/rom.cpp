@@ -54,7 +54,7 @@ FILE* ROMGetReaderOnAddr(void* dev, size_t addr)
     if (addr >= rom->config->size)
         return NULL;
 
-    fseek(rom->reader, addr, SEEK_SET);
+    fseek(rom->reader, (long)addr, SEEK_SET);
 
     return rom->reader;
 }
@@ -65,7 +65,7 @@ FILE* ROMGetWriterOnAddr(void* dev, size_t addr)
     if (addr >= rom->config->size)
         return NULL;
 
-    fseek(rom->writer, addr, SEEK_SET);
+    fseek(rom->writer, (long)addr, SEEK_SET);
 
     return rom->writer;
 }
@@ -83,8 +83,4 @@ int ROMReadFrom(void* dev, size_t addr, uint64_t* data, DataSize sz)
     return 0;
 }
 
-int ROMWriteTo(void* dev, size_t addr, uint64_t data, DataSize sz)
-{
-
-    return -1;
-}
+int ROMWriteTo(void*, size_t, uint64_t, DataSize) { return -1; }

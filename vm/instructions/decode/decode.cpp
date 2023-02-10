@@ -40,6 +40,9 @@ static InstrCreationErr decodeCommon(Argument* arg, FILE* r)
 
         case ArgNone:
             return INSTR_OK;
+
+        default:
+            return INSTR_NOT_EXIST;
     }
 
     return INSTR_OK;
@@ -156,8 +159,7 @@ static InstrCreationErr decodeARITHM(Instruction* ins, FILE* r)
 
         if (ins->Arg2.Type == ArgRegisterOffsetIndirect)
         {
-            if (fread(&ins->Arg2.ImmDisp16, sizeof(ins->Arg2.ImmDisp16), 1,
-                      r) == 0)
+            if (fread(&ins->Arg2.ImmDisp16, sizeof(ins->Arg2.ImmDisp16), 1, r) == 0)
                 return INSTR_NOT_EXIST;
         }
         return INSTR_OK;
@@ -169,60 +171,27 @@ static InstrCreationErr decodeARITHM(Instruction* ins, FILE* r)
     return decodeCommon(&ins->Arg2, r);
 }
 
-static InstrCreationErr decode_add(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_add(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_addf(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_addf(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_sub(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_sub(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_subf(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_subf(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_mul(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_mul(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_mulf(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_mulf(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_div(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_div(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_divf(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_divf(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_sqrt(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_sqrt(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_cmp(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_cmp(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
-static InstrCreationErr decode_cmpf(Instruction* ins, FILE* r)
-{
-    return decodeARITHM(ins, r);
-}
+static InstrCreationErr decode_cmpf(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
 static InstrCreationErr decode_jmp(Instruction* ins, FILE* r)
 {
@@ -247,26 +216,20 @@ static InstrCreationErr decode_call(Instruction* ins, FILE* r)
 
 static InstrCreationErr decodeNoArgs(Instruction*, FILE*) { return INSTR_OK; }
 
-static InstrCreationErr decode_ret(Instruction* i, FILE* r)
-{
-    return decodeNoArgs(i, r);
-}
+static InstrCreationErr decode_ret(Instruction* i, FILE* r) { return decodeNoArgs(i, r); }
 
-static InstrCreationErr decode_halt(Instruction* i, FILE* r)
-{
-    return decodeNoArgs(i, r);
-}
+static InstrCreationErr decode_halt(Instruction* i, FILE* r) { return decodeNoArgs(i, r); }
 
 typedef InstrCreationErr (*DecFunc)(Instruction*, FILE*);
 
-DecFunc getDecoder(InstrOpCode opCode)
+static DecFunc getDecoder(InstrOpCode opCode)
 {
 
     switch (opCode)
     {
 
-#define INSTR(name, opCode, argSets)                                           \
-    case opCode:                                                               \
+#define INSTR(name, opCode, argSets)                                                               \
+    case opCode:                                                                                   \
         return decode_##name;
 
 #include "instructionsMeta.inc"
@@ -282,9 +245,8 @@ DecFunc getDecoder(InstrOpCode opCode)
 
 static const uint8_t opCodeMask = 0b00011111;
 
-static InstrCreationErr newInstructionFromOpCode(Instruction* ins,
-                                                 InstrOpCode  opCode,
-                                                 uint8_t      argSetIdx)
+static InstrCreationErr newInstructionFromOpCode(Instruction* ins, InstrOpCode opCode,
+                                                 uint8_t argSetIdx)
 {
     assert(ins != NULL);
 

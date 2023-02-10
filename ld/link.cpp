@@ -115,7 +115,7 @@ static void setOutputSectionSizes(LD* ld, outputSect* outSect)
     }
 
     outSect->size = currSize;
-    printf("out section %s now has addr: %lu ; size: %u\n", outSect->sectName, outSect->addr,
+    printf("out section %s now has addr: %llu ; size: %u\n", outSect->sectName, outSect->addr,
            outSect->size);
 }
 
@@ -224,7 +224,7 @@ static int addNewOutputSymbol(LD* ld, LinkableFile* f, SymTabEntry* oldSymb, uin
     currOutExeSymbol->nameIdx = ld->execFile.strTableSz;
     execFileStringTableAdd(&ld->execFile, oldSymbName);
 
-    printf("added symbol %s with value %lu", oldSymbName, oldSymb->value);
+    printf("added symbol %s with value %llu", oldSymbName, oldSymb->value);
 
     ld->execFile.symTabCurrIdx++;
 
@@ -371,8 +371,8 @@ static void BuildExecFileSectionHdrs(LD* ld, outputSect* outSects)
     ld->execFile.sectHdrs =
         (SectionHeader*)calloc(ld->execFile.fileHdr.sectionsCount, sizeof(SectionHeader));
 
-    uint32_t execFileDataOffset =
-        sizeof(BinformatHeader) + ld->execFile.fileHdr.sectionsCount * sizeof(SectionHeader);
+    uint32_t execFileDataOffset = sizeof(BinformatHeader) + (uint32_t)sizeof(SectionHeader) *
+                                                                ld->execFile.fileHdr.sectionsCount;
 
     for (uint16_t i = 0; i < ld->args->outSectsCount; i++)
     {
@@ -387,7 +387,7 @@ static void BuildExecFileSectionHdrs(LD* ld, outputSect* outSects)
         ld->execFile.sectHdrs[i].size    = outSects[i].size;
         ld->execFile.sectHdrs[i].type    = SECT_LOAD;
 
-        printf("section %s at offset %u ; address: %lu ; size: %u\n",
+        printf("section %s at offset %u ; address: %llu ; size: %u\n",
                getNameFromExecFileStringTab(&ld->execFile, ld->execFile.sectHdrs[i].nameIdx),
                ld->execFile.sectHdrs[i].offset, ld->execFile.sectHdrs[i].addr,
                ld->execFile.sectHdrs[i].size);

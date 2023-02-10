@@ -195,9 +195,9 @@ static int printImmArg(ReadObj* r, Argument* arg, uint32_t symbNameIdx, bool isS
     }
 
     if (arg->Type == ArgImm)
-        isSymbol ? fprintf(r->out, "%s", symbName) : fprintf(r->out, "%lu", arg->Imm);
+        isSymbol ? fprintf(r->out, "%s", symbName) : fprintf(r->out, "%llu", arg->Imm);
     if (arg->Type == ArgImmIndirect)
-        isSymbol ? fprintf(r->out, "[%s]", symbName) : fprintf(r->out, "[%lu]", arg->Imm);
+        isSymbol ? fprintf(r->out, "[%s]", symbName) : fprintf(r->out, "[%llu]", arg->Imm);
 
     return 0;
 }
@@ -270,7 +270,7 @@ static int printLoadableSection(ReadObj* r, SectionHeader* hdr, uint16_t sectHdr
 
     getSectionRelocations(r, hdr);
 
-    fprintf(r->out, "\nLoadable section \"%s\" at address: %lu: \n", sectName, hdr->addr);
+    fprintf(r->out, "\nLoadable section \"%s\" at address: %llu: \n", sectName, hdr->addr);
 
     long offset = 0;
     while (offset < hdr->size)

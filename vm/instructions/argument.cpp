@@ -16,6 +16,8 @@ size_t DataSzToBytesSz(DataSize sz)
 
         case DataByte:
             return 1;
+
+        default:
+            return 0;
     }
-    return 0;
 }

@@ -13,7 +13,7 @@ static int execNextInstruction(CPU* cpu)
     Device* dev = FindDevice(cpu->devices, cpu->regIP);
     if (dev == NULL)
     {
-        fprintf(stderr, "vm: unmapped address: %zu\n", cpu->regIP);
+        fprintf(stderr, "vm: unmapped address: %llu\n", cpu->regIP);
         return -1;
     }
 
@@ -26,7 +26,7 @@ static int execNextInstruction(CPU* cpu)
     FILE* reader = dev->getReader(dev->concreteDevice, cpu->regIP - dev->lowAddr);
     if (reader == NULL)
     {
-        fprintf(stderr, "vm: device %s unable to serve execute request at address: %zu\n",
+        fprintf(stderr, "vm: device %s unable to serve execute request at address: %llu\n",
                 dev->name, cpu->regIP);
         return -1;
     }
@@ -48,11 +48,11 @@ static int execNextInstruction(CPU* cpu)
     }
     if (err == INSTR_WRONG_OPERANDS)
     {
-        fprintf(stderr, "vm: instruction %u: unknown arguments set\n", instr.im->OpCode);
+        fprintf(stderr, "vm: instruction %d: unknown arguments set\n", instr.im->OpCode);
         return -1;
     }
 
-    cpu->regIP += (ftell(reader) - posPrev);
+    cpu->regIP += (uint64_t)(ftell(reader) - posPrev);
 
     if (Run(cpu, &instr) < 0)
         return -1;

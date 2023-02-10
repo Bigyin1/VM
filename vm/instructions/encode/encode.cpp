@@ -4,8 +4,8 @@
 
 #include <cstddef>
 
-static size_t my_fwrite(const void* __ptr, size_t __size, size_t __nitems,
-                        FILE* __stream, bool evalSz)
+static size_t my_fwrite(const void* __ptr, size_t __size, size_t __nitems, FILE* __stream,
+                        bool evalSz)
 {
     if (evalSz)
         return __size * __nitems;
@@ -15,14 +15,12 @@ static size_t my_fwrite(const void* __ptr, size_t __size, size_t __nitems,
 
 static size_t encodeNoArgs(Instruction*, FILE*, bool, bool) { return 1; }
 
-static size_t encode_ret(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_ret(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeNoArgs(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encodeCommon(Argument* arg, FILE* w, DataSize argSz, bool evalSz,
-                           bool evalSymOffset)
+static size_t encodeCommon(Argument* arg, FILE* w, DataSize argSz, bool evalSz, bool)
 {
 
     switch (arg->Type)
@@ -42,107 +40,98 @@ static size_t encodeCommon(Argument* arg, FILE* w, DataSize argSz, bool evalSz,
 
         case ArgRegisterOffsetIndirect:
             return my_fwrite(&arg->RegNum, 1, 1, w, evalSz) +
-                   my_fwrite(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, w,
-                             evalSz);
+                   my_fwrite(&arg->ImmDisp16, sizeof(arg->ImmDisp16), 1, w, evalSz);
 
         case ArgNone:
+            return 0;
+
+        default:
             return 0;
     }
 }
 
-static size_t encode_ld(Instruction* ins, FILE* w, bool evalSz,
-                        bool evalSymOffset)
+static size_t encode_ld(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     size_t  sz   = 1;
-    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExt << 6);
+    uint8_t byte = ins->Arg1.RegNum | (uint8_t)(ins->DataSz << 4) | (uint8_t)(ins->SignExt << 6);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
     if (evalSymOffset)
         return sz;
 
-    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz,
-                             evalSymOffset);
+    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz, evalSymOffset);
 }
 
-static size_t encode_st(Instruction* ins, FILE* w, bool evalSz,
-                        bool evalSymOffset)
+static size_t encode_st(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
 
     size_t  sz   = 1;
-    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4); // sign extend ???
+    uint8_t byte = ins->Arg1.RegNum | (uint8_t)(ins->DataSz << 4);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
     if (evalSymOffset)
         return sz;
 
-    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz,
-                             evalSymOffset);
+    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz, evalSymOffset);
 }
 
-static size_t encode_mov(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_mov(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
 
     if (ins->Arg2.Type == ArgRegister)
     {
-        uint8_t byte = ins->Arg1.RegNum | (ins->Arg2.RegNum << 4);
+        uint8_t byte = ins->Arg1.RegNum | (uint8_t)(ins->Arg2.RegNum << 4);
         return 1 + my_fwrite(&byte, 1, 1, w, evalSz);
     }
 
     size_t sz = 1;
 
     uint8_t byte =
-        ins->Arg1.RegNum | (ins->Arg2._immArgSz << 4) | (ins->SignExt << 6);
+        ins->Arg1.RegNum | (uint8_t)(ins->Arg2._immArgSz << 4) | (uint8_t)(ins->SignExt << 6);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
     if (evalSymOffset)
         return sz;
 
-    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz,
-                             evalSymOffset);
+    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz, evalSymOffset);
 }
 
-static size_t encode_push(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_push(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
 
     if (ins->Arg1.Type == ArgRegister)
     {
-        uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4);
+        uint8_t byte = ins->Arg1.RegNum | (uint8_t)(ins->DataSz << 4);
 
         return 1 + my_fwrite(&byte, 1, 1, w, evalSz);
     }
 
     size_t sz = 1;
 
-    uint8_t byte =
-        (ins->DataSz) | (ins->Arg1._immArgSz << 2); // sign extend ???
+    uint8_t byte = (uint8_t)(ins->DataSz) | (uint8_t)(ins->Arg1._immArgSz << 2);
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
 
     if (evalSymOffset)
         return sz;
 
-    return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz,
-                             evalSymOffset);
+    return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz, evalSymOffset);
 }
 
-static size_t encode_pop(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_pop(Instruction* ins, FILE* w, bool evalSz, bool)
 {
-    uint8_t byte = ins->Arg1.RegNum | (ins->DataSz << 4) | (ins->SignExt << 6);
+    uint8_t byte = ins->Arg1.RegNum | (uint8_t)(ins->DataSz << 4) | (uint8_t)(ins->SignExt << 6);
     return 1 + my_fwrite(&byte, 1, 1, w, evalSz);
 }
 
-static size_t encodeARITHM(Instruction* ins, FILE* w, bool evalSz,
-                           bool evalSymOffset)
+static size_t encodeARITHM(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     size_t sz = 1;
 
     uint8_t byte = 0;
     if (ins->Arg2.Type != ArgImm)
-        byte = ins->Arg1.RegNum | (ins->Arg2.RegNum << 4);
+        byte = ins->Arg1.RegNum | (uint8_t)(ins->Arg2.RegNum << 4);
     else
-        byte = ins->Arg1.RegNum | (ins->Arg2._immArgSz << 4);
+        byte = ins->Arg1.RegNum | (uint8_t)(ins->Arg2._immArgSz << 4);
 
     sz += my_fwrite(&byte, 1, 1, w, evalSz);
     if (ins->Arg2.Type == ArgRegister || ins->Arg2.Type == ArgRegisterIndirect)
@@ -150,86 +139,72 @@ static size_t encodeARITHM(Instruction* ins, FILE* w, bool evalSz,
 
     if (ins->Arg2.Type == ArgRegisterOffsetIndirect)
     {
-        sz += my_fwrite(&ins->Arg2.ImmDisp16, sizeof(ins->Arg2.ImmDisp16), 1, w,
-                        evalSz);
+        sz += my_fwrite(&ins->Arg2.ImmDisp16, sizeof(ins->Arg2.ImmDisp16), 1, w, evalSz);
         return sz;
     }
 
     if (evalSymOffset)
         return sz;
 
-    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz,
-                             evalSymOffset);
+    return sz + encodeCommon(&ins->Arg2, w, ins->Arg2._immArgSz, evalSz, evalSymOffset);
 }
 
-static size_t encode_add(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_add(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_addf(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_addf(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_sub(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_sub(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_subf(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_subf(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_mul(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_mul(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_mulf(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_mulf(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_div(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_div(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_divf(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_divf(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_sqrt(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_sqrt(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_cmp(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_cmp(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_cmpf(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_cmpf(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
-static size_t encode_jmp(Instruction* ins, FILE* w, bool evalSz,
-                         bool evalSymOffset)
+static size_t encode_jmp(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     size_t  sz   = 1;
     uint8_t byte = ins->JmpType;
@@ -239,12 +214,10 @@ static size_t encode_jmp(Instruction* ins, FILE* w, bool evalSz,
     if (evalSymOffset)
         return sz;
 
-    return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz,
-                             evalSymOffset);
+    return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz, evalSymOffset);
 }
 
-static size_t encode_call(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_call(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     ins->Arg1._immArgSz = DataWord; // address encoded as 8 bytes for now;
     size_t sz           = 1;
@@ -252,12 +225,10 @@ static size_t encode_call(Instruction* ins, FILE* w, bool evalSz,
     if (evalSymOffset)
         return sz;
 
-    return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz,
-                             evalSymOffset);
+    return sz + encodeCommon(&ins->Arg1, w, ins->Arg1._immArgSz, evalSz, evalSymOffset);
 }
 
-static size_t encode_halt(Instruction* ins, FILE* w, bool evalSz,
-                          bool evalSymOffset)
+static size_t encode_halt(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeNoArgs(ins, w, evalSz, evalSymOffset);
 }
@@ -283,8 +254,8 @@ static EncFunc getEncFunc(InstrOpCode opCode)
     switch (opCode)
     {
 
-#define INSTR(name, opCode, argSets)                                           \
-    case opCode:                                                               \
+#define INSTR(name, opCode, argSets)                                                               \
+    case opCode:                                                                                   \
         return encode_##name;
 
 #include "instructionsMeta.inc"

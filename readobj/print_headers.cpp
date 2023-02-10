@@ -1,9 +1,11 @@
 
-#include <stdlib.h>
 #include "print_headers.hpp"
+
+#include <stdlib.h>
+
 #include "binformat.hpp"
 
-static int printFileHeader(BinformatHeader *hdr, FILE *out)
+static int printFileHeader(BinformatHeader* hdr, FILE* out)
 {
     if (hdr->magic != binMagicHeader)
     {
@@ -24,7 +26,7 @@ static int printFileHeader(BinformatHeader *hdr, FILE *out)
     fprintf(out, "Binary header:\n");
     fprintf(out, "  Magic:\t%x\n", hdr->magic);
     fprintf(out, "  Version:\t%d\n", hdr->version);
-    fprintf(out, "  Entrypoint:\t%lu\n", hdr->entrypoint);
+    fprintf(out, "  Entrypoint:\t%llu\n", hdr->entrypoint);
 
     if (hdr->fileType == BIN_LINKABLE)
         fprintf(out, "  File type:\t%s\n", "Linkable");
@@ -34,53 +36,53 @@ static int printFileHeader(BinformatHeader *hdr, FILE *out)
     return 0;
 }
 
-static const char *getSectTypeVerbose(SectionType sType)
+static const char* getSectTypeVerbose(SectionType sType)
 {
 
     switch (sType)
     {
-    case SECT_LOAD:
-        return "LOADABLE";
+        case SECT_LOAD:
+            return "LOADABLE";
 
-    case SECT_STR_TAB:
-        return "STRING TABLE";
+        case SECT_STR_TAB:
+            return "STRING TABLE";
 
-    case SECT_SYM_TAB:
-        return "SYMBOL TABLE";
+        case SECT_SYM_TAB:
+            return "SYMBOL TABLE";
 
-    case SECT_REL:
-        return "REL";
+        case SECT_REL:
+            return "REL";
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return NULL;
 }
 
-static int printSectionHeader(ReadObj *r, SectionHeader *sectHdr, uint16_t idx)
+static int printSectionHeader(ReadObj* r, SectionHeader* sectHdr, uint16_t idx)
 {
 
-    const char *name = getNameFromStrTable(r, sectHdr->nameIdx);
+    const char* name = getNameFromStrTable(r, sectHdr->nameIdx);
     if (name == NULL)
     {
         fprintf(stderr, "section %d has no name in string table\n", idx);
         return -1;
     }
 
-    const char *sectType = getSectTypeVerbose(sectHdr->type);
+    const char* sectType = getSectTypeVerbose(sectHdr->type);
     if (sectType == NULL)
     {
         fprintf(stderr, "section %s has insufficient type\n", name);
         return -1;
     }
 
-    fprintf(r->out, "[%2d]\t%s\t\t\t%s\t\t%lu\t\t%u\n", idx, name,
-            sectType, sectHdr->addr, sectHdr->offset);
+    fprintf(r->out, "[%2d]\t%s\t\t\t%s\t\t%llu\t\t%u\n", idx, name, sectType, sectHdr->addr,
+            sectHdr->offset);
     return 0;
 }
 
-static int printSectionHeaders(ReadObj *r)
+static int printSectionHeaders(ReadObj* r)
 {
 
     fprintf(r->out, "\n\n  File has %d sections:\n", r->fileHdr.sectionsCount);
@@ -95,16 +97,16 @@ static int printSectionHeaders(ReadObj *r)
     return 0;
 }
 
-static int readStringTable(ReadObj *r)
+static int readStringTable(ReadObj* r)
 {
 
-    SectionHeader *strTabHdr = &r->sectHdrs[r->fileHdr.stringTableIdx];
-    r->strTableSize = strTabHdr->size;
+    SectionHeader* strTabHdr = &r->sectHdrs[r->fileHdr.stringTableIdx];
+    r->strTableSize          = strTabHdr->size;
 
     long currOffset = ftell(r->in);
     fseek(r->in, strTabHdr->offset, SEEK_SET);
 
-    r->strTable = (char *)calloc(strTabHdr->size, sizeof(char));
+    r->strTable = (char*)calloc(strTabHdr->size, sizeof(char));
     if (r->strTable == NULL)
         return -1;
 
@@ -116,7 +118,7 @@ static int readStringTable(ReadObj *r)
     return 0;
 }
 
-int printHeaders(ReadObj *r)
+int printHeaders(ReadObj* r)
 {
     if (getObjFileHeader(r->in, &r->fileHdr) == 1)
     {

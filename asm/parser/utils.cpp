@@ -12,11 +12,13 @@ ParserErrCode eatToken(Parser* p, TokenType type)
 
     if (currTokenType(p) != type)
     {
-        ParserError* err = addNewParserError(p, PARSER_INSUFF_TOKEN);
-        err->got         = currTokenType(p);
-        err->expected    = type;
-        err->line        = currTokenLine(p);
-        err->column      = currTokenColumn(p);
+        ParserError* err = newParserError(p);
+
+        err->code     = PARSER_INSUFF_TOKEN;
+        err->got      = currTokenType(p);
+        err->expected = type;
+        err->line     = currTokenLine(p);
+        err->column   = currTokenColumn(p);
 
         return PARSER_INSUFF_TOKEN;
     }

@@ -5,12 +5,11 @@
 #include <string.h>
 
 #include "parser/parser.hpp"
+#include "utils.hpp"
 
-ParserError* addNewParserError(Parser* p, ParserErrCode eCode)
+ParserError* newParserError(Parser* p)
 {
-    ParserError* newErr = (ParserError*)calloc(1, sizeof(ParserError)); // TODO check error
-
-    newErr->code = eCode;
+    ParserError* newErr = (ParserError*)calloc(1, sizeof(ParserError));
 
     if (p->userErrors == NULL)
     {
@@ -24,6 +23,61 @@ ParserError* addNewParserError(Parser* p, ParserErrCode eCode)
 
     curr->next = newErr;
     return newErr;
+}
+
+void addUnknownCommandError(Parser* p, CommandNode* node)
+{
+
+    ParserError* err = newParserError(p);
+
+    err->code = PARSER_UNKNOWN_COMMAND;
+
+    err->token = node->name;
+    err->line  = node->line;
+}
+
+void addCommandInvArgsError(Parser* p, const char* cmdName, size_t line)
+{
+
+    ParserError* err = newParserError(p);
+
+    err->code = PARSER_COMMAND_INV_ARGS;
+
+    err->token = cmdName;
+    err->line  = line;
+}
+
+void addUnknownRegError(Parser* p)
+{
+
+    ParserError* err = newParserError(p);
+
+    err->code = PARSER_UNKNOWN_REGISTER;
+
+    err->token  = currTokenVal(p);
+    err->line   = currTokenLine(p);
+    err->column = currTokenColumn(p);
+}
+
+void addBadInstrPostfixError(Parser* p, const char* pfix)
+{
+
+    ParserError* err = newParserError(p);
+
+    err->code  = PARSER_UNKNOWN_REGISTER;
+    err->token = pfix;
+    err->line  = currTokenLine(p);
+}
+
+void addLabelRedefError(Parser* p, const char* label)
+{
+
+    ParserError* err = newParserError(p);
+
+    err->code = PARSER_LABEL_REDEF;
+
+    err->token = label;
+    err->line  = currTokenLine(p);
 }
 
 void reportParserErrors(ParserError* err, FILE* f)
@@ -55,25 +109,20 @@ void reportParserErrors(ParserError* err, FILE* f)
             }
             case PARSER_BAD_CMD_POSTFIX:
             {
-                fprintf(f,
-                        "asm: line %zu: command has invalid postfix \"%s\" "
-                        "(column: %zu)\n",
-                        err->line, err->token, err->column);
+                fprintf(f, "asm: line %zu: command has invalid postfix \"%s\"\n", err->line,
+                        err->token);
                 break;
             }
-
             case PARSER_LABEL_REDEF:
             {
                 fprintf(f, "asm: line %zu: label \"%s\" defined twice\n", err->line, err->token);
                 break;
             }
-
             case PARSER_LABEL_UNDEFIEND:
             {
                 fprintf(f, "asm: label \"%s\" was not defined\n", err->token);
                 break;
             }
-
             case PARSER_INSUFF_TOKEN:
             {
                 fprintf(f, "asm: line: %zu column: %zu: got: %s  expected: %s\n", err->line,

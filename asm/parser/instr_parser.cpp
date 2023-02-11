@@ -55,25 +55,21 @@ static ParserErrCode parseIndirectArg(Parser* parser, CommandNode* node, Argumen
     }
     else
     {
-        size_t      line   = currTokenLine(parser);
-        size_t      column = currTokenColumn(parser);
-        const char* regVal = currTokenVal(parser);
+
+        int regNum = FindRegByName(currTokenVal(parser));
+
+        if (regNum < 0)
+        {
+            if (eatToken(parser, ASM_T_REGISTER) != PARSER_OK)
+                return PARSER_BAD_COMMAND;
+
+            addUnknownRegError(parser);
+            return PARSER_BAD_COMMAND;
+        }
 
         if (eatToken(parser, ASM_T_REGISTER) != PARSER_OK)
             return PARSER_BAD_COMMAND;
 
-        int regNum = FindRegByName(regVal);
-
-        if (regNum < 0)
-        {
-            ParserError* err = addNewParserError(parser, PARSER_UNKNOWN_REGISTER);
-
-            err->token  = regVal;
-            err->line   = line;
-            err->column = column;
-
-            return PARSER_BAD_COMMAND;
-        }
         arg->RegNum = (uint8_t)regNum;
 
         eatSP(parser);
@@ -132,12 +128,7 @@ static ParserErrCode parseCommandArg(Parser* parser, CommandNode* node, Argument
         int regNum = FindRegByName(currTokenVal(parser));
         if (regNum < 0)
         {
-            ParserError* err = addNewParserError(parser, PARSER_UNKNOWN_REGISTER);
-
-            err->token  = currTokenVal(parser);
-            err->line   = currTokenLine(parser);
-            err->column = currTokenColumn(parser);
-
+            addUnknownRegError(parser);
             return PARSER_BAD_COMMAND;
         }
 
@@ -170,10 +161,7 @@ static ParserErrCode createInstruction(Parser* parser, CommandNode* node)
     InstrCreationErr instrErr = NewInstruction(&node->instr);
     if (instrErr == INSTR_WRONG_OPERANDS)
     {
-        ParserError* err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
-
-        err->token = node->name;
-        err->line  = node->line;
+        addCommandInvArgsError(parser, node->name, node->line);
         return PARSER_BAD_COMMAND;
     }
 
@@ -187,10 +175,7 @@ ParserErrCode parseInstr(Parser* parser, CommandNode* node)
     node->instr.im = FindInsMetaByName(node->name);
     if (node->instr.im == NULL)
     {
-        ParserError* err = addNewParserError(parser, PARSER_UNKNOWN_COMMAND);
-
-        err->token = node->name;
-        err->line  = node->line;
+        addUnknownCommandError(parser, node);
         return PARSER_BAD_COMMAND;
     }
 

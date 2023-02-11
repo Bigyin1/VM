@@ -5,18 +5,11 @@
 
 #include "tokenizer/errors.hpp"
 
-int addUnknownTokenError(Tokenizer* t)
+void addUnknownTokenError(Tokenizer* t)
 {
     TokenizerError* newErr = (TokenizerError*)calloc(1, sizeof(TokenizerError));
-    if (newErr == NULL)
-        return -1;
 
     char* text = (char*)calloc(MAX_TOKEN_LEN + 1, sizeof(char));
-    if (text == NULL)
-    {
-        free(newErr);
-        return -1;
-    }
 
     newErr->code   = TOK_UNKNOWN;
     newErr->column = t->column;
@@ -32,7 +25,7 @@ int addUnknownTokenError(Tokenizer* t)
     if (t->userErrors == NULL)
     {
         t->userErrors = newErr;
-        return 0;
+        return;
     }
 
     TokenizerError* curr = t->userErrors;
@@ -40,7 +33,6 @@ int addUnknownTokenError(Tokenizer* t)
         curr = curr->next;
 
     curr->next = newErr;
-    return 0;
 }
 
 void reportErrors(TokenizerError* err, FILE* f)

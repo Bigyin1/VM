@@ -59,12 +59,7 @@ static ParserErrCode getDataDefDirectiveArgsCount(Parser* parser, size_t* count)
 
     if (*count == 0)
     {
-        ParserError* err = addNewParserError(parser, PARSER_COMMAND_INV_ARGS);
-
-        err->token  = currTokenVal(parser);
-        err->line   = currTokenLine(parser);
-        err->column = currTokenColumn(parser);
-
+        addCommandInvArgsError(parser, currTokenVal(parser), currTokenLine(parser));
         return PARSER_BAD_COMMAND;
     }
     return PARSER_OK;
@@ -143,24 +138,21 @@ ParserErrCode parseControlDirective(Parser* parser, CommandNode* node)
 
     eatSP(parser);
 
-    if (currTokenType(parser) == ASM_T_FLOAT || currTokenType(parser) == ASM_T_INT)
+    if (currTokenType(parser) != ASM_T_FLOAT && currTokenType(parser) != ASM_T_INT)
     {
+        eatToken(parser, ASM_T_INT);
+        return PARSER_BAD_COMMAND;
+    }
 
-        if (defineNewAbsSymbol(parser, symb, currTokenNumVal(parser)) == PARSER_LABEL_REDEF)
-        {
-            ParserError* err = addNewParserError(parser, PARSER_LABEL_REDEF);
-
-            err->token = node->label;
-            err->line  = currTokenLine(parser);
-
-            return PARSER_BAD_COMMAND;
-        }
-        eatToken(parser, currTokenType(parser));
-
-        node->Type = CMD_CONTROL;
-        return PARSER_OK;
+    if (defineNewAbsSymbol(parser, symb, (uint64_t)currTokenNumVal(parser)) == PARSER_LABEL_REDEF)
+    {
+        addLabelRedefError(parser, symb);
+        return PARSER_BAD_COMMAND;
     }
 
     eatToken(parser, currTokenType(parser));
-    return PARSER_BAD_COMMAND;
+
+    node->Type = CMD_CONTROL;
+
+    return PARSER_OK;
 }

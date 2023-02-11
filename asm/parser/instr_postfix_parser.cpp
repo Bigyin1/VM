@@ -28,9 +28,6 @@ ParserErrCode parseInstrPostfix(Parser* parser, CommandNode* node)
 
     const char* postfix = currTokenVal(parser);
 
-    size_t line   = currTokenLine(parser);
-    size_t column = currTokenColumn(parser);
-
     eatToken(parser, ASM_T_INSTR_POSTFIX);
 
     if (parseJumpPostfix(node, postfix) == PARSER_OK)
@@ -48,11 +45,7 @@ ParserErrCode parseInstrPostfix(Parser* parser, CommandNode* node)
 
 #undef DATA_POSTFIX
 
-    ParserError* err = addNewParserError(parser, PARSER_BAD_CMD_POSTFIX);
-
-    err->token  = postfix;
-    err->line   = line;
-    err->column = column;
+    addBadInstrPostfixError(parser, postfix);
 
     return PARSER_BAD_CMD_POSTFIX;
 }

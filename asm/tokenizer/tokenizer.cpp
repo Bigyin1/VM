@@ -84,11 +84,7 @@ TokErrCode Tokenize(Tokenizer* t)
         if (checkTokens(t))
             continue;
 
-        if (addUnknownTokenError(t) < 0)
-        {
-            free(textStart);
-            return TOK_SYTEM_ERROR;
-        }
+        addUnknownTokenError(t);
     }
 
     t->currToken = getNextFreeToken(t);

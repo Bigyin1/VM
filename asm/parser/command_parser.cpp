@@ -9,26 +9,19 @@
 #include "symbols.hpp"
 #include "utils.hpp"
 
-static ParserErrCode parseCmdLabel(Parser* parser, CommandNode* node)
+static void parseCmdLabel(Parser* parser, CommandNode* node)
 {
 
     if (currTokenType(parser) != ASM_T_LABEL_DEF)
-        return PARSER_OK;
+        return;
 
     node->label = currTokenVal(parser);
 
     if (defineNewSymbol(parser, node->label, node->offset) == PARSER_LABEL_REDEF)
-    {
-        ParserError* err = addNewParserError(parser, PARSER_LABEL_REDEF);
+        addLabelRedefError(parser, node->label);
 
-        err->token  = node->label;
-        err->line   = currTokenLine(parser);
-        err->column = currTokenColumn(parser);
-    }
     eatToken(parser, ASM_T_LABEL_DEF);
     eatBlanks(parser);
-
-    return PARSER_OK;
 }
 
 ParserErrCode parseCommandNode(Parser* parser, CommandNode* node)

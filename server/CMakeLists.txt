@@ -6,8 +6,10 @@ set(STDLIB_SRCS linear printStr quad quadEqSolver)
 foreach(SRC ${STDLIB_SRCS})
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/stdlib/bin/${SRC}.o
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/stdlib/${SRC}.code
+        DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/stdlib/${SRC}.code
         ${CMAKE_CURRENT_SOURCE_DIR}/stdlib/bin
+        $<TARGET_FILE:my_asm>
 
         COMMAND $<TARGET_FILE:my_asm>
         ${CMAKE_CURRENT_SOURCE_DIR}/stdlib/${SRC}.code
@@ -23,7 +25,7 @@ add_custom_command(
 )
 
 add_custom_target(BuildServerStdLib
-    DEPENDS ${STDLIB_OBJS} ${CMAKE_CURRENT_SOURCE_DIR}/stdlib/bin
+    DEPENDS ${STDLIB_OBJS}
 )
 
 add_test(NAME serverTest COMMAND

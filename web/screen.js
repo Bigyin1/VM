@@ -9,6 +9,9 @@ export class Screen {
         this.screen.setAttribute("width", width)
         this.screen.setAttribute("height", height)
 
+        this.width = width
+        this.height = height
+
         this.ctx = this.screen.getContext("2d")
 
         this.ctx.clearRect(0, 0, width, height)
@@ -17,6 +20,11 @@ export class Screen {
 
         this.drawThreshold = 10
         this.currDraw = 0
+    }
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.width, this.height)
+        this.canvasData = this.ctx.getImageData(0, 0, this.width, this.height);
     }
 
 

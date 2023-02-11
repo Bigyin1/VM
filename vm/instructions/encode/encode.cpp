@@ -194,6 +194,21 @@ static size_t encode_sqrt(Instruction* ins, FILE* w, bool evalSz, bool evalSymOf
     return encodeARITHM(ins, w, evalSz, evalSymOffset);
 }
 
+static size_t encode_sin(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
+{
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
+}
+
+static size_t encode_cos(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
+{
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
+}
+
+static size_t encode_fltint(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
+{
+    return encodeARITHM(ins, w, evalSz, evalSymOffset);
+}
+
 static size_t encode_cmp(Instruction* ins, FILE* w, bool evalSz, bool evalSymOffset)
 {
     return encodeARITHM(ins, w, evalSz, evalSymOffset);

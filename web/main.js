@@ -24,6 +24,7 @@ class VMClient {
         this.codeInput.button.addEventListener("click", (event) => {
 
             this.infoConsole.clear()
+            this.screen.clear()
 
             if (this.socket != null) {
                 this.socket.close(1000, "incoming new code")

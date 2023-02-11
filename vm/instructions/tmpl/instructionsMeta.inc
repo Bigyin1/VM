@@ -149,3 +149,27 @@ INSTR(sqrt, 19,
           {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
           {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
       })
+
+INSTR(sin, 20,
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
+      })
+
+INSTR(cos, 21,
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
+      })
+
+INSTR(fltint, 22,
+      {
+          {.First = ArgRegister COMMA .Second = ArgRegister} COMMA
+          {.First = ArgRegister COMMA .Second = ArgImm} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterIndirect} COMMA
+          {.First = ArgRegister COMMA .Second = ArgRegisterOffsetIndirect} COMMA
+      })

@@ -1,7 +1,7 @@
 
 install(TARGETS my_asm my_ld my_vm readobj DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/progs)
 
-set(STDLIB_SRCS linear printStr quad quadEqSolver)
+set(STDLIB_SRCS linear printStr quad quadEqSolver drawCircle)
 
 foreach(SRC ${STDLIB_SRCS})
     add_custom_command(

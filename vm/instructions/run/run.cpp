@@ -416,6 +416,54 @@ static int run_sqrt(CPU* cpu, Instruction* ins)
     return runArithmf(cpu, ins, opSqrt);
 }
 
+static void opSin(CPU* cpu, Instruction* ins, double, double op2)
+{
+    double res = sin(op2);
+
+    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &res, sizeof(double));
+}
+
+static int run_sin(CPU* cpu, Instruction* ins)
+{
+
+    assert(cpu != NULL);
+    assert(ins != NULL);
+
+    return runArithmf(cpu, ins, opSin);
+}
+
+static void opCos(CPU* cpu, Instruction* ins, double, double op2)
+{
+    double res = cos(op2);
+
+    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &res, sizeof(double));
+}
+
+static int run_cos(CPU* cpu, Instruction* ins)
+{
+
+    assert(cpu != NULL);
+    assert(ins != NULL);
+
+    return runArithmf(cpu, ins, opCos);
+}
+
+static void opFltint(CPU* cpu, Instruction* ins, double, double op2)
+{
+    int64_t res = int64_t(op2);
+
+    memcpy(&cpu->gpRegs[ins->Arg1.RegNum], &res, sizeof(int64_t));
+}
+
+static int run_fltint(CPU* cpu, Instruction* ins)
+{
+
+    assert(cpu != NULL);
+    assert(ins != NULL);
+
+    return runArithmf(cpu, ins, opFltint);
+}
+
 static void opCmp(CPU* cpu, Instruction*, uint64_t op1, uint64_t op2)
 {
     int64_t res = (int64_t)(op1 - op2);

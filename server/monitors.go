@@ -12,7 +12,6 @@ func (r *Runner) inputMonitor() {
 
 	defer func() {
 		r.vmConsoleWriter.Close()
-		log.Printf("done")
 	}()
 
 	for {
@@ -27,13 +26,13 @@ func (r *Runner) inputMonitor() {
 
 			err := json.Unmarshal(buf, &conReq)
 			if err != nil {
-				log.Printf("error: %v", err)
+				log.Printf("inputMonitor error: %v", err)
 				return
 			}
 
 			_, err = r.vmConsoleWriter.Write([]byte(conReq.Data))
 			if err != nil {
-				log.Printf("error: %v", err)
+				log.Printf("inputMonitor error: %v", err)
 				return
 			}
 
@@ -51,7 +50,6 @@ func (r *Runner) monitorConsoleOut(wg *sync.WaitGroup) {
 	defer func() {
 		r.vmConsoleReader.Close()
 		wg.Done()
-		log.Printf("done")
 	}()
 
 	consBuf := make([]byte, 128)
@@ -59,7 +57,7 @@ func (r *Runner) monitorConsoleOut(wg *sync.WaitGroup) {
 
 		n, err := r.vmConsoleReader.Read(consBuf)
 		if err != nil && err != io.EOF {
-			log.Printf("error: %v", err)
+			log.Printf("monitorConsoleOut error: %v", err)
 			return
 		}
 		if n == 0 {
@@ -80,17 +78,17 @@ func (r *Runner) monitorGraphicsOut(wg *sync.WaitGroup) {
 	defer func() {
 		r.vmGraphicsReader.Close()
 		wg.Done()
-		log.Printf("monitorGraphicsOut done")
-
 	}()
 
 	const vmMajesticConsoleScreenFrameLen = 7 // TODO config ???
+
+	rb := bufio.NewReader(r.vmGraphicsReader)
 
 	for {
 
 		pointFrameBuf := make([]byte, vmMajesticConsoleScreenFrameLen)
 
-		n, err := r.vmGraphicsReader.Read(pointFrameBuf)
+		n, err := rb.Read(pointFrameBuf)
 		if err != nil && err != io.EOF {
 			log.Printf("monitorGraphicsOut error: %v", err)
 			return
@@ -98,7 +96,6 @@ func (r *Runner) monitorGraphicsOut(wg *sync.WaitGroup) {
 		if n == 0 {
 			return
 		}
-
 		if n != len(pointFrameBuf) {
 			log.Printf("monitorGraphicsOut error: got invalid point data of size: %d", n)
 			return
@@ -115,7 +112,6 @@ func (r *Runner) monitorErrorsOut(wg *sync.WaitGroup) {
 	defer func() {
 		r.vmErrorsReader.Close()
 		wg.Done()
-		log.Printf("monitorErrorsOut done")
 	}()
 
 	errScanner := bufio.NewScanner(r.vmErrorsReader)

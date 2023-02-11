@@ -7,6 +7,7 @@ var stdlib = []string{
 	"stdlib/bin/printStr.o",
 	"stdlib/bin/quad.o",
 	"stdlib/bin/quadEqSolver.o",
+	"stdlib/bin/drawCircle.o",
 }
 
 var addr = flag.String("addr", ":8080", "http service address")

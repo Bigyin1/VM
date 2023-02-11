@@ -189,6 +189,12 @@ static InstrCreationErr decode_divf(Instruction* ins, FILE* r) { return decodeAR
 
 static InstrCreationErr decode_sqrt(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
+static InstrCreationErr decode_sin(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
+
+static InstrCreationErr decode_cos(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
+
+static InstrCreationErr decode_fltint(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
+
 static InstrCreationErr decode_cmp(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }
 
 static InstrCreationErr decode_cmpf(Instruction* ins, FILE* r) { return decodeARITHM(ins, r); }

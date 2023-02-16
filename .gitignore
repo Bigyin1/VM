@@ -7,4 +7,3 @@ go.work.sum
 .vscode/settings.json
 testdata
 docker
-.clang-format

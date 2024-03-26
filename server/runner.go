@@ -61,15 +61,17 @@ func (r *Runner) responseBinary(data []byte) {
 
 func (r *Runner) setupVM(exeFile string) error {
 
-	vmConsoleReaderOur, vmConsoleWriterTheir, err := os.Pipe()
-	vmConsoleReaderTheir, vmConsoleWriterOur, err := os.Pipe()
-	vmGraphicsReaderOur, vmGraphicsWriterTheir, err := os.Pipe()
-	vmErrorsReaderOur, vmErrorsWriterTheir, err := os.Pipe()
-	if err != nil {
-		//TODO close pipes
-		fmt.Printf("failed to open one of pipes for vm communication: %s\n", err)
-		return err
-	}
+	vmConsoleReaderOur, vmConsoleWriterTheir, _ := os.Pipe()
+	vmConsoleReaderTheir, vmConsoleWriterOur, _ := os.Pipe()
+	vmGraphicsReaderOur, vmGraphicsWriterTheir, _ := os.Pipe()
+	vmErrorsReaderOur, vmErrorsWriterTheir, _ := os.Pipe()
+
+	defer func() {
+		vmConsoleReaderTheir.Close()
+		vmConsoleWriterTheir.Close()
+		vmGraphicsWriterTheir.Close()
+		vmErrorsWriterTheir.Close()
+	}()
 
 	r.vmProc = exec.CommandContext(r.ctx, r.vmExePath, exeFile)
 
@@ -83,14 +85,7 @@ func (r *Runner) setupVM(exeFile string) error {
 	r.vmConsoleWriter = vmConsoleWriterOur
 	r.vmGraphicsReader = vmGraphicsReaderOur
 
-	r.vmProc.Start()
-
-	vmConsoleReaderTheir.Close()
-	vmConsoleWriterTheir.Close()
-	vmGraphicsWriterTheir.Close()
-	vmErrorsWriterTheir.Close()
-
-	return nil
+	return r.vmProc.Start()
 }
 
 func (r *Runner) monitorVM() error {
@@ -177,7 +172,7 @@ func (r *Runner) compile() (*os.File, error) {
 			MessageType: errorMessageType,
 			Message:     errBuf.String(),
 		}
-		r.responseJson(errMes)
+		_ = r.responseJson(errMes)
 		return nil, err
 	}
 
@@ -201,7 +196,7 @@ func (r *Runner) link(linkableFile *os.File) (*os.File, error) {
 
 	defer os.Remove(linkableFile.Name())
 
-	asmExeFile, err := ioutil.TempFile(".", "bin")
+	asmExeFile, err := os.CreateTemp(".", "bin")
 	if err != nil {
 		log.Printf("failed to create temp file: %s\n", err)
 		return nil, err
@@ -229,7 +224,7 @@ func (r *Runner) link(linkableFile *os.File) (*os.File, error) {
 			MessageType: errorMessageType,
 			Message:     errBuf.String(),
 		}
-		r.responseJson(errMes)
+		_ = r.responseJson(errMes)
 		return nil, err
 	}
 
@@ -268,7 +263,7 @@ func (r *Runner) readobjDump(exeFile string) error {
 			MessageType: errorMessageType,
 			Message:     errBuf.String(),
 		}
-		r.responseJson(errMes)
+		_ = r.responseJson(errMes)
 		return err
 	}
 

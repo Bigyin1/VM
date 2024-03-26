@@ -56,7 +56,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	go runner.Start()
 }
 
-const staticPath = "../web/" // TODO
+const staticPath = "../web/" // TODO config
 
 func serveStatic(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path)
@@ -74,6 +74,7 @@ func main() {
 	http.HandleFunc("/", serveStatic)
 	http.HandleFunc("/ws", serveWs)
 
+	log.Printf("listening at: %s\n", *addr)
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

@@ -1,8 +1,8 @@
 section text
 
-# r8 - a
-# r9 - b
-# r10 - c
+# r8 - a float
+# r9 - b float
+# r10 - c float
 # return reg: r0
 .evalDiscr:
     push %r8

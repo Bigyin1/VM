@@ -67,7 +67,7 @@ func (r *Runner) monitorConsoleOut(wg *sync.WaitGroup) {
 		consData := textResp{MessageType: consOutMessageType,
 			Message: string(consBuf[0:n])}
 
-		r.responseJson(consData) // async ??
+		_ = r.responseJson(consData) // async ??
 
 	}
 
@@ -124,7 +124,7 @@ func (r *Runner) monitorErrorsOut(wg *sync.WaitGroup) {
 			MessageType: errorMessageType,
 			Message:     string(errBuf),
 		}
-		r.responseJson(errMes)
+		_ = r.responseJson(errMes)
 	}
 
 	if errScanner.Err() != nil {

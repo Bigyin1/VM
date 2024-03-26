@@ -5,10 +5,10 @@ equ conXCoord:      10017
 equ conYCoord:      10019
 equ conColor:       10021
 
-# r1 - x coord
-# r2 - y coord
-# r3 - radius
-# r4 - color
+# r1 - x coord float
+# r2 - y coord float
+# r3 - radius float
+# r4 - color (rgb)
 drawCircle:
 
     push %r5

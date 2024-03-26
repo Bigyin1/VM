@@ -66,7 +66,9 @@ func (c *Client) sendResponseWithType(message []byte, mesType int) error {
 	if err != nil {
 		return err
 	}
-	w.Write(message)
+	if _, err := w.Write(message); err != nil {
+		return err
+	}
 
 	if err := w.Close(); err != nil {
 		return err

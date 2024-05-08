@@ -164,7 +164,7 @@ func (r *Runner) compile() (*os.File, error) {
 
 	err = cmd.Run()
 	if err != nil {
-		log.Printf("error while assembling. exit code: %s\n", err.(*exec.ExitError).String())
+		log.Printf("error while assembling. exit code: %s\n", err)
 
 		os.Remove(asmLinkableFile.Name())
 

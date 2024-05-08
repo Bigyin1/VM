@@ -120,4 +120,4 @@ class VMClient {
 }
 
 
-let cmClient = new VMClient(`ws://${window.location.host}/ws`)
+let cmClient = new VMClient(`wss://${window.location.host}/ws`)

@@ -20,7 +20,7 @@ User's programm first assemebled and then linked against [standard library](./se
 
 On success, in log field will appear result of objdump for linked executable.
 
-[Another example](./pictures/circle.png) with draw circle library function.
+[Another example](./pictures/circle.png) with `drawСircle` library function.
 
 
 Console interaction techniques can be seen [here](./server/stdlib/printStr.code) and [screen](./server/stdlib/drawCircle.code)

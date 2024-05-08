@@ -120,4 +120,4 @@ class VMClient {
 }
 
 
-let cmClient = new VMClient("ws://localhost:8080/ws") // TODO configuration
+let cmClient = new VMClient(`ws://${window.location.host}/ws`)

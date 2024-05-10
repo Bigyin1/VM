@@ -16,7 +16,7 @@ static int writeToAddr(CPU* cpu, uint64_t addr, uint64_t val, DataSize sz)
     Device* dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
-        fprintf(stderr, "vm: unmapped address: %llu\n", addr);
+        fprintf(stderr, "vm: unmapped address: %llu rip: %llu\n", addr, cpu->regIP);
         return -1;
     }
 
@@ -40,7 +40,7 @@ static int readFromAddr(CPU* cpu, uint64_t addr, uint64_t* val, DataSize sz)
     Device* dev = FindDevice(cpu->devices, addr);
     if (dev == NULL)
     {
-        fprintf(stderr, "vm: unmapped address: %llu\n", addr);
+        fprintf(stderr, "vm: ddress: %llu\n", addr);
         return -1;
     }
 

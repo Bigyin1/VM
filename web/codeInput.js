@@ -6,7 +6,7 @@ export class CodeInput {
 
     constructor() {
         this.root = document.getElementsByClassName("codeInput")[0]
-        this.root.textContent = ""
+        // this.root.textContent = ""
 
         this.button = document.getElementsByClassName("sendButton")[0]
     }

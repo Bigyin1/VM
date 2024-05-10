@@ -17,7 +17,37 @@
 
         <canvas class="screen"></canvas>
 
-        <textarea class="box codeInput"></textarea>
+        <textarea class="box codeInput">
+
+section text
+
+main:
+
+mov %rbp, %rsp
+
+mov %r1, str
+
+call printStr
+
+
+# call solveQuadEq
+
+# mov %r1, 350.0
+# mov %r2, 200.0
+# mov %r3, 100.0
+# mov %r4, 0x1
+
+# call drawCircle
+
+halt
+
+section data
+
+str:
+db 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!', 0
+
+
+        </textarea>
 
         <div class="box console"></div>
 
